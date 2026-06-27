@@ -1,0 +1,30 @@
+import * as Joi from 'joi'
+
+export const configValidationSchema = Joi.object({
+  NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
+  PORT: Joi.number().default(3001),
+  DATABASE_URL: Joi.string().required(),
+  JWT_SECRET: Joi.string().min(32).required(),
+  JWT_EXPIRES_IN: Joi.string().default('15m'),
+  JWT_REFRESH_SECRET: Joi.string().min(32).required(),
+  JWT_REFRESH_EXPIRES_IN: Joi.string().default('7d'),
+  EMAIL_VERIFICATION_EXPIRES_IN: Joi.string().default('24h'),
+  CORS_ORIGINS: Joi.string().default('http://localhost:3000'),
+  THROTTLE_TTL: Joi.number().default(60000),
+  THROTTLE_LIMIT: Joi.number().default(100),
+  MAIL_HOST: Joi.string().optional(),
+  MAIL_PORT: Joi.number().default(587),
+  MAIL_USER: Joi.string().optional().allow(''),
+  MAIL_PASS: Joi.string().optional().allow(''),
+  MAIL_FROM: Joi.string().default('noreply@example.com'),
+  MAIL_FROM_NAME: Joi.string().default('TemplateNest'),
+  FRONTEND_URL: Joi.string().uri().default('http://localhost:3000'),
+  COOKIE_SECRET: Joi.string().min(32).required(),
+  CAPTCHA_ENABLED: Joi.string().valid('true', 'false').default('false'),
+  CAPTCHA_SECRET: Joi.string().when('CAPTCHA_ENABLED', {
+    is: 'true',
+    then: Joi.string().min(1).required(),
+    otherwise: Joi.string().optional().allow('').default(''),
+  }),
+  MAX_FILE_SIZE: Joi.number().default(10485760),
+})

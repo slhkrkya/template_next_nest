@@ -1,0 +1,78 @@
+import { Injectable } from '@nestjs/common';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { CreateUserCommand } from './commands/create-user.command';
+import { UpdateUserCommand } from './commands/update-user.command';
+import { DeleteUserCommand } from './commands/delete-user.command';
+import { UpdateProfileCommand } from './commands/update-profile.command';
+import { UpdateSettingsCommand } from './commands/update-settings.command';
+import { ChangePasswordCommand } from './commands/change-password.command';
+import { SaveTablePreferencesCommand } from './commands/save-table-preferences.command';
+import { GetUsersQuery } from './queries/get-users.query';
+import { GetUserByIdQuery } from './queries/get-user-by-id.query';
+import { GetTablePreferencesQuery } from './queries/get-table-preferences.query';
+import { CreateUserDto, UpdateUserDto, UpdateProfileDto, UpdateSettingsDto, ChangePasswordDto } from './dto';
+
+@Injectable()
+export class UsersService {
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
+
+  findAll(
+    query: {
+      page?: number;
+      limit?: number;
+      search?: string;
+      isActive?: boolean;
+      roleId?: string;
+    },
+    tenantId?: string,
+  ) {
+    return this.queryBus.execute(
+      new GetUsersQuery(query.page, query.limit, query.search, tenantId),
+    );
+  }
+
+  findById(id: string) {
+    return this.queryBus.execute(new GetUserByIdQuery(id));
+  }
+
+  createUser(dto: CreateUserDto, tenantId?: string) {
+    return this.commandBus.execute(new CreateUserCommand(dto, tenantId));
+  }
+
+  updateUser(id: string, dto: UpdateUserDto) {
+    return this.commandBus.execute(new UpdateUserCommand(id, dto));
+  }
+
+  softDelete(id: string) {
+    return this.commandBus.execute(new DeleteUserCommand(id));
+  }
+
+  toggleActive(id: string) {
+    return this.commandBus.execute(new UpdateUserCommand(id, { isActive: undefined } as any));
+  }
+
+  updateProfile(userId: string, dto: UpdateProfileDto) {
+    return this.commandBus.execute(new UpdateProfileCommand(userId, dto));
+  }
+
+  updateSettings(userId: string, dto: UpdateSettingsDto) {
+    return this.commandBus.execute(new UpdateSettingsCommand(userId, dto));
+  }
+
+  changePassword(userId: string, dto: ChangePasswordDto) {
+    return this.commandBus.execute(new ChangePasswordCommand(userId, dto));
+  }
+
+  getTablePreferences(userId: string, tableName: string) {
+    return this.queryBus.execute(new GetTablePreferencesQuery(userId, tableName));
+  }
+
+  saveTablePreferences(userId: string, tableName: string, visibleColumns: string[]) {
+    return this.commandBus.execute(
+      new SaveTablePreferencesCommand(userId, tableName, visibleColumns),
+    );
+  }
+}

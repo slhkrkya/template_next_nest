@@ -1,0 +1,432 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum TenantStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum ScopeType {
+  SELF
+  DEPARTMENT
+  ALL
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  READ
+  LOGIN
+  LOGOUT
+  LOGIN_FAILED
+  PASSWORD_RESET_REQUEST
+  PASSWORD_RESET
+  REGISTER
+}
+
+enum LogLevel {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+  FATAL
+}
+
+enum NotifType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
+
+enum SubStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  TRIAL
+}
+
+enum BillingCycle {
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+// ---------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------
+
+model User {
+  id                   String    @id @default(uuid())
+  tenantId             String?
+  email                String    @unique
+  passwordHash         String
+  firstName            String
+  lastName             String
+  userName             String?   @unique
+  mobile               String?
+  birthDate            DateTime?
+  profilePicturePath   String?
+  isSuperAdmin         Boolean   @default(false)
+  isActive             Boolean   @default(true)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  deletedAt            DateTime?
+  lastLoginAt          DateTime?
+  failedLoginAttempts  Int       @default(0)
+  lockedUntil          DateTime?
+
+  tenant               Tenant?                @relation(fields: [tenantId], references: [id])
+  operationClaims      UserOperationClaim[]
+  entityPermissions    UserEntityPermission[]
+  dataScopes           UserDataScope[]
+  auditLogs            AuditLog[]
+  notifications        Notification[]
+  refreshTokens        RefreshToken[]
+  settings             UserSettings?
+  tablePreferences     UserTablePreference[]
+  passwordResetTokens  PasswordResetToken[]
+
+  @@map("users")
+}
+
+model Tenant {
+  id           String       @id @default(uuid())
+  name         String
+  slug         String       @unique
+  logoPath     String?
+  status       TenantStatus @default(TRIAL)
+  trialEndsAt  DateTime?
+  maxUsers     Int          @default(10)
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  deletedAt    DateTime?
+
+  users                User[]
+  subscriptions        TenantSubscription[]
+  emailParameters      EmailParameters[]
+  operationClaims      UserOperationClaim[]
+  entityPermissions    UserEntityPermission[]
+  dataScopes           UserDataScope[]
+  auditLogs            AuditLog[]
+  notifications        Notification[]
+  entityWorkflows      EntityWorkflow[]
+
+  @@map("tenants")
+}
+
+model OperationClaim {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  priority    Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userClaims        UserOperationClaim[]
+  entityPermissions RoleEntityPermission[]
+
+  @@map("operation_claims")
+}
+
+model UserOperationClaim {
+  id               String   @id @default(uuid())
+  userId           String
+  operationClaimId String
+  tenantId         String?
+  createdAt        DateTime @default(now())
+
+  user           User           @relation(fields: [userId], references: [id])
+  operationClaim OperationClaim @relation(fields: [operationClaimId], references: [id])
+  tenant         Tenant?        @relation(fields: [tenantId], references: [id])
+
+  @@map("user_operation_claims")
+}
+
+model PermissionEntity {
+  id           String  @id @default(uuid())
+  name         String  @unique
+  displayName  String
+  description  String?
+  displayOrder Int     @default(0)
+  isActive     Boolean @default(true)
+
+  @@map("permission_entities")
+}
+
+model UserEntityPermission {
+  id         String   @id @default(uuid())
+  userId     String
+  tenantId   String?
+  entityName String
+  canCreate  Boolean
+  canRead    Boolean
+  canUpdate  Boolean
+  canDelete  Boolean
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id])
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+
+  @@unique([userId, tenantId, entityName])
+  @@map("user_entity_permissions")
+}
+
+model RoleEntityPermission {
+  id               String   @id @default(uuid())
+  operationClaimId String
+  entityName       String
+  canCreate        Boolean
+  canRead          Boolean
+  canUpdate        Boolean
+  canDelete        Boolean
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  operationClaim OperationClaim @relation(fields: [operationClaimId], references: [id])
+
+  @@unique([operationClaimId, entityName])
+  @@map("role_entity_permissions")
+}
+
+model UserDataScope {
+  id         String     @id @default(uuid())
+  userId     String
+  tenantId   String?
+  entityName String
+  scopeType  ScopeType
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id])
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+
+  @@unique([userId, tenantId, entityName])
+  @@map("user_data_scopes")
+}
+
+model AuditLog {
+  id         String      @id @default(uuid())
+  userId     String?
+  tenantId   String?
+  entityName String
+  entityId   String?
+  action     AuditAction
+  oldValues  Json?
+  newValues  Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime    @default(now())
+
+  user   User?   @relation(fields: [userId], references: [id])
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model SystemLog {
+  id         String   @id @default(uuid())
+  level      LogLevel
+  message    String
+  source     String?
+  stackTrace String?
+  tenantId   String?
+  createdAt  DateTime @default(now())
+
+  @@map("system_logs")
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  tenantId  String?
+  title     String
+  message   String
+  type      NotifType
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  link      String?
+  createdAt DateTime  @default(now())
+
+  user   User    @relation(fields: [userId], references: [id])
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+
+  @@map("notifications")
+}
+
+model EmailParameters {
+  id        String   @id @default(uuid())
+  tenantId  String   @unique
+  smtpHost  String
+  smtpPort  Int
+  smtpUser  String?
+  smtpPass  String?
+  fromEmail String
+  fromName  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@map("email_parameters")
+}
+
+model BannedIp {
+  id        String    @id @default(uuid())
+  ipAddress String
+  reason    String?
+  bannedBy  String?
+  tenantId  String?
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+
+  @@map("banned_ips")
+}
+
+model RateLimitViolation {
+  id           String   @id @default(uuid())
+  ipAddress    String
+  endpoint     String
+  requestCount Int
+  windowStart  DateTime
+  isDismissed  Boolean  @default(false)
+  dismissedBy  String?
+  tenantId     String?
+  createdAt    DateTime @default(now())
+
+  @@map("rate_limit_violations")
+}
+
+model SubscriptionPlan {
+  id                String   @id @default(uuid())
+  name              String   @unique
+  displayName       String
+  description       String?
+  maxUsers          Int
+  maxStorageBytes   BigInt
+  monthlyPrice      Decimal  @db.Decimal(10, 2)
+  yearlyPrice       Decimal  @db.Decimal(10, 2)
+  quarterlyPrice    Decimal? @db.Decimal(10, 2)
+  features          Json
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  subscriptions TenantSubscription[]
+
+  @@map("subscription_plans")
+}
+
+model TenantSubscription {
+  id           String       @id @default(uuid())
+  tenantId     String
+  planId       String
+  status       SubStatus
+  startDate    DateTime
+  endDate      DateTime?
+  autoRenew    Boolean      @default(true)
+  paidAmount   Decimal?     @db.Decimal(10, 2)
+  billingCycle BillingCycle
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  tenant Tenant           @relation(fields: [tenantId], references: [id])
+  plan   SubscriptionPlan @relation(fields: [planId], references: [id])
+
+  @@map("tenant_subscriptions")
+}
+
+model EntityWorkflow {
+  id          String   @id @default(uuid())
+  tenantId    String
+  entityName  String
+  name        String
+  description String?
+  definition  Json
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@map("entity_workflows")
+}
+
+model UserSettings {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  language        String   @default("en")
+  themePreset     String   @default("default")
+  colorScheme     String   @default("light")
+  timezoneOffset  Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("user_settings")
+}
+
+model UserTablePreference {
+  id             String   @id @default(uuid())
+  userId         String
+  tableName      String
+  visibleColumns Json
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, tableName])
+  @@map("user_table_preferences")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  isRevoked Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  isUsed    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("password_reset_tokens")
+}
+
+// ---------------------------------------------------------------------------
+// Relations added to Tenant to resolve back-refs
+// ---------------------------------------------------------------------------
+// (Tenant already has users[], subscriptions[], emailParameters[])
+// Additional back-refs declared inline on each model above.

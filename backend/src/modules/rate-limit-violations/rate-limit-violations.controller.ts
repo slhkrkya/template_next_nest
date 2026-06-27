@@ -1,0 +1,71 @@
+import {
+  Controller,
+  Get,
+  Patch,
+  Post,
+  Delete,
+  Body,
+  Param,
+  Query,
+  ParseUUIDPipe,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common'
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam } from '@nestjs/swagger'
+import { CommandBus, QueryBus } from '@nestjs/cqrs'
+import { PaginationDto } from '../../common/dto/pagination.dto'
+import { CurrentUser } from '../../common/decorators/current-user.decorator'
+import { AuthenticatedUser } from '../../common/types'
+import { BulkDismissDto } from './dto/bulk-dismiss.dto'
+import { ClearOldDto } from './dto/clear-old.dto'
+import { GetRateLimitViolationsQuery } from './queries'
+import { DismissViolationCommand, BulkDismissViolationsCommand, ClearOldViolationsCommand } from './commands'
+
+@ApiTags('rate-limit-violations')
+@ApiBearerAuth()
+@Controller('rate-limit-violations')
+export class RateLimitViolationsController {
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
+
+  @Get()
+  @ApiOperation({ summary: 'List rate limit violations (paginated)' })
+  findAll(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: PaginationDto,
+  ) {
+    return this.queryBus.execute(new GetRateLimitViolationsQuery(user, query))
+  }
+
+  @Patch(':id/dismiss')
+  @ApiOperation({ summary: 'Dismiss a single rate limit violation' })
+  @ApiParam({ name: 'id', type: String })
+  dismiss(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.commandBus.execute(new DismissViolationCommand(user, id))
+  }
+
+  @Post('bulk-dismiss')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Bulk dismiss rate limit violations by IDs' })
+  bulkDismiss(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: BulkDismissDto,
+  ) {
+    return this.commandBus.execute(new BulkDismissViolationsCommand(user, dto.ids))
+  }
+
+  @Delete('clear-old')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Delete rate limit violations older than N days (default 30)' })
+  clearOld(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: ClearOldDto,
+  ) {
+    return this.commandBus.execute(new ClearOldViolationsCommand(user, query.daysOld ?? 30))
+  }
+}

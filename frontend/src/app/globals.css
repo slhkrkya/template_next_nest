@@ -1,0 +1,772 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 38% 97%;
+    --foreground: 225 36% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 238 78% 58%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+
+    --sidebar-background: 232 44% 12%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 221.2 83.2% 53.3%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-ring: 221.2 83.2% 53.3%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 229 40% 8%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+
+    --sidebar-background: 232 45% 11%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217.2 91.2% 59.8%;
+    --sidebar-primary-foreground: 222.2 47.4% 11.2%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-ring: 224.3 76.3% 48%;
+
+    /* ── PrimeReact CSS variable overrides ── */
+    --surface-ground: #020617;
+    --surface-section: #0f172a;
+    --surface-card: #0f172a;
+    --surface-overlay: #1e293b;
+    --surface-border: #1e293b;
+    --surface-hover: #1e293b;
+    --text-color: #e2e8f0;
+    --text-color-secondary: #94a3b8;
+    --surface-0: #020617;
+    --surface-50: #0a1122;
+    --surface-100: #0f172a;
+    --surface-200: #1e293b;
+    --surface-300: #334155;
+    --surface-400: #475569;
+    --surface-500: #64748b;
+    --surface-600: #94a3b8;
+    --surface-700: #cbd5e1;
+    --surface-800: #e2e8f0;
+    --surface-900: #f1f5f9;
+    --maskbg: rgba(0, 0, 0, 0.65);
+    --focus-ring: 0 0 0 0.2rem rgba(99, 102, 241, 0.28);
+    --highlight-bg: rgba(99, 102, 241, 0.18);
+    --highlight-text-color: #e2e8f0;
+    --card-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.5);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    min-width: 320px;
+    background: linear-gradient(180deg, rgb(248 250 252) 0%, rgb(241 245 249) 100%);
+  }
+
+  .dark body {
+    background: linear-gradient(180deg, rgb(2 6 23) 0%, rgb(15 23 42) 100%);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sidebar-transition {
+    transition: width 0.2s ease-in-out, transform 0.2s ease-in-out;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   PrimeReact base overrides (light + dark)
+   ───────────────────────────────────────────── */
+
+.p-component {
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+}
+
+/* Buttons */
+.p-button {
+  border-radius: 8px;
+  font-weight: 600;
+  min-height: 2.5rem;
+  box-shadow: none;
+}
+
+.p-button:not(.p-button-text):not(.p-button-outlined) {
+  border-color: rgb(79 70 229);
+  background: rgb(79 70 229);
+}
+
+.p-button:not(.p-button-text):not(.p-button-outlined):enabled:hover {
+  border-color: rgb(67 56 202);
+  background: rgb(67 56 202);
+}
+
+/* Rounded corners */
+.p-card,
+.p-dialog,
+.p-menu,
+.p-overlaypanel,
+.p-dropdown,
+.p-multiselect,
+.p-listbox,
+.p-inputtext,
+.p-inputtextarea,
+.p-inputnumber-input,
+.p-password input,
+.p-calendar .p-inputtext,
+.p-toast,
+.p-toast .p-toast-message {
+  border-radius: 8px;
+}
+
+/* Card */
+.p-card {
+  border: 1px solid rgb(226 232 240);
+  box-shadow: 0 18px 45px rgb(15 23 42 / 0.07);
+}
+
+.p-card .p-card-body {
+  padding: 1.25rem;
+}
+
+.p-card .p-card-content {
+  padding: 0;
+}
+
+.p-card .p-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+/* Dialog */
+.p-dialog {
+  overflow: hidden;
+  border: 1px solid rgb(226 232 240);
+  box-shadow: 0 24px 70px rgb(15 23 42 / 0.22);
+}
+
+.p-dialog .p-dialog-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgb(226 232 240);
+}
+
+.p-dialog .p-dialog-content {
+  padding: 1.25rem 1.5rem;
+}
+
+.p-dialog .p-dialog-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgb(226 232 240);
+}
+
+/* Inputs */
+.p-inputtext,
+.p-dropdown,
+.p-multiselect,
+.p-inputnumber-input,
+.p-password input,
+.p-calendar .p-inputtext {
+  min-height: 2.5rem;
+  border-color: rgb(203 213 225);
+  background: rgb(255 255 255);
+}
+
+.p-inputtext:enabled:focus,
+.p-dropdown:not(.p-disabled).p-focus,
+.p-multiselect:not(.p-disabled).p-focus,
+.p-inputnumber-input:enabled:focus,
+.p-password input:enabled:focus {
+  border-color: rgb(99 102 241);
+  box-shadow: 0 0 0 3px rgb(99 102 241 / 0.14);
+}
+
+.p-selectbutton .p-button {
+  min-height: 2.375rem;
+}
+
+.p-tag {
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.p-menu,
+.p-overlaypanel,
+.p-dropdown-panel,
+.p-multiselect-panel {
+  border: 1px solid rgb(226 232 240);
+  box-shadow: 0 18px 45px rgb(15 23 42 / 0.14);
+}
+
+/* ─────────────────────────────────────────────
+   DARK MODE – PrimeReact component overrides
+   ───────────────────────────────────────────── */
+
+/* Cards */
+.dark .p-card {
+  background: #0f172a;
+  border-color: #1e293b;
+  color: #e2e8f0;
+}
+
+.dark .p-card .p-card-title {
+  color: #f1f5f9;
+}
+
+/* Dialog */
+.dark .p-dialog {
+  background: #0f172a;
+  border-color: #1e293b;
+  color: #e2e8f0;
+}
+
+.dark .p-dialog .p-dialog-header {
+  background: #0f172a;
+  border-bottom-color: #1e293b;
+  color: #f1f5f9;
+}
+
+.dark .p-dialog .p-dialog-content {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.dark .p-dialog .p-dialog-footer {
+  background: #0f172a;
+  border-top-color: #1e293b;
+}
+
+.dark .p-dialog .p-dialog-header-close {
+  color: #94a3b8;
+}
+
+.dark .p-dialog .p-dialog-header-close:hover {
+  background: #1e293b;
+  color: #e2e8f0;
+}
+
+/* Inputs */
+.dark .p-inputtext,
+.dark .p-dropdown,
+.dark .p-multiselect,
+.dark .p-inputnumber-input,
+.dark .p-inputtextarea,
+.dark .p-password input,
+.dark .p-calendar .p-inputtext {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+.dark .p-inputtext::placeholder,
+.dark .p-inputtextarea::placeholder,
+.dark .p-password input::placeholder {
+  color: #64748b;
+}
+
+.dark .p-inputtext:enabled:focus,
+.dark .p-password input:enabled:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.22);
+}
+
+/* Checkbox */
+.dark .p-checkbox .p-checkbox-box {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+.dark .p-checkbox .p-checkbox-box.p-highlight {
+  background: #6366f1;
+  border-color: #6366f1;
+}
+
+/* Dropdown */
+.dark .p-dropdown {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.dark .p-dropdown .p-dropdown-label {
+  color: #e2e8f0;
+}
+
+.dark .p-dropdown .p-dropdown-trigger {
+  color: #94a3b8;
+}
+
+.dark .p-dropdown-panel {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.dark .p-dropdown-panel .p-dropdown-header {
+  background: #1e293b;
+  border-bottom-color: #334155;
+  padding: 0.5rem 0.75rem;
+}
+
+.dark .p-dropdown-panel .p-dropdown-filter {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+.dark .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+  color: #e2e8f0;
+}
+
+.dark .p-dropdown-panel .p-dropdown-items .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+.dark .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+}
+
+/* Multiselect */
+.dark .p-multiselect-panel {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.dark .p-multiselect-panel .p-multiselect-header {
+  background: #1e293b;
+  border-bottom-color: #334155;
+}
+
+.dark .p-multiselect-panel .p-multiselect-items .p-multiselect-item {
+  color: #e2e8f0;
+}
+
+.dark .p-multiselect-panel .p-multiselect-items .p-multiselect-item:not(.p-highlight):not(.p-disabled):hover {
+  background: #334155;
+}
+
+.dark .p-multiselect-panel .p-multiselect-items .p-multiselect-item.p-highlight {
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+}
+
+/* Menu */
+.dark .p-menu {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.dark .p-menu .p-menuitem-link {
+  color: #e2e8f0;
+}
+
+.dark .p-menu .p-menuitem-link:not(.p-disabled):hover {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+.dark .p-menu .p-menuitem-link .p-menuitem-icon,
+.dark .p-menu .p-menuitem-link .p-menuitem-text {
+  color: inherit;
+}
+
+.dark .p-menu .p-menu-separator {
+  border-top-color: #334155;
+}
+
+/* Overlay Panel */
+.dark .p-overlaypanel {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  color: #e2e8f0;
+}
+
+.dark .p-overlaypanel::before,
+.dark .p-overlaypanel::after {
+  border-bottom-color: #334155;
+}
+
+/* Select Button */
+.dark .p-selectbutton .p-button {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+.dark .p-selectbutton .p-button.p-highlight {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: #ffffff;
+}
+
+.dark .p-selectbutton .p-button:not(.p-highlight):hover {
+  background: #334155;
+  color: #e2e8f0;
+}
+
+/* Listbox */
+.dark .p-listbox {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+.dark .p-listbox .p-listbox-item {
+  color: #e2e8f0;
+}
+
+.dark .p-listbox .p-listbox-item:not(.p-highlight):not(.p-disabled):hover {
+  background: #334155;
+}
+
+/* DataTable */
+.dark .p-datatable .p-datatable-header {
+  background: #0f172a;
+  border-color: #1e293b;
+  color: #e2e8f0;
+}
+
+.dark .p-datatable .p-datatable-thead > tr > th {
+  background: #0f172a;
+  border-color: #1e293b;
+  color: #94a3b8;
+}
+
+.dark .p-datatable .p-datatable-tbody > tr {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.dark .p-datatable .p-datatable-tbody > tr > td {
+  border-color: #1e293b;
+  color: #e2e8f0;
+}
+
+.dark .p-datatable .p-datatable-tbody > tr:hover {
+  background: #1e293b;
+}
+
+.dark .p-datatable .p-datatable-emptymessage td {
+  color: #64748b;
+}
+
+/* Paginator */
+.dark .p-paginator {
+  background: #0f172a;
+  border-color: #1e293b;
+  color: #94a3b8;
+}
+
+.dark .p-paginator .p-paginator-page,
+.dark .p-paginator .p-paginator-first,
+.dark .p-paginator .p-paginator-prev,
+.dark .p-paginator .p-paginator-next,
+.dark .p-paginator .p-paginator-last {
+  color: #94a3b8;
+  border-color: transparent;
+  background: transparent;
+}
+
+.dark .p-paginator .p-paginator-page:not(.p-highlight):hover,
+.dark .p-paginator .p-paginator-first:not(.p-disabled):hover,
+.dark .p-paginator .p-paginator-prev:not(.p-disabled):hover,
+.dark .p-paginator .p-paginator-next:not(.p-disabled):hover,
+.dark .p-paginator .p-paginator-last:not(.p-disabled):hover {
+  background: #1e293b;
+  color: #e2e8f0;
+}
+
+.dark .p-paginator .p-paginator-page.p-highlight {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: transparent;
+  color: #a5b4fc;
+}
+
+/* Toast */
+.dark .p-toast .p-toast-message {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+.dark .p-toast .p-toast-message .p-toast-summary {
+  color: #f1f5f9;
+}
+
+.dark .p-toast .p-toast-message .p-toast-detail {
+  color: #94a3b8;
+}
+
+.dark .p-toast .p-toast-message .p-toast-icon-close {
+  color: #94a3b8;
+}
+
+.dark .p-toast .p-toast-message.p-toast-message-info {
+  background: #1e293b;
+  border-left-color: #60a5fa;
+}
+
+.dark .p-toast .p-toast-message.p-toast-message-success {
+  background: #1e293b;
+  border-left-color: #34d399;
+}
+
+.dark .p-toast .p-toast-message.p-toast-message-warn {
+  background: #1e293b;
+  border-left-color: #fbbf24;
+}
+
+.dark .p-toast .p-toast-message.p-toast-message-error {
+  background: #1e293b;
+  border-left-color: #f87171;
+}
+
+/* Skeleton */
+.dark .p-skeleton {
+  background: #1e293b;
+}
+
+.dark .p-skeleton::after {
+  background: linear-gradient(90deg, transparent, rgba(255 255 255 / 0.06), transparent);
+}
+
+/* Password strength meter */
+.dark .p-password-panel {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+/* Tooltip */
+.dark .p-tooltip .p-tooltip-text {
+  background: #1e293b;
+  color: #e2e8f0;
+}
+
+/* Avatar */
+.dark .p-avatar {
+  background: #334155;
+  color: #e2e8f0;
+}
+
+/* Badge */
+.dark .p-badge {
+  background: #6366f1;
+  color: #fff;
+}
+
+/* Tag */
+.dark .p-tag.p-tag-success {
+  background: rgba(52, 211, 153, 0.18);
+  color: #6ee7b7;
+}
+
+.dark .p-tag.p-tag-danger {
+  background: rgba(248, 113, 113, 0.18);
+  color: #fca5a5;
+}
+
+.dark .p-tag.p-tag-info {
+  background: rgba(96, 165, 250, 0.18);
+  color: #93c5fd;
+}
+
+.dark .p-tag.p-tag-warning {
+  background: rgba(251, 191, 36, 0.18);
+  color: #fcd34d;
+}
+
+.dark .p-tag.p-tag-secondary {
+  background: rgba(148, 163, 184, 0.18);
+  color: #94a3b8;
+}
+
+/* Button overrides for dark (text / secondary variants) */
+.dark .p-button.p-button-secondary.p-button-text {
+  color: #94a3b8;
+}
+
+.dark .p-button.p-button-secondary.p-button-text:enabled:hover {
+  background: rgba(148, 163, 184, 0.1);
+  color: #e2e8f0;
+}
+
+.dark .p-button.p-button-text {
+  color: #94a3b8;
+}
+
+.dark .p-button.p-button-text:enabled:hover {
+  background: rgba(148, 163, 184, 0.1);
+  color: #e2e8f0;
+}
+
+/* ─────────────────────────────────────────────
+   Custom DataTable styles (arca-data-table)
+   ───────────────────────────────────────────── */
+
+.arca-data-table .p-datatable-wrapper {
+  border: 1px solid rgb(226 232 240);
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
+}
+
+.arca-data-table .p-datatable-thead > tr > th {
+  background: rgb(248 250 252);
+  color: rgb(71 85 105);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgb(226 232 240);
+  padding: 0.85rem 1rem;
+}
+
+.arca-data-table .p-datatable-tbody > tr > td {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid rgb(241 245 249);
+}
+
+.arca-data-table .p-datatable-tbody > tr:hover {
+  background: rgb(238 242 255);
+}
+
+.dark .arca-data-table .p-datatable-wrapper {
+  border-color: #1e293b;
+}
+
+.dark .arca-data-table .p-datatable-thead > tr > th {
+  background: #0f172a;
+  border-bottom-color: #1e293b;
+  color: #64748b;
+}
+
+.dark .arca-data-table .p-datatable-tbody > tr {
+  background: #0f172a;
+}
+
+.dark .arca-data-table .p-datatable-tbody > tr > td {
+  border-bottom-color: #1e293b;
+  color: #cbd5e1;
+}
+
+.dark .arca-data-table .p-datatable-tbody > tr:hover {
+  background: #1e293b;
+}
+
+/* ─────────────────────────────────────────────
+   Stat card top accent bar
+   ───────────────────────────────────────────── */
+
+.arca-stat-card {
+  overflow: hidden;
+  position: relative;
+}
+
+.arca-stat-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, rgb(79 70 229), rgb(14 165 233), rgb(16 185 129));
+}
+
+/* ─────────────────────────────────────────────
+   Topbar
+   ───────────────────────────────────────────── */
+
+.arca-topbar {
+  backdrop-filter: blur(14px);
+  background: rgb(255 255 255 / 0.92);
+}
+
+.dark .arca-topbar {
+  background: rgb(15 23 42 / 0.92);
+}
+
+/* ─────────────────────────────────────────────
+   Page surface (main content area)
+   ───────────────────────────────────────────── */
+
+.arca-page-surface {
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.82), rgb(248 250 252 / 0.65));
+}
+
+.dark .arca-page-surface {
+  background: linear-gradient(180deg, rgb(15 23 42 / 0.82), rgb(2 6 23 / 0.55));
+}

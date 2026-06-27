@@ -1,0 +1,244 @@
+'use client';
+
+import { usePathname, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/store/auth.store';
+import { usePermissionStore } from '@/store/permission.store';
+import { logout as logoutApi } from '@/lib/api/auth.api';
+import {
+  LayoutDashboard,
+  User,
+  Bell,
+  Users,
+  Shield,
+  Key,
+  ClipboardList,
+  Mail,
+  Ban,
+  Gauge,
+  Database,
+  Building2,
+  Workflow,
+  ChevronLeft,
+  ChevronRight,
+  LogOut,
+  Globe,
+  Building,
+  CreditCard,
+  ScrollText,
+  ArrowLeftRight,
+} from 'lucide-react';
+
+interface SidebarProps {
+  collapsed: boolean;
+  onToggle: () => void;
+}
+
+interface NavItem {
+  labelKey: string;
+  href: string;
+  icon: React.ElementType;
+  permission?: {
+    entity: string;
+    action: 'read';
+  };
+}
+
+interface NavGroup {
+  titleKey: string;
+  items: NavItem[];
+}
+
+const userNavItems: NavItem[] = [
+  { labelKey: 'dashboard', href: '/user/dashboard', icon: LayoutDashboard },
+  { labelKey: 'profile', href: '/user/profile', icon: User },
+  { labelKey: 'notifications', href: '/user/notifications', icon: Bell },
+];
+
+const adminNavItems: NavItem[] = [
+  { labelKey: 'dashboard', href: '/admin/dashboard', icon: LayoutDashboard, permission: { entity: 'AuditLogs', action: 'read' } },
+  { labelKey: 'users', href: '/admin/users', icon: Users, permission: { entity: 'Users', action: 'read' } },
+  { labelKey: 'roles', href: '/admin/roles', icon: Shield, permission: { entity: 'Roles', action: 'read' } },
+  { labelKey: 'permissions', href: '/admin/permissions', icon: Key, permission: { entity: 'Permissions', action: 'read' } },
+  { labelKey: 'auditLogs', href: '/admin/audit-logs', icon: ClipboardList, permission: { entity: 'AuditLogs', action: 'read' } },
+  { labelKey: 'emailParameters', href: '/admin/email-parameters', icon: Mail, permission: { entity: 'EmailParameters', action: 'read' } },
+  { labelKey: 'ipBans', href: '/admin/ip-bans', icon: Ban, permission: { entity: 'IpBans', action: 'read' } },
+  { labelKey: 'rateLimits', href: '/admin/rate-limit-violations', icon: Gauge, permission: { entity: 'RateLimits', action: 'read' } },
+  { labelKey: 'dataScopes', href: '/admin/data-scopes', icon: Database, permission: { entity: 'DataScopes', action: 'read' } },
+  { labelKey: 'companyProfile', href: '/admin/company-profile', icon: Building2, permission: { entity: 'Tenants', action: 'read' } },
+  { labelKey: 'notifications', href: '/admin/notifications', icon: Bell, permission: { entity: 'Notifications', action: 'read' } },
+  { labelKey: 'workflowDemo', href: '/admin/workflow-demo', icon: Workflow, permission: { entity: 'EntityWorkflows', action: 'read' } },
+];
+
+const superAdminNavItems: NavItem[] = [
+  { labelKey: 'tenants', href: '/super-admin/tenants', icon: Globe, permission: { entity: 'Tenants', action: 'read' } },
+  { labelKey: 'subscriptionPlans', href: '/super-admin/subscription-plans', icon: CreditCard, permission: { entity: 'SubscriptionPlans', action: 'read' } },
+  { labelKey: 'systemLogs', href: '/super-admin/system-logs', icon: ScrollText, permission: { entity: 'AuditLogs', action: 'read' } },
+  { labelKey: 'notifications', href: '/super-admin/notifications', icon: Bell, permission: { entity: 'Notifications', action: 'read' } },
+  { labelKey: 'switchTenant', href: '/super-admin/tenant-select', icon: ArrowLeftRight, permission: { entity: 'Tenants', action: 'read' } },
+];
+
+function NavLink({
+  item,
+  collapsed,
+  active,
+}: {
+  item: NavItem;
+  collapsed: boolean;
+  active: boolean;
+}) {
+  const t = useTranslations('nav');
+  const Icon = item.icon;
+  const label = t(item.labelKey);
+
+  return (
+    <Link
+      href={item.href}
+      className={cn(
+        'group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors',
+        active
+          ? 'bg-white/10 text-white shadow-sm'
+          : 'text-sidebar-foreground/70 hover:bg-white/10 hover:text-sidebar-foreground',
+        collapsed && 'justify-center px-2'
+      )}
+      title={collapsed ? label : undefined}
+    >
+      {active && !collapsed && <span className="absolute left-0 h-6 w-1 rounded-r-full bg-sky-400" />}
+      <Icon className="h-4 w-4 shrink-0" />
+      {!collapsed && <span className="truncate">{label}</span>}
+    </Link>
+  );
+}
+
+function NavGroup({
+  group,
+  collapsed,
+  pathname,
+}: {
+  group: NavGroup;
+  collapsed: boolean;
+  pathname: string;
+}) {
+  const t = useTranslations('nav');
+  return (
+    <div className="mb-4">
+      {!collapsed && (
+        <p className="mb-2 px-3 text-xs font-bold uppercase tracking-widest text-sidebar-foreground/40">
+          {t(group.titleKey)}
+        </p>
+      )}
+      {collapsed && (
+        <div className="my-1 mx-2 h-px bg-sidebar-border" />
+      )}
+      <nav className="flex flex-col gap-0.5">
+        {group.items.map((item) => (
+          <NavLink
+            key={item.href}
+            item={item}
+            collapsed={collapsed}
+            active={pathname === item.href || pathname.startsWith(item.href + '/')}
+          />
+        ))}
+      </nav>
+    </div>
+  );
+}
+
+export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+  const t = useTranslations();
+  const pathname = usePathname();
+  const router = useRouter();
+  const { user, clearAuth } = useAuthStore();
+  const { hasPermission } = usePermissionStore();
+
+  async function logout() {
+    try { await logoutApi(); } catch { /* ignore */ }
+    clearAuth();
+    router.push('/login');
+  }
+
+  const canAccessItem = (item: NavItem) => {
+    if (!item.permission) return true;
+    if (user?.isSuperAdmin) return true;
+    return hasPermission(item.permission.entity, item.permission.action);
+  };
+
+  const filteredAdminItems = adminNavItems.filter(canAccessItem);
+  const filteredSuperAdminItems = superAdminNavItems.filter(canAccessItem);
+
+  const groups: NavGroup[] = [
+    { titleKey: 'user', items: userNavItems },
+    ...(filteredAdminItems.length > 0 ? [{ titleKey: 'admin', items: filteredAdminItems }] : []),
+    ...(filteredSuperAdminItems.length > 0 ? [{ titleKey: 'superAdmin', items: filteredSuperAdminItems }] : []),
+  ];
+
+  return (
+    <div className="flex h-full flex-col text-sidebar-foreground">
+      {/* Logo / App name */}
+      <div
+        className={cn(
+          'flex h-16 shrink-0 items-center border-b border-white/10 px-4',
+          collapsed ? 'justify-center' : 'gap-3'
+        )}
+      >
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-500 text-white shadow-lg shadow-indigo-950/30">
+          <Building className="h-4 w-4" />
+        </div>
+        {!collapsed && (
+          <div className="min-w-0">
+            <span className="block truncate text-sm font-bold tracking-tight">{t('auth.brand')}</span>
+            <span className="block truncate text-xs text-sidebar-foreground/45">{t('nav.operationsSuite')}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Navigation */}
+      <div className="flex-1 overflow-y-auto px-2 py-4 scrollbar-hide">
+        {groups.map((group) => (
+          <NavGroup
+            key={group.titleKey}
+            group={group}
+            collapsed={collapsed}
+            pathname={pathname}
+          />
+        ))}
+      </div>
+
+      {/* Footer: collapse toggle + logout */}
+      <div className="shrink-0 space-y-1 border-t border-white/10 p-2">
+        <button
+          onClick={onToggle}
+          className={cn(
+            'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/60 transition-colors hover:bg-white/10 hover:text-sidebar-foreground',
+            collapsed && 'justify-center px-2'
+          )}
+          aria-label={collapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')}
+        >
+          {collapsed ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <>
+              <ChevronLeft className="h-4 w-4" />
+              <span>{t('nav.collapse')}</span>
+            </>
+          )}
+        </button>
+
+        <button
+          onClick={logout}
+          className={cn(
+            'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/60 transition-colors hover:bg-rose-500/15 hover:text-rose-100',
+            collapsed && 'justify-center px-2'
+          )}
+          aria-label={t('auth.logout')}
+          title={collapsed ? t('auth.logout') : undefined}
+        >
+          <LogOut className="h-4 w-4" />
+          {!collapsed && <span>{t('auth.logout')}</span>}
+        </button>
+      </div>
+    </div>
+  );
+}
