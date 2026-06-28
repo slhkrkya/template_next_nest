@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { I18nService } from '../i18n';
+import { PrismaService } from '../../prisma/prisma.service';
 
 interface ErrorResponse {
   success: false;
@@ -22,7 +23,10 @@ interface ErrorResponse {
 export class HttpExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(HttpExceptionFilter.name);
 
-  constructor(private readonly i18n: I18nService) {}
+  constructor(
+    private readonly i18n: I18nService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
@@ -87,6 +91,20 @@ export class HttpExceptionFilter implements ExceptionFilter {
     if (errors !== undefined) {
       body.errors = errors.map((error) => this.i18n.translateMessage(error));
     }
+
+    this.prisma.systemLog
+      .create({
+        data: {
+          level: statusCode >= 500 ? 'ERROR' : 'WARN',
+          message: typeof message === 'string' ? message : JSON.stringify(message),
+          source: request.url,
+          stackTrace:
+            statusCode >= 500 && exception instanceof Error
+              ? exception.stack
+              : undefined,
+        },
+      })
+      .catch(() => {});
 
     response.status(statusCode).json(body);
   }

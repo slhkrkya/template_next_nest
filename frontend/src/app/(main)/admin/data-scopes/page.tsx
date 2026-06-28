@@ -190,8 +190,8 @@ export default function DataScopesPage() {
             />
           </div>
           {selectedUser && (
-            <div className="flex items-center gap-3 rounded-xl bg-indigo-50 px-4 py-3">
-              <Avatar label={`${selectedUser.firstName[0]}${selectedUser.lastName[0]}`} shape="circle" className="bg-indigo-600 text-white" />
+            <div className="flex items-center gap-3 rounded-xl bg-primary/10 px-4 py-3">
+              <Avatar label={`${selectedUser.firstName[0]}${selectedUser.lastName[0]}`} shape="circle" className="bg-primary text-primary-foreground" />
               <div>
                 <p className="m-0 text-sm font-semibold text-slate-950 dark:text-slate-50">{selectedUser.firstName} {selectedUser.lastName}</p>
                 <p className="m-0 mt-1 text-xs text-slate-500">{selectedUser.email}</p>

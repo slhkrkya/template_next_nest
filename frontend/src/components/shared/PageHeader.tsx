@@ -6,14 +6,14 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
   return (
-    <div className="mb-6 flex flex-col gap-4 rounded-lg border border-slate-200 bg-white/90 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/80 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mb-6 flex flex-col gap-4 rounded-lg border border-border bg-card/90 p-4 text-card-foreground shadow-sm sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
-        <div className="mb-2 h-1 w-12 rounded-full bg-indigo-600" />
-        <h1 className="m-0 truncate text-2xl font-bold tracking-tight text-slate-950 dark:text-slate-50">
+        <div className="mb-2 h-1 w-12 rounded-full bg-primary" />
+        <h1 className="m-0 truncate text-2xl font-bold tracking-tight text-card-foreground">
           {title}
         </h1>
         {subtitle && (
-          <p className="m-0 mt-1 max-w-3xl text-sm leading-6 text-slate-500 dark:text-slate-400">
+          <p className="m-0 mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
             {subtitle}
           </p>
         )}

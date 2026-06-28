@@ -66,8 +66,18 @@ function isTokenExpired(payload: JWTPayload): boolean {
   return Date.now() >= payload.exp * 1000;
 }
 
-function getDefaultDashboard(): string {
-  return '/user/dashboard';
+function normalizeRole(role?: string): string {
+  return (role ?? '').trim().toLowerCase();
+}
+
+function isAdminRole(role?: string): boolean {
+  return normalizeRole(role) === 'admin';
+}
+
+function getDefaultDashboard(payload: Pick<JWTPayload, 'role' | 'isSuperAdmin'>): string {
+  if (payload.isSuperAdmin) return '/super-admin/tenants';
+  if (isAdminRole(payload.role)) return '/admin/dashboard';
+  return '/user/profile';
 }
 
 export function middleware(request: NextRequest) {
@@ -88,7 +98,7 @@ export function middleware(request: NextRequest) {
     if (token && isAuthPath(pathname)) {
       const payload = decodeJWT(token);
       if (payload && !isTokenExpired(payload)) {
-        const dashboard = getDefaultDashboard();
+        const dashboard = getDefaultDashboard(payload);
         return NextResponse.redirect(new URL(dashboard, request.url));
       }
     }
@@ -110,6 +120,22 @@ export function middleware(request: NextRequest) {
     const response = NextResponse.redirect(new URL('/login', request.url));
     response.cookies.delete('access_token');
     return response;
+  }
+
+  if (pathname === '/dashboard' || pathname === '/user/dashboard') {
+    return NextResponse.redirect(new URL(getDefaultDashboard(payload), request.url));
+  }
+
+  if (pathname.startsWith('/super-admin') && !payload.isSuperAdmin) {
+    return NextResponse.redirect(new URL(getDefaultDashboard(payload), request.url));
+  }
+
+  if (
+    pathname.startsWith('/admin') &&
+    !payload.isSuperAdmin &&
+    !isAdminRole(payload.role)
+  ) {
+    return NextResponse.redirect(new URL(getDefaultDashboard(payload), request.url));
   }
 
   return NextResponse.next();

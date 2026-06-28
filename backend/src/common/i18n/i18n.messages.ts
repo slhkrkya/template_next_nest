@@ -340,7 +340,6 @@ export const literalMessageKeys: Record<string, string> = {
   'Invalid or expired verification link': 'auth.invalidVerificationLink',
   'Password has been reset successfully. Please log in.': 'auth.passwordResetCompleted',
   'Current password is incorrect': 'auth.currentPasswordIncorrect',
-  'Password changed successfully': 'auth.passwordChanged',
   'CSRF token missing': 'csrf.tokenMissing',
   'CSRF token mismatch': 'csrf.tokenMismatch',
   'CSRF token invalid': 'csrf.tokenInvalid',

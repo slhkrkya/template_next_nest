@@ -13,6 +13,9 @@ import {
 } from '../../domain/auth.repository.interface';
 import { VerifyEmailCommand } from '../verify-email.command';
 import { IUnitOfWork, UNIT_OF_WORK } from '../../../../common/unit-of-work';
+import { ITenantRepository, TENANT_REPOSITORY } from '../../../tenants/domain/tenant.repository.interface';
+import { IPermissionRepository, PERMISSION_REPOSITORY } from '../../../permissions/domain/permission.repository.interface';
+import { IRoleRepository, ROLE_REPOSITORY } from '../../../roles/domain/role.repository.interface';
 
 interface EmailVerificationPayload {
   sub: string;
@@ -26,6 +29,9 @@ export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand> {
   constructor(
     @Inject(AUTH_REPOSITORY) private readonly authRepo: IAuthRepository,
     @Inject(UNIT_OF_WORK) private readonly uow: IUnitOfWork,
+    @Inject(TENANT_REPOSITORY) private readonly tenantRepo: ITenantRepository,
+    @Inject(PERMISSION_REPOSITORY) private readonly permissionRepo: IPermissionRepository,
+    @Inject(ROLE_REPOSITORY) private readonly roleRepo: IRoleRepository,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
   ) {}
@@ -57,6 +63,12 @@ export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand> {
     }
 
     await this.uow.runInTransaction(async () => {
+      // 1. Tenant'ı aktifleştir
+      if (user.tenantId) {
+        await this.tenantRepo.update(user.tenantId, { isActive: true });
+      }
+
+      // 2. 'User' operationClaim ata
       const defaultClaimAssigned = await this.authRepo.assignOperationClaimByName(
         user.id,
         'User',
@@ -69,6 +81,19 @@ export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand> {
         );
       }
 
+      // 3. Role permission'larını kullanıcıya sync et
+      if (user.tenantId) {
+        const userRole = await this.roleRepo.findByName('User');
+        if (userRole) {
+          await this.permissionRepo.syncRolePermissionsToUser(
+            userRole.id,
+            user.id,
+            user.tenantId,
+          );
+        }
+      }
+
+      // 4. Kullanıcıyı aktifleştir
       if (!user.isActive) {
         await this.authRepo.activateUser(user.id);
       }

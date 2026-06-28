@@ -33,7 +33,7 @@ export class PermissionsGuard implements CanActivate {
       throw new ForbiddenException('User not authenticated');
     }
 
-    // SuperAdmin bypasses all permission checks
+    // SuperAdmin is above all roles — bypasses every permission check.
     if (user.isSuperAdmin) {
       return true;
     }
@@ -45,26 +45,22 @@ export class PermissionsGuard implements CanActivate {
       throw new ForbiddenException(`Unsupported permission action '${action}'`);
     }
 
-    const tenantPermission = user.tenantId
-      ? await this.prisma.userEntityPermission.findFirst({
-          where: {
-            userId: user.id,
-            entityName: entity,
-            tenantId: user.tenantId,
-          },
-        })
-      : null;
+    // Non-SuperAdmin users are strictly tenant-scoped.
+    // We look only at the user's own tenant (or null for tenant-less accounts).
+    // There is no global fallback — a permission must be explicitly assigned
+    // within the user's tenant context.
+    const effectiveTenantId = user.tenantId;
 
-    const permission = tenantPermission ?? (await this.prisma.userEntityPermission.findFirst({
+    const userPermission = await this.prisma.userEntityPermission.findFirst({
       where: {
         userId: user.id,
         entityName: entity,
-        tenantId: null,
+        tenantId: effectiveTenantId,
       },
-    }));
+    });
 
-    if (permission) {
-      if (permission[actionField as keyof typeof permission] === true) {
+    if (userPermission) {
+      if (userPermission[actionField as keyof typeof userPermission] === true) {
         return true;
       }
 
@@ -73,17 +69,15 @@ export class PermissionsGuard implements CanActivate {
       );
     }
 
-    // Check entity permissions granted through the user's operation claims.
+    // Check permissions granted through the user's role (operation claim),
+    // but only for role assignments scoped to the same tenant.
     const rolePermission = await this.prisma.roleEntityPermission.findFirst({
       where: {
         operationClaim: {
           userClaims: {
             some: {
               userId: user.id,
-              OR: [
-                { tenantId: user.tenantId ?? null },
-                { tenantId: null },
-              ],
+              tenantId: effectiveTenantId,
             },
           },
         },

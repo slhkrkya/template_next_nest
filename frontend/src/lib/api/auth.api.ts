@@ -36,12 +36,26 @@ export async function logout(): Promise<void> {
 }
 
 /**
+ * Fetch a CSRF token from the server. Also sets the _csrf cookie used by
+ * the CSRF guard on state-changing endpoints like /auth/refresh.
+ */
+export async function getCsrfToken(): Promise<string> {
+  const response = await axiosInstance.get<{ csrfToken: string }>(
+    '/auth/csrf-token',
+  )
+  return response.data.csrfToken
+}
+
+/**
  * Exchange the httpOnly refresh-token cookie for a new access token.
  * Called automatically by the axios response interceptor on 401.
  */
 export async function refreshToken(): Promise<{ accessToken: string }> {
+  const csrfToken = await getCsrfToken()
   const response = await axiosInstance.post<{ accessToken: string }>(
     '/auth/refresh',
+    {},
+    { headers: { 'x-csrf-token': csrfToken } },
   )
   return response.data
 }
@@ -89,5 +103,21 @@ export async function verifyEmail(token: string): Promise<{ message: string }> {
  */
 export async function getMe(): Promise<AuthUser> {
   const response = await axiosInstance.get<AuthUser>('/auth/me')
+  return response.data
+}
+
+/**
+ * Switch SuperAdmin tenant context. Pass null to return to global mode.
+ * Issues new access + refresh tokens and sets cookies server-side.
+ */
+export async function switchTenant(
+  tenantId: string | null,
+): Promise<{ accessToken: string; tenantId: string | null; tenantName: string | null }> {
+  const csrfToken = await getCsrfToken()
+  const response = await axiosInstance.post(
+    '/auth/switch-tenant',
+    { tenantId },
+    { headers: { 'x-csrf-token': csrfToken } },
+  )
   return response.data
 }

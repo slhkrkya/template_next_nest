@@ -12,12 +12,8 @@ import { StatusBadge } from '@/components/shared/StatusBadge';
 import { useAppToast } from '@/providers/prime-provider';
 import { useAuthStore } from '@/store/auth.store';
 import { getTenants } from '@/lib/api/tenants.api';
-import axiosInstance from '@/lib/axios';
+import { switchTenant } from '@/lib/api/auth.api';
 import type { Tenant } from '@/types';
-
-async function switchTenant(tenantId: string | null): Promise<void> {
-  await axiosInstance.post('/auth/switch-tenant', { tenantId });
-}
 
 export default function TenantSelectPage() {
   const router = useRouter();
@@ -75,7 +71,7 @@ export default function TenantSelectPage() {
           : 'Switched to global context',
         variant: 'success',
       });
-      router.push('/dashboard');
+      router.push(id ? '/admin/dashboard' : '/super-admin/tenants');
     } catch {
       toast({ title: 'Failed to switch tenant', variant: 'destructive' });
     } finally {
@@ -96,19 +92,19 @@ export default function TenantSelectPage() {
         disabled={switching !== null}
         className={
           activeTenantId === null
-            ? 'mb-6 flex w-full items-center gap-4 rounded-xl border-2 border-indigo-500 bg-indigo-50 px-5 py-4 text-left'
-            : 'mb-6 flex w-full items-center gap-4 rounded-xl border-2 border-slate-200 bg-white px-5 py-4 text-left transition-colors hover:border-indigo-300 dark:border-slate-800 dark:bg-slate-900'
+            ? 'mb-6 flex w-full items-center gap-4 rounded-xl border-2 border-primary bg-primary/10 px-5 py-4 text-left'
+            : 'mb-6 flex w-full items-center gap-4 rounded-xl border-2 border-border bg-card px-5 py-4 text-left transition-colors hover:border-primary/40'
         }
       >
-        <Avatar icon="pi pi-globe" shape="circle" size="large" className="bg-indigo-600 text-white" />
+        <Avatar icon="pi pi-globe" shape="circle" size="large" className="bg-primary text-primary-foreground" />
         <div className="min-w-0 flex-1">
           <p className="m-0 text-sm font-semibold text-slate-950 dark:text-slate-50">All Tenants (Global View)</p>
           <p className="m-0 mt-1 text-xs text-slate-500">
             Manage all tenants without a specific context.
           </p>
         </div>
-        {activeTenantId === null && <i className="pi pi-check-circle text-xl text-indigo-600" />}
-        {switching === '__global__' && <i className="pi pi-spin pi-spinner text-indigo-600" />}
+        {activeTenantId === null && <i className="pi pi-check-circle text-xl text-primary" />}
+        {switching === '__global__' && <i className="pi pi-spin pi-spinner text-primary" />}
       </button>
 
       <span className="p-input-icon-left mb-4 block max-w-md">
@@ -145,8 +141,8 @@ export default function TenantSelectPage() {
                 disabled={switching !== null || tenant.status === 'DELETED'}
                 className={
                   isActive
-                    ? 'rounded-xl border-2 border-indigo-500 bg-indigo-50 p-4 text-left'
-                    : 'rounded-xl border-2 border-slate-200 bg-white p-4 text-left transition-colors hover:border-indigo-300 dark:border-slate-800 dark:bg-slate-900'
+                    ? 'rounded-xl border-2 border-primary bg-primary/10 p-4 text-left'
+                    : 'rounded-xl border-2 border-border bg-card p-4 text-left transition-colors hover:border-primary/40'
                 }
               >
                 <div className="flex items-start justify-between gap-3">
@@ -154,15 +150,15 @@ export default function TenantSelectPage() {
                     <Avatar
                       label={tenant.name.charAt(0).toUpperCase()}
                       shape="circle"
-                      className="bg-fuchsia-100 text-fuchsia-700"
+                      className="bg-primary/10 text-primary"
                     />
                     <div className="min-w-0">
                       <p className="m-0 truncate text-sm font-semibold text-slate-950 dark:text-slate-50">{tenant.name}</p>
                       <p className="m-0 mt-1 truncate font-mono text-xs text-slate-500">{tenant.slug}</p>
                     </div>
                   </div>
-                  {isActive && <i className="pi pi-check-circle text-indigo-600" />}
-                  {isSwitching && <i className="pi pi-spin pi-spinner text-indigo-600" />}
+                  {isActive && <i className="pi pi-check-circle text-primary" />}
+                  {isSwitching && <i className="pi pi-spin pi-spinner text-primary" />}
                 </div>
                 <div className="mt-4 flex items-center justify-between">
                   <StatusBadge status={tenant.status} />

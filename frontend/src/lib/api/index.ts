@@ -1,4 +1,3 @@
-// ─── Auth ─────────────────────────────────────────────────────────────────────
 export {
   login,
   register,
@@ -9,7 +8,6 @@ export {
   getMe,
 } from './auth.api'
 
-// ─── Users ────────────────────────────────────────────────────────────────────
 export {
   getUsers,
   getUser,
@@ -19,12 +17,13 @@ export {
   toggleActive,
   updateProfile,
   updateSettings,
+  getThemePreference,
+  updateThemePreference,
   changePassword,
   getTablePreferences,
   saveTablePreferences,
 } from './users.api'
 
-// ─── Permissions ──────────────────────────────────────────────────────────────
 export {
   getMyPermissions,
   getAllEntities,
@@ -36,7 +35,6 @@ export {
   bulkDeleteRolePermissions,
 } from './permissions.api'
 
-// ─── Admin ────────────────────────────────────────────────────────────────────
 export {
   getDashboardStats,
   getAuditLogs,
@@ -44,7 +42,6 @@ export {
   getDailyLoginStats,
 } from './admin.api'
 
-// ─── Tenants ──────────────────────────────────────────────────────────────────
 export {
   getTenants,
   getTenant,
@@ -54,7 +51,6 @@ export {
   updateTenantStatus,
 } from './tenants.api'
 
-// ─── Notifications ────────────────────────────────────────────────────────────
 export {
   getMyNotifications,
   createNotification,

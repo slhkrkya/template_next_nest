@@ -1,16 +1,14 @@
+import { BaseSoftDeletableEntityProps } from '../../../core/domain/base-entity.props'
+
 export type TenantStatus = 'TRIAL' | 'ACTIVE' | 'SUSPENDED' | 'DELETED'
 
-export interface TenantProps {
-  id: string
+export interface TenantProps extends BaseSoftDeletableEntityProps {
   name: string
   slug: string
   logoPath: string | null
   status: TenantStatus
   trialEndsAt: Date | null
   maxUsers: number
-  isActive: boolean
-  createdAt: Date
-  updatedAt: Date
 }
 
 export class TenantEntity {
@@ -28,4 +26,5 @@ export class TenantEntity {
   activate() { this.props.status = 'ACTIVE'; this.props.isActive = true }
   suspend() { this.props.status = 'SUSPENDED'; this.props.isActive = false }
   toPlain(): TenantProps { return { ...this.props } }
+  toJSON(): TenantProps { return { ...this.props } }
 }

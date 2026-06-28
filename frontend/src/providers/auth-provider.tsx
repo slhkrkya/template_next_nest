@@ -6,6 +6,7 @@ import { usePermissionStore } from '@/store/permission.store';
 import { getMe, refreshToken } from '@/lib/api/auth.api';
 import { getMyPermissions } from '@/lib/api/permissions.api';
 import { setAxiosAccessToken } from '@/lib/axios';
+import { useThemeStore } from '@/store/theme.store';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -15,6 +16,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isInitializing, setIsInitializing] = useState(true);
   const { setAuth, clearAuth } = useAuthStore();
   const { setPermissions, clearPermissions } = usePermissionStore();
+  const setThemePreference = useThemeStore((state) => state.setPreference);
 
   useEffect(() => {
     async function initialize() {
@@ -23,6 +25,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setAxiosAccessToken(accessToken);
 
         const user = await getMe();
+        setThemePreference(user.themePreference);
         setAuth(user, accessToken);
 
         const permissions = await getMyPermissions();
@@ -36,7 +39,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     initialize();
-  }, [setAuth, clearAuth, setPermissions, clearPermissions]);
+  }, [setAuth, clearAuth, setPermissions, clearPermissions, setThemePreference]);
 
   if (isInitializing) {
     return (

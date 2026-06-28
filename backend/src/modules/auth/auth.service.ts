@@ -22,7 +22,9 @@ import {
   RegisterCommand,
   ResetPasswordCommand,
   VerifyEmailCommand,
+  SwitchTenantCommand,
 } from './commands';
+import { AuthenticatedUser } from '../../common/types';
 import { GetMeQuery } from './queries';
 import { UnauthorizedException } from '@nestjs/common';
 
@@ -67,6 +69,10 @@ export class AuthService {
 
   getMe(userId: string) {
     return this.queryBus.execute(new GetMeQuery(userId));
+  }
+
+  switchTenant(tenantId: string | null, user: AuthenticatedUser, res: Response) {
+    return this.commandBus.execute(new SwitchTenantCommand(user, tenantId, res));
   }
 
   // ---------------------------------------------------------------------------

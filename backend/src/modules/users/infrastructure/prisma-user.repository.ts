@@ -1,12 +1,29 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../../../prisma/prisma.service'
 import { getTransactionClient } from '../../../common/unit-of-work/prisma-transaction.context'
-import { IUserRepository, FindUsersOptions, PaginatedUsers, UserSettingsData, TablePreferenceData } from '../domain/user.repository.interface'
+import {
+  IUserRepository,
+  FindUsersOptions,
+  PaginatedUsers,
+  UserSettingsData,
+  UserThemePreferenceData,
+  UserThemePreferenceUpdate,
+  TablePreferenceData,
+} from '../domain/user.repository.interface'
 import { UserEntity, UserProps } from '../domain/user.entity'
 
 @Injectable()
 export class PrismaUserRepository implements IUserRepository {
   constructor(private readonly prismaService: PrismaService) {}
+
+  private readonly defaultThemePreference: UserThemePreferenceData = {
+    themeFamily: 'lara',
+    themeName: 'indigo',
+    colorScheme: 'light',
+    inputStyle: 'outlined',
+    ripple: true,
+    scale: 14,
+  }
 
   private get prisma() {
     return getTransactionClient() ?? this.prismaService;
@@ -93,6 +110,9 @@ export class PrismaUserRepository implements IUserRepository {
         settings: {
           create: { language: 'en', themePreset: 'default', colorScheme: 'light', timezoneOffset: 0 },
         },
+        themePreference: {
+          create: this.defaultThemePreference,
+        },
         ...(props.role ? {
           operationClaims: {
             create: {
@@ -112,6 +132,7 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async delete(id: string): Promise<void> {
+    await (this.prisma as any).userThemePreference.deleteMany({ where: { userId: id } })
     await this.prisma.user.delete({ where: { id } })
   }
 
@@ -142,6 +163,49 @@ export class PrismaUserRepository implements IUserRepository {
       themePreset: result.themePreset,
       colorScheme: result.colorScheme,
       timezoneOffset: result.timezoneOffset,
+    }
+  }
+
+  async getThemePreference(userId: string): Promise<UserThemePreferenceData> {
+    const result = await (this.prisma as any).userThemePreference.findUnique({
+      where: { userId },
+    })
+
+    return result ? this.mapThemePreference(result) : this.defaultThemePreference
+  }
+
+  async updateThemePreference(
+    userId: string,
+    data: UserThemePreferenceUpdate,
+  ): Promise<UserThemePreferenceData> {
+    const result = await (this.prisma as any).userThemePreference.upsert({
+      where: { userId },
+      update: {
+        ...(data.themeFamily !== undefined ? { themeFamily: data.themeFamily } : {}),
+        ...(data.themeName !== undefined ? { themeName: data.themeName } : {}),
+        ...(data.colorScheme !== undefined ? { colorScheme: data.colorScheme } : {}),
+        ...(data.inputStyle !== undefined ? { inputStyle: data.inputStyle } : {}),
+        ...(data.ripple !== undefined ? { ripple: data.ripple } : {}),
+        ...(data.scale !== undefined ? { scale: data.scale } : {}),
+      },
+      create: {
+        userId,
+        ...this.defaultThemePreference,
+        ...data,
+      },
+    })
+
+    return this.mapThemePreference(result)
+  }
+
+  private mapThemePreference(raw: any): UserThemePreferenceData {
+    return {
+      themeFamily: raw.themeFamily ?? this.defaultThemePreference.themeFamily,
+      themeName: raw.themeName ?? this.defaultThemePreference.themeName,
+      colorScheme: raw.colorScheme ?? this.defaultThemePreference.colorScheme,
+      inputStyle: raw.inputStyle ?? this.defaultThemePreference.inputStyle,
+      ripple: raw.ripple ?? this.defaultThemePreference.ripple,
+      scale: raw.scale ?? this.defaultThemePreference.scale,
     }
   }
 

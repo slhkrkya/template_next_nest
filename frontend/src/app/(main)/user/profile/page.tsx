@@ -64,7 +64,7 @@ const timezoneOptions = [
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
-  return <small className="mt-1 block text-rose-600">{message}</small>;
+  return <small className="mt-1 block text-rose-600 dark:text-rose-400">{message}</small>;
 }
 
 function PersonalInfoTab({ user }: { user: any }) {
@@ -120,7 +120,7 @@ function PersonalInfoTab({ user }: { user: any }) {
           label={avatarPreview ? undefined : initials || '?'}
           shape="circle"
           size="xlarge"
-          className="bg-indigo-100 text-indigo-700"
+          className="bg-primary/10 text-primary"
         />
         <div>
           <Button
@@ -130,7 +130,7 @@ function PersonalInfoTab({ user }: { user: any }) {
             text
             onClick={() => fileInputRef.current?.click()}
           />
-          <p className="m-0 mt-1 text-xs text-slate-400">{t('profile.fileHelp')}</p>
+          <p className="m-0 mt-1 text-xs text-slate-500 dark:text-slate-400">{t('profile.fileHelp')}</p>
           <input
             ref={fileInputRef}
             type="file"
@@ -144,22 +144,22 @@ function PersonalInfoTab({ user }: { user: any }) {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="firstName" className="mb-2 block text-sm font-semibold text-slate-700">{t('auth.firstName')}</label>
+          <label htmlFor="firstName" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">{t('auth.firstName')}</label>
           <InputText id="firstName" autoComplete="given-name" {...register('firstName')} invalid={!!errors.firstName} className="w-full" />
           <FieldError message={errors.firstName?.message} />
         </div>
         <div>
-          <label htmlFor="lastName" className="mb-2 block text-sm font-semibold text-slate-700">{t('auth.lastName')}</label>
+          <label htmlFor="lastName" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">{t('auth.lastName')}</label>
           <InputText id="lastName" autoComplete="family-name" {...register('lastName')} invalid={!!errors.lastName} className="w-full" />
           <FieldError message={errors.lastName?.message} />
         </div>
         <div>
-          <label htmlFor="mobile" className="mb-2 block text-sm font-semibold text-slate-700">{t('profile.mobileNumber')}</label>
+          <label htmlFor="mobile" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">{t('profile.mobileNumber')}</label>
           <InputText id="mobile" autoComplete="tel" placeholder="+1 (555) 000-0000" {...register('mobile')} invalid={!!errors.mobile} className="w-full" />
           <FieldError message={errors.mobile?.message} />
         </div>
         <div>
-          <label htmlFor="birthDate" className="mb-2 block text-sm font-semibold text-slate-700">{t('profile.dateOfBirth')}</label>
+          <label htmlFor="birthDate" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">{t('profile.dateOfBirth')}</label>
           <Controller
             control={control}
             name="birthDate"
@@ -232,7 +232,7 @@ function SettingsTab({ user }: { user: any }) {
         ['timezone', t('profile.timezone'), timezoneOptions],
       ].map(([name, label, options]) => (
         <div key={name as string}>
-          <label htmlFor={name as string} className="mb-2 block text-sm font-semibold text-slate-700">
+          <label htmlFor={name as string} className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
             {label as string}
           </label>
           <Controller
@@ -293,7 +293,7 @@ function ChangePasswordTab() {
         ['confirmPassword', t('auth.confirmNewPassword'), 'new-password'],
       ].map(([name, label, autoComplete]) => (
         <div key={name}>
-          <label htmlFor={name} className="mb-2 block text-sm font-semibold text-slate-700">
+          <label htmlFor={name} className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
             {label}
           </label>
           <Controller
@@ -332,7 +332,7 @@ export default function ProfilePage() {
     <div className="space-y-6">
       <div>
         <h1 className="m-0 text-2xl font-bold text-slate-950 dark:text-slate-50">{t('title')}</h1>
-        <p className="m-0 mt-1 text-sm text-slate-500">
+        <p className="m-0 mt-1 text-sm text-slate-500 dark:text-slate-400">
           {t('subtitle')}
         </p>
       </div>

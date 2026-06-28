@@ -4,6 +4,8 @@ export type NotifType = 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR'
 
 export type ColorScheme = 'light' | 'dark'
 
+export type PrimeInputStyle = 'outlined' | 'filled'
+
 export type SortOrder = 'asc' | 'desc'
 
 export type ScopeType = 'SELF' | 'DEPARTMENT' | 'ALL'
@@ -28,6 +30,15 @@ export interface UserSettings {
   timezoneOffset: number
 }
 
+export interface UserThemePreference {
+  themeFamily: string
+  themeName: string
+  colorScheme: ColorScheme
+  inputStyle: PrimeInputStyle
+  ripple: boolean
+  scale: number
+}
+
 export interface AuthUser {
   id: string
   email: string
@@ -39,6 +50,7 @@ export interface AuthUser {
   tenantName?: string
   profilePictureUrl?: string
   settings: UserSettings
+  themePreference?: UserThemePreference
 }
 
 export interface RegisterRequest {
@@ -63,6 +75,7 @@ export interface User {
   tenantName?: string
   profilePictureUrl?: string
   settings: UserSettings
+  themePreference?: UserThemePreference
   lastLoginAt?: string
   createdAt: string
   updatedAt: string
@@ -298,6 +311,8 @@ export interface UpdateSettingsRequest {
   colorScheme?: ColorScheme
   timezoneOffset?: number
 }
+
+export type UpdateThemePreferenceRequest = Partial<UserThemePreference>
 
 export interface ChangePasswordRequest {
   currentPassword: string

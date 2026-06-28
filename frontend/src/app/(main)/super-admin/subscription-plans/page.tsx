@@ -26,8 +26,8 @@ interface PlanFormValues {
 }
 
 async function getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
-  const res = await axiosInstance.get<SubscriptionPlan[]>('/subscription-plans');
-  return res.data;
+  const res = await axiosInstance.get<{ data: SubscriptionPlan[] }>('/subscription-plans');
+  return res.data.data;
 }
 
 async function createSubscriptionPlan(
@@ -158,13 +158,13 @@ function PlanCard({
         {plan.description && <p className="m-0 text-sm leading-6 text-slate-500">{plan.description}</p>}
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-xl bg-indigo-50 p-4 text-center">
-            <p className="m-0 text-xs font-semibold uppercase text-indigo-500">Monthly</p>
-            <p className="m-0 mt-2 text-2xl font-bold tabular-nums text-indigo-950">${plan.monthlyPrice.toFixed(2)}</p>
+          <div className="rounded-xl bg-primary/10 p-4 text-center">
+            <p className="m-0 text-xs font-semibold uppercase text-primary">Monthly</p>
+            <p className="m-0 mt-2 text-2xl font-bold tabular-nums text-foreground">${plan.monthlyPrice.toFixed(2)}</p>
           </div>
-          <div className="relative rounded-xl bg-fuchsia-50 p-4 text-center">
-            <p className="m-0 text-xs font-semibold uppercase text-fuchsia-500">Yearly</p>
-            <p className="m-0 mt-2 text-2xl font-bold tabular-nums text-fuchsia-950">${plan.yearlyPrice.toFixed(2)}</p>
+          <div className="relative rounded-xl bg-accent p-4 text-center">
+            <p className="m-0 text-xs font-semibold uppercase text-accent-foreground">Yearly</p>
+            <p className="m-0 mt-2 text-2xl font-bold tabular-nums text-foreground">${plan.yearlyPrice.toFixed(2)}</p>
             {yearlyDiscount > 0 && (
               <Tag value={`-${yearlyDiscount}%`} severity="success" className="absolute -right-2 -top-2" />
             )}

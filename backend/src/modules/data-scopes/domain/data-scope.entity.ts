@@ -1,13 +1,14 @@
+import { BaseTimestampedEntityProps } from '../../../core/domain/base-entity.props'
+
 export type ScopeType = 'SELF' | 'DEPARTMENT' | 'ALL'
-export interface DataScopeProps {
-  id: string
+
+export interface DataScopeProps extends BaseTimestampedEntityProps {
   userId: string
   tenantId: string | null
   entityName: string
   scopeType: ScopeType
-  createdAt: Date
-  updatedAt: Date
 }
+
 export class DataScopeEntity {
   constructor(private readonly props: DataScopeProps) {}
   get id() { return this.props.id }
@@ -16,4 +17,5 @@ export class DataScopeEntity {
   get entityName() { return this.props.entityName }
   get scopeType() { return this.props.scopeType }
   toPlain(): DataScopeProps { return { ...this.props } }
+  toJSON(): DataScopeProps { return { ...this.props } }
 }

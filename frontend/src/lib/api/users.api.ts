@@ -7,8 +7,10 @@ import type {
   TablePreferences,
   UpdateProfileRequest,
   UpdateSettingsRequest,
+  UpdateThemePreferenceRequest,
   User,
   UserSettings,
+  UserThemePreference,
 } from '@/types'
 
 /**
@@ -107,6 +109,23 @@ export async function updateSettings(
 ): Promise<UserSettings> {
   const response = await axiosInstance.patch<UserSettings>(
     '/users/settings',
+    data,
+  )
+  return response.data
+}
+
+export async function getThemePreference(): Promise<UserThemePreference> {
+  const response = await axiosInstance.get<UserThemePreference>(
+    '/users/theme-preference',
+  )
+  return response.data
+}
+
+export async function updateThemePreference(
+  data: UpdateThemePreferenceRequest,
+): Promise<UserThemePreference> {
+  const response = await axiosInstance.patch<UserThemePreference>(
+    '/users/theme-preference',
     data,
   )
   return response.data

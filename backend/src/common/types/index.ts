@@ -5,7 +5,7 @@ export interface JwtPayload {
   sub: string;
   email: string;
   role: string;
-  tenantId?: string;
+  tenantId: string | null;
   isSuperAdmin: boolean;
   iat?: number;
   exp?: number;
@@ -15,12 +15,14 @@ export interface JwtPayload {
 
 /**
  * Shape attached to `req.user` after JWT strategy validation.
+ * SuperAdmins have tenantId: null and bypass all permission/tenant checks.
+ * All other users must have a non-null tenantId and are strictly tenant-scoped.
  */
 export interface AuthenticatedUser {
   id: string;
   email: string;
   role: string;
-  tenantId?: string;
+  tenantId: string | null;
   isSuperAdmin: boolean;
 }
 

@@ -108,7 +108,7 @@ export default function RateLimitViolationsPage() {
       ),
     },
     { header: 'IP Address', key: 'ipAddress', render: (_, row) => <span className="font-mono font-semibold">{row.ipAddress}</span> },
-    { header: 'Endpoint', key: 'endpoint', render: (_, row) => <span className="line-clamp-1 font-mono text-xs text-indigo-600">{row.endpoint}</span> },
+    { header: 'Endpoint', key: 'endpoint', render: (_, row) => <span className="line-clamp-1 font-mono text-xs text-primary">{row.endpoint}</span> },
     {
       header: 'Requests',
       key: 'requestCount',

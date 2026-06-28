@@ -1,8 +1,9 @@
+import { BaseSoftDeletableEntityProps } from '../../../core/domain/base-entity.props'
+
 export type BillingCycle = 'MONTHLY' | 'QUARTERLY' | 'YEARLY'
 export type SubStatus = 'ACTIVE' | 'EXPIRED' | 'CANCELLED' | 'TRIAL'
 
-export interface SubscriptionPlanProps {
-  id: string
+export interface SubscriptionPlanProps extends BaseSoftDeletableEntityProps {
   name: string
   displayName: string
   description: string | null
@@ -12,9 +13,6 @@ export interface SubscriptionPlanProps {
   yearlyPrice: number
   quarterlyPrice: number | null
   features: Record<string, unknown>
-  isActive: boolean
-  createdAt: Date
-  updatedAt: Date
 }
 
 export class SubscriptionPlanEntity {
@@ -26,4 +24,5 @@ export class SubscriptionPlanEntity {
   get maxUsers() { return this.props.maxUsers }
   get isActive() { return this.props.isActive }
   toPlain(): SubscriptionPlanProps { return { ...this.props } }
+  toJSON(): SubscriptionPlanProps { return { ...this.props } }
 }

@@ -1,15 +1,13 @@
-export interface UserProps {
-  id: string
+import { BaseSoftDeletableEntityProps } from '../../../core/domain/base-entity.props'
+
+export interface UserProps extends BaseSoftDeletableEntityProps {
   email: string
   firstName: string
   lastName: string
   passwordHash: string
-  isActive: boolean
   isSuperAdmin: boolean
   tenantId: string | null
   role?: string
-  createdAt: Date
-  updatedAt: Date
 }
 
 export class UserEntity {
@@ -36,4 +34,8 @@ export class UserEntity {
   activate(): void { this.props.isActive = true }
 
   toPlain(): UserProps { return { ...this.props } }
+  toJSON(): Omit<UserProps, 'passwordHash'> {
+    const { passwordHash: _, ...rest } = this.props
+    return rest
+  }
 }

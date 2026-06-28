@@ -52,7 +52,7 @@ async function getSystemLogs(params: {
   dateFrom?: string;
   dateTo?: string;
 }): Promise<{ data: SystemLog[]; totalCount: number }> {
-  const res = await axiosInstance.get('/system-logs', { params });
+  const res = await axiosInstance.get('/admin/system-logs', { params });
   return res.data;
 }
 

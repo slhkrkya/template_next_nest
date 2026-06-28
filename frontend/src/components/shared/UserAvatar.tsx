@@ -46,28 +46,6 @@ function getInitials(name?: string): string {
   return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 }
 
-/**
- * Generate a deterministic background colour from a string so that the same
- * user always gets the same avatar colour.
- */
-function hashColour(seed: string): string {
-  const PALETTES = [
-    'bg-violet-600',
-    'bg-blue-600',
-    'bg-teal-600',
-    'bg-emerald-600',
-    'bg-orange-600',
-    'bg-pink-600',
-    'bg-rose-600',
-    'bg-indigo-600',
-  ];
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) {
-    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
-  }
-  return PALETTES[hash % PALETTES.length];
-}
-
 export function UserAvatar({
   src,
   name,
@@ -78,7 +56,6 @@ export function UserAvatar({
   alt,
 }: UserAvatarProps) {
   const displayInitials = initials ?? getInitials(name);
-  const colourClass = hashColour(name ?? displayInitials);
   const sizeClass = SIZE_CLASSES[size];
   const dotSizeClass = STATUS_DOT_SIZE[size];
 
@@ -97,9 +74,8 @@ export function UserAvatar({
       ) : (
         <div
           className={cn(
-            'rounded-full ring-2 ring-background flex items-center justify-center font-semibold text-white select-none',
+            'rounded-full ring-2 ring-background flex items-center justify-center bg-primary font-semibold text-primary-foreground select-none',
             sizeClass,
-            colourClass,
           )}
           aria-label={alt ?? name ?? 'User avatar'}
           role="img"

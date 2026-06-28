@@ -32,7 +32,9 @@ import {
   RegisterDto,
   ResetPasswordDto,
   VerifyEmailDto,
+  SwitchTenantDto,
 } from './dto';
+import { AuthenticatedUser } from '../../common/types';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -193,6 +195,27 @@ export class AuthController {
     @Body() dto: ResetPasswordDto,
   ): Promise<{ message: string }> {
     return this.authService.resetPassword(dto);
+  }
+
+  // ---------------------------------------------------------------------------
+  // POST /auth/switch-tenant
+  // ---------------------------------------------------------------------------
+  @UseGuards(JwtAuthGuard, CsrfGuard)
+  @Post('switch-tenant')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiHeader({ name: 'x-csrf-token', description: 'CSRF token', required: true })
+  @ApiOperation({ summary: 'Switch SuperAdmin tenant context (null = global mode)' })
+  @ApiResponse({ status: 200, description: 'Context switched, new tokens issued.' })
+  @ApiResponse({ status: 400, description: 'Tenant is inactive' })
+  @ApiResponse({ status: 403, description: 'Not a SuperAdmin' })
+  @ApiResponse({ status: 404, description: 'Tenant not found' })
+  switchTenant(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: SwitchTenantDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.switchTenant(dto.tenantId ?? null, user, res);
   }
 
   // ---------------------------------------------------------------------------

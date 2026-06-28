@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTheme } from 'next-themes';
 import { useTranslations } from 'next-intl';
@@ -22,6 +23,7 @@ import { Building2, CalendarPlus, Users, UserCheck } from 'lucide-react';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { StatsCard } from '@/components/shared/StatsCard';
+import { useThemeStore } from '@/store/theme.store';
 
 ChartJS.register(
   CategoryScale,
@@ -78,7 +80,15 @@ function ActionBadge({ action }: { action: string }) {
 export default function AdminDashboardPage() {
   const t = useTranslations();
   const { resolvedTheme } = useTheme();
+  const themePreference = useThemeStore((state) => state.preference);
+  const [primaryChartColor, setPrimaryChartColor] = useState('238 78% 58%');
   const isDark = resolvedTheme === 'dark';
+
+  useEffect(() => {
+    const rootStyles = getComputedStyle(document.documentElement);
+    const primary = rootStyles.getPropertyValue('--primary').trim();
+    setPrimaryChartColor(primary || '238 78% 58%');
+  }, [themePreference, isDark]);
 
   const statsQuery = useQuery({
     queryKey: ['admin', 'dashboard-stats'],
@@ -109,8 +119,8 @@ export default function AdminDashboardPage() {
 
   const gridColor = isDark ? 'rgba(51,65,85,0.5)' : 'rgba(148,163,184,0.18)';
   const tickColor = isDark ? '#64748b' : '#94a3b8';
-  const lineColor = isDark ? '#818cf8' : '#4f46e5';
-  const fillColor = isDark ? 'rgba(129,140,248,0.12)' : 'rgba(79,70,229,0.10)';
+  const lineColor = `hsl(${primaryChartColor})`;
+  const fillColor = `hsl(${primaryChartColor} / ${isDark ? '0.18' : '0.10'})`;
   const tooltipBg = isDark ? '#1e293b' : '#ffffff';
   const tooltipText = isDark ? '#e2e8f0' : '#0f172a';
 
@@ -216,7 +226,7 @@ export default function AdminDashboardPage() {
               icon={Building2}
               title={t('dashboard.totalTenants')}
               value={(stats?.totalTenants ?? 0).toLocaleString()}
-              iconClassName="bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-400"
+              iconClassName="bg-primary/10 text-primary"
             />
             <StatsCard
               icon={CalendarPlus}

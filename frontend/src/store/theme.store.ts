@@ -1,69 +1,166 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
-import type { ColorScheme } from '@/types'
+import type { ColorScheme, PrimeInputStyle, UserThemePreference } from '@/types'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface ThemeState {
-  theme: ColorScheme
-  preset: string
+export interface ThemeOption {
+  family: string
+  label: string
+  name: string
+  color: string
+  lightTheme: string
+  darkTheme: string
 }
 
-interface ThemeActions {
-  setTheme: (theme: ColorScheme) => void
-  toggleTheme: () => void
-  setPreset: (preset: string) => void
+interface ThemePreferenceState {
+  preference: UserThemePreference
+  setPreference: (preference?: Partial<UserThemePreference> | null) => void
+  updatePreference: (partial: Partial<UserThemePreference>) => UserThemePreference
+  resetPreference: () => void
 }
 
-type ThemeStore = ThemeState & ThemeActions
+export const DEFAULT_THEME_PREFERENCE: UserThemePreference = {
+  themeFamily: 'lara',
+  themeName: 'indigo',
+  colorScheme: 'light',
+  inputStyle: 'outlined',
+  ripple: true,
+  scale: 14,
+}
 
-// ─── Store ────────────────────────────────────────────────────────────────────
-// Theme preference is the one piece of state that should survive a page reload
-// without an API round-trip, so we persist it to localStorage.
+export const SCALE_OPTIONS = [12, 13, 14, 15, 16, 17, 18]
 
-export const useThemeStore = create<ThemeStore>()(
-  persist(
-    (set, get) => ({
-      // ── Initial state ────────────────────────────────────────────────────
-      theme: 'light',
-      preset: 'default',
+export const INPUT_STYLE_OPTIONS: Array<{ label: string; value: PrimeInputStyle }> = [
+  { label: 'Outlined', value: 'outlined' },
+  { label: 'Filled', value: 'filled' },
+]
 
-      // ── Actions ──────────────────────────────────────────────────────────
-      setTheme: (theme) => {
-        set({ theme })
-        applyThemeToDom(theme)
-      },
+export const COLOR_SCHEME_OPTIONS: Array<{ label: string; value: ColorScheme }> = [
+  { label: 'Light', value: 'light' },
+  { label: 'Dark', value: 'dark' },
+]
 
-      toggleTheme: () => {
-        const next: ColorScheme =
-          get().theme === 'light' ? 'dark' : 'light'
-        set({ theme: next })
-        applyThemeToDom(next)
-      },
+export const THEME_OPTIONS: ThemeOption[] = [
+  ...['amber', 'blue', 'cyan', 'green', 'indigo', 'pink', 'purple', 'teal'].map((name) => ({
+    family: 'lara',
+    label: 'Lara',
+    name,
+    color: themeColor(name),
+    lightTheme: `lara-light-${name}`,
+    darkTheme: `lara-dark-${name}`,
+  })),
+  ...['blue', 'purple'].map((name) => ({
+    family: 'bootstrap',
+    label: 'Bootstrap',
+    name,
+    color: themeColor(name),
+    lightTheme: `bootstrap4-light-${name}`,
+    darkTheme: `bootstrap4-dark-${name}`,
+  })),
+  ...['indigo', 'deeppurple'].map((name) => ({
+    family: 'material',
+    label: 'Material Design',
+    name,
+    color: themeColor(name),
+    lightTheme: `md-light-${name}`,
+    darkTheme: `md-dark-${name}`,
+  })),
+  ...['indigo', 'deeppurple'].map((name) => ({
+    family: 'material-compact',
+    label: 'Material Compact',
+    name,
+    color: themeColor(name),
+    lightTheme: `mdc-light-${name}`,
+    darkTheme: `mdc-dark-${name}`,
+  })),
+  {
+    family: 'soho',
+    label: 'Soho',
+    name: 'default',
+    color: '#64748b',
+    lightTheme: 'soho-light',
+    darkTheme: 'soho-dark',
+  },
+  {
+    family: 'viva',
+    label: 'Viva',
+    name: 'default',
+    color: '#6366f1',
+    lightTheme: 'viva-light',
+    darkTheme: 'viva-dark',
+  },
+]
 
-      setPreset: (preset) => set({ preset }),
-    }),
-    {
-      name: 'theme-storage',
-      // Re-apply the persisted theme to the DOM on hydration
-      onRehydrateStorage: () => (state) => {
-        if (state) {
-          applyThemeToDom(state.theme)
-        }
-      },
-    },
-  ),
-)
+export const useThemeStore = create<ThemePreferenceState>((set, get) => ({
+  preference: DEFAULT_THEME_PREFERENCE,
 
-// ─── DOM helper ───────────────────────────────────────────────────────────────
-// Toggles the `dark` class on <html> so Tailwind's `dark:` variants work.
+  setPreference: (preference) => {
+    set({ preference: normalizeThemePreference(preference) })
+  },
 
-function applyThemeToDom(theme: ColorScheme): void {
-  if (typeof document === 'undefined') return
-  const root = document.documentElement
-  if (theme === 'dark') {
-    root.classList.add('dark')
-  } else {
-    root.classList.remove('dark')
+  updatePreference: (partial) => {
+    const next = normalizeThemePreference({ ...get().preference, ...partial })
+    set({ preference: next })
+    return next
+  },
+
+  resetPreference: () => {
+    set({ preference: DEFAULT_THEME_PREFERENCE })
+  },
+}))
+
+export function normalizeThemePreference(
+  preference?: Partial<UserThemePreference> | null,
+): UserThemePreference {
+  const merged = { ...DEFAULT_THEME_PREFERENCE, ...(preference ?? {}) }
+  const option = findThemeOption(merged.themeFamily, merged.themeName)
+    ?? findThemeOption(DEFAULT_THEME_PREFERENCE.themeFamily, DEFAULT_THEME_PREFERENCE.themeName)
+    ?? THEME_OPTIONS[0]
+
+  return {
+    themeFamily: option.family,
+    themeName: option.name,
+    colorScheme: merged.colorScheme === 'dark' ? 'dark' : 'light',
+    inputStyle: merged.inputStyle === 'filled' ? 'filled' : 'outlined',
+    ripple: merged.ripple !== false,
+    scale: clampScale(merged.scale),
   }
+}
+
+export function findThemeOption(family: string, name: string) {
+  return THEME_OPTIONS.find(
+    (option) => option.family === family && option.name === name,
+  )
+}
+
+export function getThemeAssetName(preference: UserThemePreference) {
+  const option = findThemeOption(preference.themeFamily, preference.themeName)
+    ?? THEME_OPTIONS[0]
+  return preference.colorScheme === 'dark' ? option.darkTheme : option.lightTheme
+}
+
+export function groupThemeOptions() {
+  return THEME_OPTIONS.reduce<Record<string, ThemeOption[]>>((groups, option) => {
+    groups[option.label] = [...(groups[option.label] ?? []), option]
+    return groups
+  }, {})
+}
+
+function clampScale(scale: number) {
+  if (!Number.isFinite(scale)) return DEFAULT_THEME_PREFERENCE.scale
+  return Math.min(18, Math.max(12, Math.round(scale)))
+}
+
+function themeColor(name: string) {
+  const colors: Record<string, string> = {
+    amber: '#f59e0b',
+    blue: '#3b82f6',
+    cyan: '#06b6d4',
+    deeppurple: '#7e57c2',
+    green: '#22c55e',
+    indigo: '#6366f1',
+    pink: '#ec4899',
+    purple: '#8b5cf6',
+    teal: '#14b8a6',
+  }
+
+  return colors[name] ?? '#6366f1'
 }

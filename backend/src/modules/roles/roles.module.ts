@@ -17,6 +17,9 @@ import { PrismaRoleRepository } from './infrastructure/prisma-role.repository';
     ...CommandHandlers,
     ...QueryHandlers,
   ],
-  exports: [RolesService],
+  exports: [
+    RolesService,
+    { provide: ROLE_REPOSITORY, useClass: PrismaRoleRepository },
+  ],
 })
 export class RolesModule {}

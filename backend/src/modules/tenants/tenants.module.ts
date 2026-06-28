@@ -5,6 +5,10 @@ import { TenantsController } from './tenants.controller'
 import { TENANT_REPOSITORY } from './domain/tenant.repository.interface'
 import { PrismaTenantRepository } from './infrastructure/prisma-tenant.repository'
 import { PrismaModule } from '../../prisma/prisma.module'
+import { PermissionsModule } from '../permissions/permissions.module'
+import { RolesModule } from '../roles/roles.module'
+import { AUTH_REPOSITORY } from '../auth/domain/auth.repository.interface'
+import { PrismaAuthRepository } from '../auth/infrastructure/prisma-auth.repository'
 
 import { GetTenantsHandler, GetTenantByIdHandler } from './queries/handlers'
 import {
@@ -26,14 +30,18 @@ const CommandHandlers = [
 ]
 
 @Module({
-  imports: [PrismaModule, CqrsModule],
+  imports: [PrismaModule, CqrsModule, PermissionsModule, RolesModule],
   controllers: [TenantsController],
   providers: [
     TenantsService,
     { provide: TENANT_REPOSITORY, useClass: PrismaTenantRepository },
+    { provide: AUTH_REPOSITORY, useClass: PrismaAuthRepository },
     ...QueryHandlers,
     ...CommandHandlers,
   ],
-  exports: [TenantsService],
+  exports: [
+    TenantsService,
+    { provide: TENANT_REPOSITORY, useClass: PrismaTenantRepository },
+  ],
 })
 export class TenantsModule {}

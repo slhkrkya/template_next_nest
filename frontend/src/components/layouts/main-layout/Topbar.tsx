@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -10,10 +10,12 @@ import { Button } from 'primereact/button';
 import { Menu } from 'primereact/menu';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import type { MenuItem } from 'primereact/menuitem';
+import { Building, ArrowLeft } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { useNotificationStore } from '@/store/notification.store';
-import { logout as logoutApi } from '@/lib/api/auth.api';
+import { logout as logoutApi, switchTenant } from '@/lib/api/auth.api';
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher';
+import { ThemeConfigurator } from '@/components/shared/ThemeConfigurator';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 
 interface TopbarProps {
@@ -87,6 +89,41 @@ function Breadcrumb() {
   );
 }
 
+function TenantContextBadge() {
+  const { user, updateUser } = useAuthStore();
+  const router = useRouter();
+
+  if (!user?.isSuperAdmin || !user?.tenantId) return null;
+
+  async function returnToGlobal() {
+    try {
+      await switchTenant(null);
+      updateUser({ tenantId: undefined, tenantName: undefined });
+      router.push('/super-admin/tenants');
+    } catch {
+      // Ignore; user can retry via tenant-select page.
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm">
+      <Building className="h-3.5 w-3.5 shrink-0 text-primary" />
+      <span className="max-w-[160px] truncate font-semibold text-primary">
+        {user.tenantName ?? user.tenantId}
+      </span>
+      <button
+        type="button"
+        onClick={returnToGlobal}
+        className="flex items-center gap-1 text-xs text-primary hover:text-primary/80"
+        title="Return to global mode"
+      >
+        <ArrowLeft className="h-3 w-3" />
+        Global
+      </button>
+    </div>
+  );
+}
+
 function NotificationDropdown() {
   const t = useTranslations('notifications');
   const panelRef = useRef<OverlayPanel>(null);
@@ -156,7 +193,7 @@ function NotificationDropdown() {
         {notifications.length > 5 && (
           <Link
             href="/user/notifications"
-            className="block border-t border-slate-200 pt-3 text-center text-sm font-semibold text-indigo-600 dark:border-slate-700 dark:text-indigo-400"
+            className="block border-t border-border pt-3 text-center text-sm font-semibold text-primary"
           >
             {t('viewAll')}
           </Link>
@@ -229,7 +266,7 @@ function UserDropdown() {
           <Avatar
             label={initials}
             shape="circle"
-            className="bg-indigo-600 text-white dark:bg-indigo-500"
+            className="bg-primary text-primary-foreground"
           />
           <span className="hidden text-sm font-semibold text-slate-700 dark:text-slate-200 md:block">
             {user?.firstName ?? t('nav.user')}
@@ -243,38 +280,56 @@ function UserDropdown() {
 
 export function Topbar({ onSidebarToggle, onMobileToggle }: TopbarProps) {
   const t = useTranslations('nav');
-  return (
-    <header className="arca-topbar sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-slate-200 px-4 shadow-sm dark:border-slate-800">
-      <div className="flex items-center gap-3">
-        <Button
-          type="button"
-          icon="pi pi-bars"
-          severity="secondary"
-          text
-          rounded
-          onClick={onMobileToggle}
-          className="lg:hidden"
-          aria-label={t('openSidebar')}
-        />
-        <Button
-          type="button"
-          icon="pi pi-bars"
-          severity="secondary"
-          text
-          rounded
-          onClick={onSidebarToggle}
-          className="hidden lg:inline-flex"
-          aria-label={t('toggleSidebar')}
-        />
-        <Breadcrumb />
-      </div>
+  const [themeConfigOpen, setThemeConfigOpen] = useState(false);
 
-      <div className="flex items-center gap-2">
-        <LanguageSwitcher />
-        <ThemeToggle />
-        <NotificationDropdown />
-        <UserDropdown />
-      </div>
-    </header>
+  return (
+    <>
+      <header className="arca-topbar sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-slate-200 px-4 shadow-sm dark:border-slate-800">
+        <div className="flex items-center gap-3">
+          <Button
+            type="button"
+            icon="pi pi-bars"
+            severity="secondary"
+            text
+            rounded
+            onClick={onMobileToggle}
+            className="lg:hidden"
+            aria-label={t('openSidebar')}
+          />
+          <Button
+            type="button"
+            icon="pi pi-bars"
+            severity="secondary"
+            text
+            rounded
+            onClick={onSidebarToggle}
+            className="hidden lg:inline-flex"
+            aria-label={t('toggleSidebar')}
+          />
+          <Breadcrumb />
+          <TenantContextBadge />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher />
+          <Button
+            type="button"
+            icon="pi pi-palette"
+            severity="secondary"
+            text
+            rounded
+            onClick={() => setThemeConfigOpen(true)}
+            aria-label="Open theme configurator"
+          />
+          <ThemeToggle />
+          <NotificationDropdown />
+          <UserDropdown />
+        </div>
+      </header>
+      <ThemeConfigurator
+        visible={themeConfigOpen}
+        onHide={() => setThemeConfigOpen(false)}
+      />
+    </>
   );
 }

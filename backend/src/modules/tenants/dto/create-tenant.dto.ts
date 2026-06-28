@@ -5,7 +5,9 @@ import {
   IsOptional,
   IsInt,
   IsDateString,
+  IsEmail,
   Min,
+  MinLength,
   MaxLength,
   Matches,
 } from 'class-validator'
@@ -36,4 +38,26 @@ export class CreateTenantDto {
   @IsOptional()
   @IsDateString()
   trialEndsAt?: string
+
+  @ApiProperty({ example: 'John', description: 'Admin user first name' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(50)
+  adminFirstName: string
+
+  @ApiProperty({ example: 'Doe', description: 'Admin user last name' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(50)
+  adminLastName: string
+
+  @ApiProperty({ example: 'admin@acme.com', description: 'Admin user email' })
+  @IsEmail()
+  adminEmail: string
+
+  @ApiProperty({ example: 'SecurePass@123', description: 'Admin user initial password' })
+  @IsString()
+  @MinLength(8)
+  @MaxLength(100)
+  adminPassword: string
 }

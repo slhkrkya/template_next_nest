@@ -127,7 +127,7 @@ export default function RegisterPage() {
         <p className="mx-auto my-5 max-w-sm text-sm leading-6 text-slate-500 dark:text-slate-400">
           {t('auth.confirmationSent')}
         </p>
-        <Link href="/login" className="font-semibold text-indigo-600 dark:text-indigo-400">
+        <Link href="/login" className="font-semibold text-primary hover:text-primary/80">
           {t('auth.backToSignIn')}
         </Link>
       </div>
@@ -271,9 +271,9 @@ export default function RegisterPage() {
 
         <p className="m-0 text-xs leading-5 text-slate-400 dark:text-slate-500">
           {t('auth.termsPrefix')}{' '}
-          <Link href="/terms" className="text-indigo-600 dark:text-indigo-400">{t('auth.terms')}</Link>{' '}
+          <Link href="/terms" className="text-primary hover:text-primary/80">{t('auth.terms')}</Link>{' '}
           {t('auth.and')}{' '}
-          <Link href="/privacy" className="text-indigo-600 dark:text-indigo-400">{t('auth.privacy')}</Link>.
+          <Link href="/privacy" className="text-primary hover:text-primary/80">{t('auth.privacy')}</Link>.
         </p>
 
         <Button
@@ -287,7 +287,7 @@ export default function RegisterPage() {
 
       <p className="mt-7 text-center text-sm text-slate-500 dark:text-slate-400">
         {t('auth.haveAccount')}{' '}
-        <Link href="/login" className="font-semibold text-indigo-600">
+        <Link href="/login" className="font-semibold text-primary hover:text-primary/80">
           {t('auth.signIn')}
         </Link>
       </p>

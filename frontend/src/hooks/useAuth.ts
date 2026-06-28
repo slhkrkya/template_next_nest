@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { login as apiLogin, logout as apiLogout, register as apiRegister } from '@/lib/api/auth.api'
 import { useAuthStore } from '@/store/auth.store'
+import { useThemeStore } from '@/store/theme.store'
 import type { LoginRequest, LoginResponse, RegisterRequest } from '@/types'
 
 /**
@@ -28,6 +29,7 @@ export function useAuth() {
     setLoading(true)
     try {
       const response = await apiLogin(data)
+      useThemeStore.getState().setPreference(response.user.themePreference)
       setAuth(response.user, response.accessToken)
       return response
     } catch (error) {
@@ -57,8 +59,12 @@ export function useAuth() {
 
   // ---------------------------------------------------------------------------
 
+  function hasAdminRole(): boolean {
+    return (user?.role ?? '').trim().toLowerCase() === 'admin'
+  }
+
   function isAdmin(): boolean {
-    return user?.isSuperAdmin ?? false
+    return (user?.isSuperAdmin ?? false) || hasAdminRole()
   }
 
   function isSuperAdmin(): boolean {

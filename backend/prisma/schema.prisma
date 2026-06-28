@@ -97,6 +97,7 @@ model User {
   notifications        Notification[]
   refreshTokens        RefreshToken[]
   settings             UserSettings?
+  themePreference      UserThemePreference?
   tablePreferences     UserTablePreference[]
   passwordResetTokens  PasswordResetToken[]
 
@@ -382,6 +383,23 @@ model UserSettings {
   user User @relation(fields: [userId], references: [id])
 
   @@map("user_settings")
+}
+
+model UserThemePreference {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  themeFamily   String   @default("lara")
+  themeName     String   @default("indigo")
+  colorScheme   String   @default("light")
+  inputStyle    String   @default("outlined")
+  ripple        Boolean  @default(true)
+  scale         Int      @default(14)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("user_theme_preferences")
 }
 
 model UserTablePreference {

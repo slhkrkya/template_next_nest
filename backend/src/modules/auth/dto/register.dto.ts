@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsString,
   Matches,
+  MaxLength,
   MinLength,
 } from 'class-validator';
 
@@ -34,10 +35,11 @@ export class RegisterDto {
   })
   password: string;
 
-  @ApiPropertyOptional({ example: 'Acme Corp' })
-  @IsOptional()
+  @ApiProperty({ example: 'Acme Corp', description: 'Company or workspace name (used as tenant name)' })
   @IsString()
-  companyName?: string;
+  @MinLength(2, { message: 'Company name must be at least 2 characters' })
+  @MaxLength(100, { message: 'Company name must be at most 100 characters' })
+  companyName: string;
 
   @ApiPropertyOptional({ description: 'reCAPTCHA token for bot protection' })
   @IsOptional()

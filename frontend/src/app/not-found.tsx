@@ -5,7 +5,7 @@ export default async function NotFound() {
   const t = await getTranslations('errors');
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4 text-foreground">
       <div className="text-center max-w-md">
         {/* Illustration */}
         <div className="mb-8 flex justify-center">
@@ -46,7 +46,7 @@ export default async function NotFound() {
 
         <Link
           href="/"
-          className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="inline-flex items-center gap-2 bg-primary px-6 py-3 rounded-lg font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
         >
           <svg
             width="16"

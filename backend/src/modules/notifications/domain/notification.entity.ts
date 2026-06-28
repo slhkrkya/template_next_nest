@@ -1,7 +1,8 @@
+import { BaseEntityProps } from '../../../core/domain/base-entity.props'
+
 export type NotifType = 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR'
 
-export interface NotificationProps {
-  id: string
+export interface NotificationProps extends BaseEntityProps {
   title: string
   message: string
   type: NotifType
@@ -10,7 +11,6 @@ export interface NotificationProps {
   link: string | null
   userId: string
   tenantId: string | null
-  createdAt: Date
 }
 
 export class NotificationEntity {
@@ -37,4 +37,5 @@ export class NotificationEntity {
   }
 
   toPlain(): NotificationProps { return { ...this.props } }
+  toJSON(): NotificationProps { return { ...this.props } }
 }

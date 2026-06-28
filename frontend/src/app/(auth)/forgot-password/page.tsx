@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
   if (sent) {
     return (
       <div className="text-center">
-        <span className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+        <span className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
           <i className="pi pi-envelope text-2xl" />
         </span>
         <h2 className="m-0 text-2xl font-bold text-slate-950 dark:text-slate-50">

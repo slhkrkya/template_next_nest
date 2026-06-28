@@ -219,7 +219,7 @@ export default function RolesPage() {
             <div className="flex flex-col divide-y divide-slate-100">
               {roleUsers.map((user) => (
                 <div key={user.id} className="flex items-center gap-3 py-3">
-                  <Avatar label={`${user.firstName[0]}${user.lastName[0]}`} shape="circle" className="bg-indigo-100 text-indigo-700" />
+                  <Avatar label={`${user.firstName[0]}${user.lastName[0]}`} shape="circle" className="bg-primary/10 text-primary" />
                   <div>
                     <p className="m-0 text-sm font-semibold text-slate-950 dark:text-slate-50">{user.firstName} {user.lastName}</p>
                     <p className="m-0 mt-1 text-xs text-slate-500">{user.email}</p>

@@ -52,11 +52,19 @@ export class RefreshTokenHandler
 
     const user = storedToken.user;
     const roleName = user.role ?? 'User';
+
+    // SuperAdmin için refresh token JWT'sindeki tenantId'yi koru.
+    // DB'deki SuperAdmin tenantId her zaman null olduğundan switch edilmiş
+    // tenant context token refresh'te sıfırlanırdı.
+    const resolvedTenantId = (user.isSuperAdmin ?? false)
+      ? (payload.tenantId ?? null)
+      : (user.tenantId ?? null);
+
     const tokenPayload = {
       sub: user.id,
       email: user.email,
       role: roleName,
-      tenantId: user.tenantId ?? null,
+      tenantId: resolvedTenantId,
       isSuperAdmin: user.isSuperAdmin ?? false,
     };
 

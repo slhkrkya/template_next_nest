@@ -6,6 +6,15 @@ import {
 } from '../../domain/auth.repository.interface';
 import { GetMeQuery } from '../get-me.query';
 
+const defaultThemePreference = {
+  themeFamily: 'lara',
+  themeName: 'indigo',
+  colorScheme: 'light',
+  inputStyle: 'outlined',
+  ripple: true,
+  scale: 14,
+};
+
 @Injectable()
 @QueryHandler(GetMeQuery)
 export class GetMeHandler implements IQueryHandler<GetMeQuery> {
@@ -37,6 +46,7 @@ export class GetMeHandler implements IQueryHandler<GetMeQuery> {
         colorScheme: 'light',
         timezoneOffset: 0,
       },
+      themePreference: user.themePreference ?? defaultThemePreference,
     };
   }
 }

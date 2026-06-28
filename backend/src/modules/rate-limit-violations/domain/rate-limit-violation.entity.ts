@@ -1,5 +1,6 @@
-export interface RateLimitViolationProps {
-  id: string
+import { BaseEntityProps } from '../../../core/domain/base-entity.props'
+
+export interface RateLimitViolationProps extends BaseEntityProps {
   ipAddress: string
   endpoint: string
   requestCount: number
@@ -7,8 +8,8 @@ export interface RateLimitViolationProps {
   isDismissed: boolean
   dismissedBy: string | null
   tenantId: string | null
-  createdAt: Date
 }
+
 export class RateLimitViolationEntity {
   constructor(private readonly props: RateLimitViolationProps) {}
   get id() { return this.props.id }
@@ -18,4 +19,5 @@ export class RateLimitViolationEntity {
   get isDismissed() { return this.props.isDismissed }
   get createdAt() { return this.props.createdAt }
   toPlain(): RateLimitViolationProps { return { ...this.props } }
+  toJSON(): RateLimitViolationProps { return { ...this.props } }
 }

@@ -55,7 +55,7 @@ export function StatsCard({
         <div
           className={classNames(
             'flex h-12 w-12 shrink-0 items-center justify-center rounded-lg shadow-sm',
-            iconClassName ?? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300',
+            iconClassName ?? 'bg-primary/10 text-primary',
           )}
         >
           <Icon className="h-5 w-5" />

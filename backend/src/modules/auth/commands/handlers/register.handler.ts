@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import * as bcrypt from 'bcryptjs';
+import { TenantStatus } from '../../../tenants/domain/tenant.entity';
 import {
   AUTH_REPOSITORY,
   IAuthRepository,
@@ -17,6 +18,7 @@ import { JwtService } from '@nestjs/jwt';
 import { RegisterCommand } from '../register.command';
 import { IUnitOfWork, UNIT_OF_WORK } from '../../../../common/unit-of-work';
 import { CaptchaService } from '../../../../common/captcha';
+import { ITenantRepository, TENANT_REPOSITORY } from '../../../tenants/domain/tenant.repository.interface';
 
 @Injectable()
 @CommandHandler(RegisterCommand)
@@ -26,6 +28,7 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
   constructor(
     @Inject(AUTH_REPOSITORY) private readonly authRepo: IAuthRepository,
     @Inject(UNIT_OF_WORK) private readonly uow: IUnitOfWork,
+    @Inject(TENANT_REPOSITORY) private readonly tenantRepo: ITenantRepository,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
@@ -49,26 +52,36 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
     const saltRounds = 12;
     const passwordHash = await bcrypt.hash(dto.password, saltRounds);
 
-    // Atomic DB write only — user is persisted before any external call
     let createdUser: Awaited<ReturnType<IAuthRepository['createUser']>>;
     try {
       createdUser = await this.uow.runInTransaction(async () => {
+        const slug = this.generateSlug(dto.companyName);
+        const tenant = await this.tenantRepo.create({
+          name: dto.companyName.trim(),
+          slug,
+          status: 'TRIAL' as TenantStatus,
+          isActive: false,
+          maxUsers: 10,
+          logoPath: null,
+          trialEndsAt: null,
+        });
+
         return this.authRepo.createUser({
           firstName: dto.firstName.trim(),
           lastName: dto.lastName.trim(),
           email: normalizedEmail,
           passwordHash,
           isActive: false,
+          tenantId: tenant.id,
         });
       });
     } catch (err) {
-      this.logger.error('Failed to create user during registration', err);
+      this.logger.error('Failed to create user and tenant during registration', err);
       throw new InternalServerErrorException(
         'Registration is currently unavailable. Please try again later.',
       );
     }
 
-    // Sign token after commit (CPU-only, no DB)
     const verificationToken = await this.jwtService.signAsync(
       { sub: createdUser.id, email: normalizedEmail, purpose: 'email-verification' },
       {
@@ -77,8 +90,6 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
       },
     );
 
-    // Email is a side effect — user is already persisted. If mail fails,
-    // user can request a new verification email via POST /auth/resend-verification.
     try {
       await this.mailService.sendEmailVerification(
         normalizedEmail,
@@ -88,7 +99,7 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
       );
     } catch (err) {
       this.logger.error(
-        `Verification email failed for ${normalizedEmail} (userId: ${createdUser.id}). User created but unverified.`,
+        `Verification email failed for ${normalizedEmail} (userId: ${createdUser.id}). User and tenant created but unverified.`,
         err,
       );
     }
@@ -96,5 +107,16 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
     return {
       message: 'Registration successful. Please verify your email address.',
     };
+  }
+
+  private generateSlug(companyName: string): string {
+    const base = companyName
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 40);
+    const suffix = crypto.randomUUID().replace(/-/g, '').slice(0, 8);
+    return `${base}-${suffix}`;
   }
 }

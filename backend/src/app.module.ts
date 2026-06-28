@@ -2,7 +2,7 @@ import { Module, MiddlewareConsumer, NestModule, RequestMethod } from '@nestjs/c
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { configValidationSchema } from './config/config.schema';
 import { appConfig, jwtConfig, throttleConfig, mailConfig } from './config/app.config';
 import { PrismaModule } from './prisma/prisma.module';
@@ -27,6 +27,7 @@ import { IpBanMiddleware } from './common/middleware/ip-ban.middleware';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 import { AuditLogInterceptor } from './common/interceptors/audit-log.interceptor';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { I18nMiddleware } from './common/i18n';
 
 @Module({
@@ -66,6 +67,7 @@ import { I18nMiddleware } from './common/i18n';
     HealthModule,
   ],
   providers: [
+    { provide: APP_FILTER, useClass: HttpExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: AuditLogInterceptor },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     {

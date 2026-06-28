@@ -17,6 +17,9 @@ import { QueryHandlers } from './queries';
     ...CommandHandlers,
     ...QueryHandlers,
   ],
-  exports: [PermissionsService],
+  exports: [
+    PermissionsService,
+    { provide: PERMISSION_REPOSITORY, useClass: PrismaPermissionRepository },
+  ],
 })
 export class PermissionsModule {}

@@ -52,13 +52,12 @@ interface NavGroup {
 }
 
 const userNavItems: NavItem[] = [
-  { labelKey: 'dashboard', href: '/user/dashboard', icon: LayoutDashboard },
   { labelKey: 'profile', href: '/user/profile', icon: User },
   { labelKey: 'notifications', href: '/user/notifications', icon: Bell },
 ];
 
 const adminNavItems: NavItem[] = [
-  { labelKey: 'dashboard', href: '/admin/dashboard', icon: LayoutDashboard, permission: { entity: 'AuditLogs', action: 'read' } },
+  { labelKey: 'dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { labelKey: 'users', href: '/admin/users', icon: Users, permission: { entity: 'Users', action: 'read' } },
   { labelKey: 'roles', href: '/admin/roles', icon: Shield, permission: { entity: 'Roles', action: 'read' } },
   { labelKey: 'permissions', href: '/admin/permissions', icon: Key, permission: { entity: 'Permissions', action: 'read' } },
@@ -80,6 +79,10 @@ const superAdminNavItems: NavItem[] = [
   { labelKey: 'switchTenant', href: '/super-admin/tenant-select', icon: ArrowLeftRight, permission: { entity: 'Tenants', action: 'read' } },
 ];
 
+function isAdminRole(role?: string): boolean {
+  return (role ?? '').trim().toLowerCase() === 'admin';
+}
+
 function NavLink({
   item,
   collapsed,
@@ -99,13 +102,13 @@ function NavLink({
       className={cn(
         'group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors',
         active
-          ? 'bg-white/10 text-white shadow-sm'
-          : 'text-sidebar-foreground/70 hover:bg-white/10 hover:text-sidebar-foreground',
+          ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
+          : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
         collapsed && 'justify-center px-2'
       )}
       title={collapsed ? label : undefined}
     >
-      {active && !collapsed && <span className="absolute left-0 h-6 w-1 rounded-r-full bg-sky-400" />}
+      {active && !collapsed && <span className="absolute left-0 h-6 w-1 rounded-r-full bg-sidebar-primary" />}
       <Icon className="h-4 w-4 shrink-0" />
       {!collapsed && <span className="truncate">{label}</span>}
     </Link>
@@ -152,6 +155,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const router = useRouter();
   const { user, clearAuth } = useAuthStore();
   const { hasPermission } = usePermissionStore();
+  const isSuperAdmin = user?.isSuperAdmin ?? false;
+  const isAdmin = isAdminRole(user?.role);
 
   async function logout() {
     try { await logoutApi(); } catch { /* ignore */ }
@@ -159,17 +164,25 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     router.push('/login');
   }
 
+  const inTenantMode = isSuperAdmin && !!(user?.tenantId);
+  const inGlobalMode = isSuperAdmin && !user?.tenantId;
+
   const canAccessItem = (item: NavItem) => {
     if (!item.permission) return true;
-    if (user?.isSuperAdmin) return true;
+    if (isSuperAdmin) return true;
     return hasPermission(item.permission.entity, item.permission.action);
   };
 
-  const filteredAdminItems = adminNavItems.filter(canAccessItem);
-  const filteredSuperAdminItems = superAdminNavItems.filter(canAccessItem);
+  // Global mode shows SuperAdmin; tenant mode shows Admin for the selected tenant.
+  const showAdminSection = inTenantMode || isAdmin;
+  const showSuperAdminSection = inGlobalMode;
+
+  const filteredAdminItems = showAdminSection ? adminNavItems.filter(canAccessItem) : [];
+  const filteredSuperAdminItems = showSuperAdminSection ? superAdminNavItems : [];
 
   const groups: NavGroup[] = [
-    { titleKey: 'user', items: userNavItems },
+    // User section is visible for regular users and SuperAdmin tenant mode.
+    ...(!isAdmin && !inGlobalMode ? [{ titleKey: 'user', items: userNavItems }] : []),
     ...(filteredAdminItems.length > 0 ? [{ titleKey: 'admin', items: filteredAdminItems }] : []),
     ...(filteredSuperAdminItems.length > 0 ? [{ titleKey: 'superAdmin', items: filteredSuperAdminItems }] : []),
   ];
@@ -179,11 +192,11 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Logo / App name */}
       <div
         className={cn(
-          'flex h-16 shrink-0 items-center border-b border-white/10 px-4',
+          'flex h-16 shrink-0 items-center border-b border-sidebar-border px-4',
           collapsed ? 'justify-center' : 'gap-3'
         )}
       >
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-500 text-white shadow-lg shadow-indigo-950/30">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground shadow-lg shadow-sidebar-ring/20">
           <Building className="h-4 w-4" />
         </div>
         {!collapsed && (
@@ -207,11 +220,11 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       </div>
 
       {/* Footer: collapse toggle + logout */}
-      <div className="shrink-0 space-y-1 border-t border-white/10 p-2">
+      <div className="shrink-0 space-y-1 border-t border-sidebar-border p-2">
         <button
           onClick={onToggle}
           className={cn(
-            'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/60 transition-colors hover:bg-white/10 hover:text-sidebar-foreground',
+            'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/60 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
             collapsed && 'justify-center px-2'
           )}
           aria-label={collapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')}

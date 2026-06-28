@@ -16,6 +16,7 @@ import {
   CreateUserDto,
   UpdateProfileDto,
   UpdateSettingsDto,
+  UpdateThemePreferenceDto,
   UpdateUserDto,
 } from './dto';
 import { UsersService } from './users.service';
@@ -84,6 +85,19 @@ export class UsersController {
     @Body() dto: UpdateSettingsDto,
   ) {
     return this.usersService.updateSettings(userId, dto);
+  }
+
+  @Get('theme-preference')
+  getThemePreference(@GetUser('id') userId: string) {
+    return this.usersService.getThemePreference(userId);
+  }
+
+  @Patch('theme-preference')
+  updateThemePreference(
+    @GetUser('id') userId: string,
+    @Body() dto: UpdateThemePreferenceDto,
+  ) {
+    return this.usersService.updateThemePreference(userId, dto);
   }
 
   @Patch('change-password')

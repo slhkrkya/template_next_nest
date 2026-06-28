@@ -1,3 +1,6 @@
+// BigInt is not JSON-serializable by default; convert to string for transport.
+(BigInt.prototype as any).toJSON = function () { return this.toString(); };
+
 import { NestFactory } from '@nestjs/core';
 import { BadRequestException, Logger, ValidationError, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -6,7 +9,6 @@ import * as compression from 'compression';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { I18nService } from './common/i18n';
 
@@ -73,9 +75,6 @@ async function bootstrap() {
         }),
     }),
   );
-
-  // Global exception filter
-  app.useGlobalFilters(new HttpExceptionFilter(i18n));
 
   // Global response transform interceptor
   app.useGlobalInterceptors(new TransformInterceptor(i18n));

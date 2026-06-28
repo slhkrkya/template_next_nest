@@ -413,7 +413,7 @@ export default function PermissionsPage() {
                 frozen
                 body={(permission: PermissionEntry) => (
                   <div className="flex items-center gap-2">
-                    <i className="pi pi-database text-indigo-500" />
+                    <i className="pi pi-database text-primary" />
                     <span className="font-mono text-sm text-slate-800 dark:text-slate-100">
                       {permission.entityName}
                     </span>

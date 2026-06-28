@@ -1,12 +1,13 @@
-export interface IpBanProps {
-  id: string
+import { BaseEntityProps } from '../../../core/domain/base-entity.props'
+
+export interface IpBanProps extends BaseEntityProps {
   ipAddress: string
   reason: string | null
   bannedBy: string | null
   tenantId: string | null
-  createdAt: Date
   expiresAt: Date | null
 }
+
 export class IpBanEntity {
   constructor(private readonly props: IpBanProps) {}
   get id() { return this.props.id }
@@ -18,4 +19,5 @@ export class IpBanEntity {
   get createdAt() { return this.props.createdAt }
   isExpired(): boolean { return !!this.props.expiresAt && this.props.expiresAt < new Date() }
   toPlain(): IpBanProps { return { ...this.props } }
+  toJSON(): IpBanProps { return { ...this.props } }
 }

@@ -222,7 +222,7 @@ export default function AdminNotificationsPage() {
           <Card><div className="py-12 text-center text-sm text-slate-500">{filter === 'unread' ? t('notifications.noUnread') : t('notifications.noNotificationsYet')}</div></Card>
         ) : (
           displayed.map((notification) => (
-            <Card key={notification.id} className={notification.isRead ? '' : 'border-l-4 border-l-indigo-500'}>
+            <Card key={notification.id} className={notification.isRead ? '' : 'border-l-4 border-l-primary'}>
               <div className="flex items-start gap-4">
                 <Tag value={notification.type} severity={typeSeverity(notification.type)} />
                 <div className="min-w-0 flex-1">
@@ -230,7 +230,7 @@ export default function AdminNotificationsPage() {
                     <h2 className="m-0 text-base font-semibold text-slate-950 dark:text-slate-50">{notification.title}</h2>
                     {notification.isBroadcast && <Tag value={t('notifications.broadcast')} severity="info" />}
                     {notification.targetUserName && <Tag value={t('notifications.toUser', { user: notification.targetUserName })} severity="warning" />}
-                    {!notification.isRead && <span className="h-2 w-2 rounded-full bg-indigo-600" />}
+                    {!notification.isRead && <span className="h-2 w-2 rounded-full bg-primary" />}
                   </div>
                   <p className="m-0 mt-2 text-sm leading-6 text-slate-500">{notification.message}</p>
                   <p className="m-0 mt-2 text-xs text-slate-400">

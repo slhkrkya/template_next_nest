@@ -1,9 +1,12 @@
 'use client';
 
-import { useTheme } from 'next-themes';
 import { useTranslations } from 'next-intl';
 import { Button } from 'primereact/button';
 import { SelectButton } from 'primereact/selectbutton';
+import { updateThemePreference } from '@/lib/api/users.api';
+import { useAuthStore } from '@/store/auth.store';
+import { COLOR_SCHEME_OPTIONS, useThemeStore } from '@/store/theme.store';
+import type { ColorScheme } from '@/types';
 
 interface ThemeToggleProps {
   variant?: 'icon-only' | 'labeled';
@@ -11,20 +14,29 @@ interface ThemeToggleProps {
 
 export function ThemeToggle({ variant = 'icon-only' }: ThemeToggleProps) {
   const t = useTranslations('theme');
-  const { theme, setTheme, resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
-  const themeOptions = [
-    { label: t('light'), value: 'light' },
-    { label: t('dark'), value: 'dark' },
-    { label: t('system'), value: 'system' },
-  ];
+  const { preference, updatePreference } = useThemeStore();
+  const updateUser = useAuthStore((state) => state.updateUser);
+  const isDark = preference.colorScheme === 'dark';
+
+  async function setColorScheme(colorScheme: ColorScheme) {
+    const next = updatePreference({ colorScheme });
+    updateUser({ themePreference: next });
+
+    try {
+      const saved = await updateThemePreference({ colorScheme });
+      useThemeStore.getState().setPreference(saved);
+      updateUser({ themePreference: saved });
+    } catch {
+      // Keep the optimistic UI state; the backend value will be restored on next login if saving fails.
+    }
+  }
 
   if (variant === 'labeled') {
     return (
       <SelectButton
-        value={theme ?? 'system'}
-        options={themeOptions}
-        onChange={(event) => event.value && setTheme(event.value)}
+        value={preference.colorScheme}
+        options={COLOR_SCHEME_OPTIONS}
+        onChange={(event) => event.value && setColorScheme(event.value)}
         allowEmpty={false}
         aria-label={t('theme')}
       />
@@ -38,7 +50,7 @@ export function ThemeToggle({ variant = 'icon-only' }: ThemeToggleProps) {
       severity="secondary"
       text
       rounded
-      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+      onClick={() => setColorScheme(isDark ? 'light' : 'dark')}
       aria-label={isDark ? t('toLight') : t('toDark')}
     />
   );

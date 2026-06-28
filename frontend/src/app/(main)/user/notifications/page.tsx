@@ -20,6 +20,7 @@ import { Paginator } from 'primereact/paginator';
 import { SelectButton } from 'primereact/selectbutton';
 import { Skeleton } from 'primereact/skeleton';
 import { Tag } from 'primereact/tag';
+import type { CSSProperties } from 'react';
 
 type FilterType = 'all' | 'unread';
 
@@ -27,27 +28,43 @@ const PAGE_SIZE = 10;
 
 const typeConfig: Record<
   NotifType,
-  { icon: string; severity: 'info' | 'success' | 'warning' | 'danger'; className: string }
+  {
+    icon: string;
+    severity: 'info' | 'success' | 'warning' | 'danger';
+    style: CSSProperties;
+  }
 > = {
   INFO: {
     icon: 'pi pi-info-circle',
     severity: 'info',
-    className: 'bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300',
+    style: {
+      backgroundColor: 'color-mix(in srgb, var(--blue-500) 16%, transparent)',
+      color: 'var(--blue-500)',
+    },
   },
   SUCCESS: {
     icon: 'pi pi-check-circle',
     severity: 'success',
-    className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300',
+    style: {
+      backgroundColor: 'color-mix(in srgb, var(--green-500) 16%, transparent)',
+      color: 'var(--green-500)',
+    },
   },
   WARNING: {
     icon: 'pi pi-exclamation-triangle',
     severity: 'warning',
-    className: 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
+    style: {
+      backgroundColor: 'color-mix(in srgb, var(--yellow-500) 16%, transparent)',
+      color: 'var(--yellow-500)',
+    },
   },
   ERROR: {
     icon: 'pi pi-times-circle',
     severity: 'danger',
-    className: 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300',
+    style: {
+      backgroundColor: 'color-mix(in srgb, var(--red-500) 16%, transparent)',
+      color: 'var(--red-500)',
+    },
   },
 };
 
@@ -55,7 +72,10 @@ function NotificationIcon({ type }: { type: NotifType }) {
   const config = typeConfig[type] ?? typeConfig.INFO;
 
   return (
-    <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${config.className}`}>
+    <span
+      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+      style={config.style}
+    >
       <i className={config.icon} />
     </span>
   );
@@ -113,7 +133,7 @@ function NotificationItem({
   return (
     <div
       className={`flex gap-4 border-b border-slate-100 px-5 py-4 last:border-b-0 dark:border-slate-800 ${
-        isUnread ? 'bg-indigo-50/60 dark:bg-indigo-950/20' : ''
+        isUnread ? 'bg-primary/10' : ''
       }`}
     >
       <NotificationIcon type={notification.type} />

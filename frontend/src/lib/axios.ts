@@ -112,10 +112,16 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true
 
       try {
+        const { data: csrfData } = await axiosInstance.get<{ csrfToken: string }>(
+          '/auth/csrf-token',
+        )
         const { data } = await axiosInstance.post<{ accessToken: string }>(
           '/auth/refresh',
           {},
-          { withCredentials: true },
+          {
+            withCredentials: true,
+            headers: { 'x-csrf-token': csrfData.csrfToken },
+          },
         )
 
         const newToken = data.accessToken

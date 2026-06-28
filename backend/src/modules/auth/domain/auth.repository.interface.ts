@@ -33,6 +33,7 @@ export interface IAuthRepository {
     isActive: boolean; isSuperAdmin: boolean; tenantId: string | null;
     role?: string; profilePicturePath?: string | null;
     settings?: Record<string, unknown> | null;
+    themePreference?: Record<string, unknown> | null;
   } | null>
   updateLastLogin(userId: string): Promise<void>
   incrementFailedLoginAttempts(userId: string): Promise<void>

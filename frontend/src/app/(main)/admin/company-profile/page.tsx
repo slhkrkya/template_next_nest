@@ -135,7 +135,7 @@ export default function CompanyProfilePage() {
           <form onSubmit={handleSubmit((data) => saveMutation.mutate(data))} className="space-y-5">
             <button
               type="button"
-              className="flex w-full flex-col items-center gap-3 rounded-xl border-2 border-dashed border-slate-200 p-6 transition-colors hover:border-indigo-300 dark:border-slate-700 dark:hover:border-indigo-500"
+              className="flex w-full flex-col items-center gap-3 rounded-xl border-2 border-dashed border-border p-6 transition-colors hover:border-primary/50"
               onClick={() => fileRef.current?.click()}
               onDragOver={(event) => event.preventDefault()}
               onDrop={(event) => {
@@ -149,7 +149,7 @@ export default function CompanyProfilePage() {
                 icon={previewUrl ? undefined : 'pi pi-building'}
                 size="xlarge"
                 shape="square"
-                className="bg-indigo-100 text-indigo-700"
+                className="bg-primary/10 text-primary"
               />
               <span className="text-sm font-semibold text-slate-700">
                 {logoFile ? logoFile.name : 'Click or drag to upload logo'}

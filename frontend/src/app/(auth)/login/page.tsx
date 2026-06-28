@@ -12,6 +12,7 @@ import { InputText } from 'primereact/inputtext';
 import { Message } from 'primereact/message';
 import { Password } from 'primereact/password';
 import { useAuth } from '@/hooks/useAuth';
+import type { AuthUser } from '@/types';
 
 const createLoginSchema = (t: (key: any, params?: any) => string) => z.object({
   email: z.string().email(t('validation.email')),
@@ -20,6 +21,23 @@ const createLoginSchema = (t: (key: any, params?: any) => string) => z.object({
 });
 
 type LoginFormData = z.infer<ReturnType<typeof createLoginSchema>>;
+
+function isAdminRole(role?: string): boolean {
+  return (role ?? '').trim().toLowerCase() === 'admin';
+}
+
+function getDefaultDashboard(user: AuthUser): string {
+  if (user.isSuperAdmin) return '/super-admin/tenants';
+  if (isAdminRole(user.role)) return '/admin/dashboard';
+  return '/user/profile';
+}
+
+function canAccessPath(path: string, user: AuthUser): boolean {
+  if (user.isSuperAdmin) return true;
+  if (path.startsWith('/super-admin')) return false;
+  if (path.startsWith('/admin')) return isAdminRole(user.role);
+  return true;
+}
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
@@ -45,7 +63,7 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await login({
+      const response = await login({
         email: data.email,
         password: data.password,
         rememberMe: data.rememberMe,
@@ -53,10 +71,16 @@ export default function LoginPage() {
 
       const params = new URLSearchParams(window.location.search);
       const rawCallback = params.get('callbackUrl') ?? '';
+      const defaultDashboard = getDefaultDashboard(response.user);
+      const normalizedCallback =
+        rawCallback === '/dashboard' || rawCallback === '/user/dashboard'
+          ? defaultDashboard
+          : rawCallback;
       const safePath =
-        rawCallback.startsWith('/') && !rawCallback.startsWith('//')
-          ? rawCallback
-          : '/user/dashboard';
+        normalizedCallback.startsWith('/') && !normalizedCallback.startsWith('//')
+          && canAccessPath(normalizedCallback, response.user)
+          ? normalizedCallback
+          : defaultDashboard;
       router.push(safePath);
     } catch (err: unknown) {
       const message =
@@ -110,7 +134,7 @@ export default function LoginPage() {
             </label>
             <Link
               href="/forgot-password"
-              className="text-sm font-semibold text-indigo-600 dark:text-indigo-400"
+              className="text-sm font-semibold text-primary hover:text-primary/80"
             >
               {t('auth.forgotPasswordLink')}
             </Link>
@@ -170,7 +194,7 @@ export default function LoginPage() {
         {t('auth.noAccount')}{' '}
         <Link
           href="/register"
-          className="font-semibold text-indigo-600 dark:text-indigo-400"
+          className="font-semibold text-primary hover:text-primary/80"
         >
           {t('auth.createOne')}
         </Link>

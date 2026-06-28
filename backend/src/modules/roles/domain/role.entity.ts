@@ -1,9 +1,8 @@
-export interface RoleProps {
-  id: string
+import { BaseTimestampedEntityProps } from '../../../core/domain/base-entity.props'
+
+export interface RoleProps extends BaseTimestampedEntityProps {
   name: string
   description: string | null
-  createdAt: Date
-  updatedAt: Date
 }
 
 export class RoleEntity {
@@ -20,4 +19,5 @@ export class RoleEntity {
   get updatedAt() { return this.props.updatedAt }
 
   toPlain(): RoleProps { return { ...this.props } }
+  toJSON(): RoleProps { return { ...this.props } }
 }

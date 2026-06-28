@@ -5,12 +5,21 @@ import { UpdateUserCommand } from './commands/update-user.command';
 import { DeleteUserCommand } from './commands/delete-user.command';
 import { UpdateProfileCommand } from './commands/update-profile.command';
 import { UpdateSettingsCommand } from './commands/update-settings.command';
+import { UpdateThemePreferenceCommand } from './commands/update-theme-preference.command';
 import { ChangePasswordCommand } from './commands/change-password.command';
 import { SaveTablePreferencesCommand } from './commands/save-table-preferences.command';
 import { GetUsersQuery } from './queries/get-users.query';
 import { GetUserByIdQuery } from './queries/get-user-by-id.query';
 import { GetTablePreferencesQuery } from './queries/get-table-preferences.query';
-import { CreateUserDto, UpdateUserDto, UpdateProfileDto, UpdateSettingsDto, ChangePasswordDto } from './dto';
+import { GetThemePreferenceQuery } from './queries/get-theme-preference.query';
+import {
+  CreateUserDto,
+  UpdateUserDto,
+  UpdateProfileDto,
+  UpdateSettingsDto,
+  UpdateThemePreferenceDto,
+  ChangePasswordDto,
+} from './dto';
 
 @Injectable()
 export class UsersService {
@@ -60,6 +69,16 @@ export class UsersService {
 
   updateSettings(userId: string, dto: UpdateSettingsDto) {
     return this.commandBus.execute(new UpdateSettingsCommand(userId, dto));
+  }
+
+  getThemePreference(userId: string) {
+    return this.queryBus.execute(new GetThemePreferenceQuery(userId));
+  }
+
+  updateThemePreference(userId: string, dto: UpdateThemePreferenceDto) {
+    return this.commandBus.execute(
+      new UpdateThemePreferenceCommand(userId, dto),
+    );
   }
 
   changePassword(userId: string, dto: ChangePasswordDto) {

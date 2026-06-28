@@ -1,5 +1,6 @@
-export interface EmailParametersProps {
-  id: string
+import { BaseSoftDeletableEntityProps } from '../../../core/domain/base-entity.props'
+
+export interface EmailParametersProps extends BaseSoftDeletableEntityProps {
   tenantId: string
   smtpHost: string
   smtpPort: number
@@ -7,10 +8,8 @@ export interface EmailParametersProps {
   smtpPass: string | null
   fromEmail: string
   fromName: string
-  isActive: boolean
-  createdAt: Date
-  updatedAt: Date
 }
+
 export class EmailParametersEntity {
   constructor(private readonly props: EmailParametersProps) {}
   get id() { return this.props.id }
@@ -21,4 +20,5 @@ export class EmailParametersEntity {
   get fromName() { return this.props.fromName }
   get isActive() { return this.props.isActive }
   toPlain(): EmailParametersProps { return { ...this.props } }
+  toJSON(): EmailParametersProps { return { ...this.props } }
 }

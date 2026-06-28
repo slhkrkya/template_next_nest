@@ -11,15 +11,15 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
   return (
     <QueryProvider>
-      <PrimeProvider>
-        <ThemeProvider>
+      <ThemeProvider>
+        <PrimeProvider>
           <AuthProvider>
             <SocketProvider>
               {children}
             </SocketProvider>
           </AuthProvider>
-        </ThemeProvider>
-      </PrimeProvider>
+        </PrimeProvider>
+      </ThemeProvider>
     </QueryProvider>
   );
 }

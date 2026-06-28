@@ -16,6 +16,15 @@ import { LoginCommand } from '../login.command';
 import { IUnitOfWork, UNIT_OF_WORK } from '../../../../common/unit-of-work';
 import { CaptchaService } from '../../../../common/captcha';
 
+const defaultThemePreference = {
+  themeFamily: 'lara',
+  themeName: 'indigo',
+  colorScheme: 'light',
+  inputStyle: 'outlined',
+  ripple: true,
+  scale: 14,
+};
+
 @Injectable()
 @CommandHandler(LoginCommand)
 export class LoginHandler implements ICommandHandler<LoginCommand> {
@@ -138,6 +147,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
           colorScheme: 'light',
           timezoneOffset: 0,
         },
+        themePreference: userWithRelations?.themePreference ?? defaultThemePreference,
       },
     };
   }

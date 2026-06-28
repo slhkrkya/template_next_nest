@@ -37,6 +37,7 @@ export class PrismaAuthRepository implements IAuthRepository {
       include: {
         operationClaims: { include: { operationClaim: true } },
         settings: true,
+        themePreference: true,
       },
     })
     if (!raw) return null
@@ -51,6 +52,7 @@ export class PrismaAuthRepository implements IAuthRepository {
       role: (raw as any).operationClaims?.[0]?.operationClaim?.name as string | undefined,
       profilePicturePath: (raw as any).profilePicturePath ?? null,
       settings: (raw as any).settings ?? null,
+      themePreference: (raw as any).themePreference ?? null,
     }
   }
 
@@ -83,6 +85,16 @@ export class PrismaAuthRepository implements IAuthRepository {
         tenantId: data.tenantId ?? null, isSuperAdmin: data.isSuperAdmin ?? false,
         isActive: data.isActive ?? true,
         settings: { create: { language: 'en', themePreset: 'default', colorScheme: 'light', timezoneOffset: 0 } },
+        themePreference: {
+          create: {
+            themeFamily: 'lara',
+            themeName: 'indigo',
+            colorScheme: 'light',
+            inputStyle: 'outlined',
+            ripple: true,
+            scale: 14,
+          },
+        },
       },
       select: { id: true, email: true, firstName: true, lastName: true, tenantId: true, isSuperAdmin: true },
     })
@@ -127,6 +139,7 @@ export class PrismaAuthRepository implements IAuthRepository {
   }
 
   async deleteUser(userId: string): Promise<void> {
+    await (this.prisma as any).userThemePreference.deleteMany({ where: { userId } })
     await this.prisma.userSettings.deleteMany({ where: { userId } })
     await this.prisma.user.delete({ where: { id: userId } })
   }

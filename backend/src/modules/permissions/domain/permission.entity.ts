@@ -1,5 +1,6 @@
-export interface UserEntityPermissionProps {
-  id: string
+import { BaseTimestampedEntityProps } from '../../../core/domain/base-entity.props'
+
+export interface UserEntityPermissionProps extends BaseTimestampedEntityProps {
   userId: string
   tenantId: string | null
   entityName: string
@@ -7,8 +8,6 @@ export interface UserEntityPermissionProps {
   canRead: boolean
   canUpdate: boolean
   canDelete: boolean
-  createdAt: Date
-  updatedAt: Date
 }
 
 export class UserEntityPermissionEntity {
@@ -22,18 +21,16 @@ export class UserEntityPermissionEntity {
   get canUpdate() { return this.props.canUpdate }
   get canDelete() { return this.props.canDelete }
   toPlain(): UserEntityPermissionProps { return { ...this.props } }
+  toJSON(): UserEntityPermissionProps { return { ...this.props } }
 }
 
-export interface RoleEntityPermissionProps {
-  id: string
+export interface RoleEntityPermissionProps extends BaseTimestampedEntityProps {
   operationClaimId: string
   entityName: string
   canCreate: boolean
   canRead: boolean
   canUpdate: boolean
   canDelete: boolean
-  createdAt: Date
-  updatedAt: Date
 }
 
 export class RoleEntityPermissionEntity {
@@ -46,4 +43,5 @@ export class RoleEntityPermissionEntity {
   get canUpdate() { return this.props.canUpdate }
   get canDelete() { return this.props.canDelete }
   toPlain(): RoleEntityPermissionProps { return { ...this.props } }
+  toJSON(): RoleEntityPermissionProps { return { ...this.props } }
 }

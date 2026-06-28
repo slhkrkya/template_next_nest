@@ -15,24 +15,27 @@ import { getMyNotifications, markAllRead } from '@/lib/api/notifications.api';
 import type { Notification, NotifType } from '@/types';
 
 const TYPE_DOT: Record<NotifType, string> = {
-  INFO: 'bg-blue-500',
-  SUCCESS: 'bg-emerald-500',
-  WARNING: 'bg-amber-500',
-  ERROR: 'bg-rose-500',
+  INFO: 'var(--blue-500)',
+  SUCCESS: 'var(--green-500)',
+  WARNING: 'var(--yellow-500)',
+  ERROR: 'var(--red-500)',
 };
 
 function NotifRow({ notif, locale }: { notif: Notification; locale: string }) {
-  const dot = TYPE_DOT[notif.type as NotifType] ?? 'bg-slate-400';
+  const dotColor = TYPE_DOT[notif.type as NotifType] ?? 'var(--surface-400)';
   const dateLocale = locale === 'tr' ? tr : enUS;
 
   return (
     <div
       className={classNames(
-        'flex gap-3 rounded-md px-3 py-3 transition-colors hover:bg-slate-50',
-        !notif.isRead && 'bg-indigo-50',
+        'flex gap-3 rounded-md px-3 py-3 transition-colors hover:bg-accent',
+        !notif.isRead && 'bg-primary/10',
       )}
     >
-      <span className={classNames('mt-1.5 h-2 w-2 shrink-0 rounded-full', dot)} />
+      <span
+        className="mt-1.5 h-2 w-2 shrink-0 rounded-full"
+        style={{ backgroundColor: dotColor }}
+      />
       <div className="min-w-0 flex-1">
         <p className="m-0 truncate text-sm font-semibold text-slate-900">{notif.title}</p>
         <p className="m-0 mt-1 line-clamp-2 text-xs leading-5 text-slate-500">
@@ -143,7 +146,7 @@ export function NotificationBell() {
         </div>
         <Link
           href="/user/notifications"
-          className="block border-t border-slate-200 pt-3 text-center text-sm font-semibold text-indigo-600"
+          className="block border-t border-border pt-3 text-center text-sm font-semibold text-primary"
           onClick={() => panelRef.current?.hide()}
         >
           {t('viewAll')}

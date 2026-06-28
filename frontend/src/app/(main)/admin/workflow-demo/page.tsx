@@ -162,8 +162,8 @@ const initialNodes: Node[] = [
 ];
 
 const initialEdges: Edge[] = [
-  { id: "e1-2", source: "1", target: "2", animated: true, style: { stroke: "#4f46e5" } },
-  { id: "e2-3", source: "2", target: "3", animated: true, style: { stroke: "#4f46e5" } },
+  { id: "e1-2", source: "1", target: "2", animated: true, style: { stroke: "hsl(var(--primary))" } },
+  { id: "e2-3", source: "2", target: "3", animated: true, style: { stroke: "hsl(var(--primary))" } },
   {
     id: "e3-4",
     source: "3",
@@ -182,7 +182,7 @@ const initialEdges: Edge[] = [
     style: { stroke: "#dc2626" },
     labelStyle: { fill: "#dc2626", fontSize: 11 },
   },
-  { id: "e4-6", source: "4", target: "6", animated: true, style: { stroke: "#4f46e5" } },
+  { id: "e4-6", source: "4", target: "6", animated: true, style: { stroke: "hsl(var(--primary))" } },
 ];
 
 function saveWorkflow(nodes: Node[], edges: Edge[]) {
@@ -208,7 +208,7 @@ export default function WorkflowDemoPage() {
   const onConnect = useCallback(
     (params: Connection) =>
       setEdges((currentEdges) =>
-        addEdge({ ...params, animated: true, style: { stroke: "#4f46e5" } }, currentEdges),
+        addEdge({ ...params, animated: true, style: { stroke: "hsl(var(--primary))" } }, currentEdges),
       ),
     [setEdges],
   );
@@ -322,8 +322,8 @@ export default function WorkflowDemoPage() {
                   onClick={() => setSelectedNodeType(config.type)}
                   className={`flex w-full items-center gap-3 rounded-lg border p-3 text-left transition ${
                     selectedNodeType === config.type
-                      ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40"
-                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:hover:border-slate-700"
+                      ? "border-primary bg-primary/10"
+                      : "border-border bg-card hover:border-primary/40 hover:bg-accent"
                   }`}
                 >
                   <span
@@ -405,7 +405,7 @@ export default function WorkflowDemoPage() {
               deleteKeyCode="Delete"
               defaultEdgeOptions={{
                 animated: true,
-                style: { stroke: "#4f46e5", strokeWidth: 2 },
+                style: { stroke: "hsl(var(--primary))", strokeWidth: 2 },
               }}
             >
               <Background color="#cbd5e1" gap={20} />

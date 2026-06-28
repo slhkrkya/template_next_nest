@@ -113,7 +113,7 @@ function JsonDiff({
       <PrimeColumn
         field="key"
         header="Field"
-        body={(row) => <span className="font-mono text-sm text-indigo-600">{row.key}</span>}
+        body={(row) => <span className="font-mono text-sm text-primary">{row.key}</span>}
       />
       <PrimeColumn
         field="before"

@@ -3,3 +3,4 @@ export { RegisterDto } from './register.dto';
 export { ForgotPasswordDto } from './forgot-password.dto';
 export { ResetPasswordDto } from './reset-password.dto';
 export { VerifyEmailDto } from './verify-email.dto';
+export { SwitchTenantDto } from './switch-tenant.dto';

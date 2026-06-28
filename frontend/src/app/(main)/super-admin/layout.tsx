@@ -1,9 +1,17 @@
 import { redirect } from 'next/navigation';
-import { SuperAdminLayout } from '@/components/layouts/super-admin-layout/SuperAdminLayout';
 import { getUserFromCookie } from '@/lib/auth';
 
 interface SuperAdminRouteLayoutProps {
   children: React.ReactNode;
+}
+
+function isAdminRole(role?: string): boolean {
+  return (role ?? '').trim().toLowerCase() === 'admin';
+}
+
+function getDefaultDashboard(role?: string): string {
+  if (isAdminRole(role)) return '/admin/dashboard';
+  return '/user/profile';
 }
 
 export default async function SuperAdminRouteLayout({
@@ -15,5 +23,9 @@ export default async function SuperAdminRouteLayout({
     redirect('/login');
   }
 
-  return <SuperAdminLayout>{children}</SuperAdminLayout>;
+  if (!user.isSuperAdmin) {
+    redirect(getDefaultDashboard(user.role));
+  }
+
+  return <>{children}</>;
 }

@@ -22,6 +22,17 @@ export interface UserSettingsData {
   timezoneOffset?: number
 }
 
+export interface UserThemePreferenceData {
+  themeFamily: string
+  themeName: string
+  colorScheme: string
+  inputStyle: string
+  ripple: boolean
+  scale: number
+}
+
+export type UserThemePreferenceUpdate = Partial<UserThemePreferenceData>
+
 export interface TablePreferenceData {
   tableName: string
   visibleColumns: string[]
@@ -38,6 +49,8 @@ export interface IUserRepository {
   delete(id: string): Promise<void>
   existsByEmail(email: string): Promise<boolean>
   updateSettings(userId: string, data: UserSettingsData): Promise<UserSettingsData>
+  getThemePreference(userId: string): Promise<UserThemePreferenceData>
+  updateThemePreference(userId: string, data: UserThemePreferenceUpdate): Promise<UserThemePreferenceData>
   getTablePreferences(userId: string, tableName: string): Promise<TablePreferenceData | null>
   saveTablePreferences(userId: string, tableName: string, visibleColumns: string[]): Promise<TablePreferenceData>
 }
