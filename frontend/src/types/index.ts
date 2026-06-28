@@ -58,7 +58,7 @@ export interface RegisterRequest {
   lastName: string
   email: string
   password: string
-  companyName?: string
+  companyName: string
   captchaToken?: string
 }
 
@@ -151,6 +151,10 @@ export interface CreateTenantRequest {
   slug: string
   maxUsers?: number
   trialEndsAt?: string
+  adminFirstName: string
+  adminLastName: string
+  adminEmail: string
+  adminPassword: string
 }
 
 export interface UpdateTenantRequest {

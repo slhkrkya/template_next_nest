@@ -6,5 +6,6 @@ export class GetRateLimitViolationsQuery implements IQuery {
   constructor(
     public readonly user: AuthenticatedUser,
     public readonly pagination: PaginationDto,
+    public readonly dismissed?: boolean,
   ) {}
 }

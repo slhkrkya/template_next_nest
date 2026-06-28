@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Column as PrimeColumn } from 'primereact/column';
 import { DataTable as PrimeDataTable } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
@@ -10,10 +11,10 @@ import { classNames } from 'primereact/utils';
 import { useTranslations } from 'next-intl';
 
 export interface Column<T = Record<string, unknown>> {
-  header: string;
+  header: ReactNode;
   key: string;
   className?: string;
-  render?: (value: unknown, row: T, index: number) => React.ReactNode;
+  render?: (value: unknown, row: T, index: number) => ReactNode;
 }
 
 export interface PaginationProps {
@@ -32,6 +33,12 @@ interface DataTableProps<T = Record<string, unknown>> {
   searchPlaceholder?: string;
   className?: string;
   emptyMessage?: string;
+  dataKey?: string;
+  minWidth?: string;
+  scrollable?: boolean;
+  scrollHeight?: string;
+  header?: ReactNode;
+  footer?: ReactNode;
 }
 
 export function DataTable<T extends object>({
@@ -43,6 +50,12 @@ export function DataTable<T extends object>({
   searchPlaceholder,
   className,
   emptyMessage,
+  dataKey = 'id',
+  minWidth = '42rem',
+  scrollable = true,
+  scrollHeight,
+  header,
+  footer,
 }: DataTableProps<T>) {
   const t = useTranslations('common');
   const [searchValue, setSearchValue] = useState('');
@@ -73,8 +86,8 @@ export function DataTable<T extends object>({
   return (
     <div className={classNames('flex flex-col gap-3', className)}>
       {onSearch && (
-        <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-3 shadow-sm">
-          <span className="p-input-icon-left w-full max-w-sm">
+        <div className="rounded-lg border border-border bg-card p-3 shadow-sm">
+          <span className="p-input-icon-left block w-full max-w-md">
             <i className="pi pi-search" />
             <InputText
               value={searchValue}
@@ -87,36 +100,42 @@ export function DataTable<T extends object>({
         </div>
       )}
 
-      <PrimeDataTable
-        value={value}
-        dataKey="id"
-        loading={false}
-        emptyMessage={emptyMessage ?? t('noData')}
-        rowHover
-        showGridlines={false}
-        className="arca-data-table"
-        tableStyle={{ minWidth: '42rem' }}
-      >
-        {columns.map((col) => (
-          <PrimeColumn
-            key={col.key}
-            header={col.header}
-            className={col.className}
-            body={(row: T, options) =>
-              isLoading ? (
-                <Skeleton height="1rem" />
-              ) : col.render ? (
-                col.render((row as Record<string, unknown>)[col.key], row, options.rowIndex)
-              ) : (
-                String((row as Record<string, unknown>)[col.key] ?? '')
-              )
-            }
-          />
-        ))}
-      </PrimeDataTable>
+      <div className="min-w-0 overflow-hidden rounded-lg border border-border bg-card">
+        <PrimeDataTable
+          value={value}
+          dataKey={dataKey}
+          loading={false}
+          emptyMessage={emptyMessage ?? t('noData')}
+          rowHover
+          showGridlines={false}
+          scrollable={scrollable}
+          scrollHeight={scrollHeight}
+          header={header}
+          footer={footer}
+          className="arca-data-table"
+          tableStyle={{ minWidth }}
+        >
+          {columns.map((col) => (
+            <PrimeColumn
+              key={col.key}
+              header={col.header}
+              className={col.className}
+              body={(row: T, options) =>
+                isLoading ? (
+                  <Skeleton height="1rem" />
+                ) : col.render ? (
+                  col.render((row as Record<string, unknown>)[col.key], row, options.rowIndex)
+                ) : (
+                  String((row as Record<string, unknown>)[col.key] ?? '')
+                )
+              }
+            />
+          ))}
+        </PrimeDataTable>
+      </div>
 
       {pagination && (
-        <div className="flex flex-col gap-2 rounded-b-lg border border-t-0 border-border bg-card px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 rounded-lg border border-border bg-card px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="m-0 text-sm text-muted-foreground">
             {pagination.totalCount === 0
               ? t('noResults')

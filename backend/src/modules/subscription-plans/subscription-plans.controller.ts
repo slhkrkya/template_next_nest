@@ -10,11 +10,13 @@ import {
   ParseUUIDPipe,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common'
 import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam } from '@nestjs/swagger'
 import { CurrentUser } from '../../common/decorators/current-user.decorator'
 import { AuthenticatedUser } from '../../common/types'
+import { SuperAdminGuard } from '../../common/guards/superadmin.guard'
 import { CreateSubscriptionPlanDto } from './dto/create-subscription-plan.dto'
 import { PaginationDto } from '../../common/dto/pagination.dto'
 import {
@@ -27,6 +29,7 @@ import {
   DeactivateSubscriptionPlanCommand,
 } from './cqrs/commands'
 
+@UseGuards(SuperAdminGuard)
 @ApiTags('subscription-plans')
 @ApiBearerAuth()
 @Controller('subscription-plans')

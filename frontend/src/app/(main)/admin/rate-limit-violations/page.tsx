@@ -1,13 +1,16 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axiosInstance from '@/lib/axios';
 import { format } from 'date-fns';
 import { Button } from 'primereact/button';
 import { Checkbox } from 'primereact/checkbox';
 import { SelectButton } from 'primereact/selectbutton';
 import { Tag } from 'primereact/tag';
 import { DataTable, type Column } from '@/components/shared/DataTable';
+import { FilterBar, FilterField } from '@/components/shared/FilterBar';
 import { PageHeader } from '@/components/shared/PageHeader';
 
 interface RateLimitViolation {
@@ -19,45 +22,41 @@ interface RateLimitViolation {
   dismissed: boolean;
 }
 
-const filterOptions = [
-  { label: 'Undismissed', value: 'undismissed' },
-  { label: 'Dismissed', value: 'dismissed' },
-  { label: 'All', value: 'all' },
-];
-
 async function getViolations(dismissed?: boolean): Promise<RateLimitViolation[]> {
-  const qs = dismissed !== undefined ? `?dismissed=${dismissed}` : '';
-  const res = await fetch(`/api/admin/rate-limit-violations${qs}`);
-  if (!res.ok) throw new Error('Failed to fetch violations');
-  return res.json();
+  const res = await axiosInstance.get<{ data: (RateLimitViolation & { isDismissed: boolean })[] }>(
+    '/rate-limit-violations',
+    { params: dismissed !== undefined ? { dismissed } : {} },
+  );
+  return res.data.data.map((v) => ({ ...v, dismissed: v.isDismissed }));
 }
 
 async function dismissViolation(id: string): Promise<void> {
-  const res = await fetch(`/api/admin/rate-limit-violations/${id}/dismiss`, { method: 'PATCH' });
-  if (!res.ok) throw new Error('Failed to dismiss');
+  await axiosInstance.patch(`/rate-limit-violations/${id}/dismiss`);
 }
 
 async function dismissAll(ids: string[]): Promise<void> {
-  const res = await fetch('/api/admin/rate-limit-violations/dismiss-bulk', {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ids }),
-  });
-  if (!res.ok) throw new Error('Failed to dismiss');
+  await axiosInstance.post('/rate-limit-violations/bulk-dismiss', { ids });
 }
 
 function severityFor(count: number) {
-  if (count >= 1000) return { label: 'Critical', severity: 'danger' as const };
-  if (count >= 500) return { label: 'High', severity: 'warning' as const };
-  if (count >= 100) return { label: 'Medium', severity: 'info' as const };
-  return { label: 'Low', severity: 'secondary' as const };
+  if (count >= 1000) return { key: 'critical', severity: 'danger' as const };
+  if (count >= 500) return { key: 'high', severity: 'warning' as const };
+  if (count >= 100) return { key: 'medium', severity: 'info' as const };
+  return { key: 'low', severity: 'secondary' as const };
 }
 
 export default function RateLimitViolationsPage() {
+  const t = useTranslations('rateLimitViolations');
+  const commonT = useTranslations('common');
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<'undismissed' | 'dismissed' | 'all'>('undismissed');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const dismissed = filter === 'undismissed' ? false : filter === 'dismissed' ? true : undefined;
+  const filterOptions = [
+    { label: t('undismissed'), value: 'undismissed' },
+    { label: t('dismissed'), value: 'dismissed' },
+    { label: commonT('all'), value: 'all' },
+  ];
 
   const violationsQuery = useQuery({
     queryKey: ['rate-limit-violations', filter],
@@ -103,29 +102,36 @@ export default function RateLimitViolationsPage() {
         <Checkbox
           checked={selected.has(row.id)}
           onChange={() => toggleSelect(row.id)}
-          aria-label="Select violation"
+          aria-label={t('selectViolation')}
         />
       ),
     },
-    { header: 'IP Address', key: 'ipAddress', render: (_, row) => <span className="font-mono font-semibold">{row.ipAddress}</span> },
-    { header: 'Endpoint', key: 'endpoint', render: (_, row) => <span className="line-clamp-1 font-mono text-xs text-primary">{row.endpoint}</span> },
+    { header: t('ipAddress'), key: 'ipAddress', render: (_, row) => <span className="font-mono font-semibold">{row.ipAddress}</span> },
+    { header: t('endpoint'), key: 'endpoint', render: (_, row) => <span className="line-clamp-1 font-mono text-xs text-primary">{row.endpoint}</span> },
     {
-      header: 'Requests',
+      header: t('requests'),
       key: 'requestCount',
       render: (_, row) => (
         <span className="font-semibold tabular-nums">{row.requestCount.toLocaleString()}</span>
       ),
     },
     {
-      header: 'Severity',
+      header: t('severity'),
       key: 'severity',
       render: (_, row) => {
         const severity = severityFor(row.requestCount);
-        return <Tag value={severity.label} severity={severity.severity} />;
+        const label = {
+          critical: t('severityLevels.critical'),
+          high: t('severityLevels.high'),
+          medium: t('severityLevels.medium'),
+          low: t('severityLevels.low'),
+        }[severity.key];
+
+        return <Tag value={label} severity={severity.severity} />;
       },
     },
     {
-      header: 'Time',
+      header: t('time'),
       key: 'windowStart',
       render: (_, row) => (
         <span className="text-xs tabular-nums text-muted-foreground">
@@ -134,21 +140,21 @@ export default function RateLimitViolationsPage() {
       ),
     },
     {
-      header: 'Status',
+      header: commonT('status'),
       key: 'dismissed',
       render: (_, row) => (
-        <Tag value={row.dismissed ? 'Dismissed' : 'Active'} severity={row.dismissed ? 'secondary' : 'danger'} />
+        <Tag value={row.dismissed ? t('dismissed') : commonT('active')} severity={row.dismissed ? 'secondary' : 'danger'} />
       ),
     },
     {
-      header: 'Action',
+      header: commonT('actions'),
       key: 'id',
       className: 'w-28',
       render: (_, row) =>
         row.dismissed ? null : (
           <Button
             type="button"
-            label="Dismiss"
+            label={t('dismiss')}
             size="small"
             severity="warning"
             outlined
@@ -162,48 +168,60 @@ export default function RateLimitViolationsPage() {
   return (
     <div>
       <PageHeader
-        title="Rate Limit Violations"
-        subtitle="IPs that exceeded request thresholds. Dismiss resolved incidents."
+        title={t('title')}
+        subtitle={t('subtitle')}
       />
 
-      <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4">
-        <Checkbox
-          inputId="select-all-violations"
-          checked={violations.length > 0 && selected.size === violations.length}
-          onChange={toggleAll}
-        />
-        <label htmlFor="select-all-violations" className="text-sm font-semibold text-muted-foreground">
-          Select all
-        </label>
-        <SelectButton
-          value={filter}
-          options={filterOptions}
-          onChange={(event) => {
-            if (event.value) {
-              setFilter(event.value);
-              setSelected(new Set());
-            }
-          }}
-          allowEmpty={false}
-        />
-        <div className="flex-1" />
-        <span className="text-sm text-muted-foreground">{selected.size} selected</span>
-        <Button
-          type="button"
-          label="Dismiss Selected"
-          icon="pi pi-check"
-          severity="warning"
-          disabled={selected.size === 0}
-          loading={bulkDismissMutation.isPending}
-          onClick={() => bulkDismissMutation.mutate()}
-        />
-      </div>
+      <FilterBar
+        actions={
+          <>
+            <span className="text-sm text-muted-foreground">{t('selected', { count: selected.size })}</span>
+            <Button
+              type="button"
+              label={t('dismissSelected')}
+              icon="pi pi-check"
+              severity="warning"
+              disabled={selected.size === 0}
+              loading={bulkDismissMutation.isPending}
+              onClick={() => bulkDismissMutation.mutate()}
+            />
+          </>
+        }
+      >
+        <FilterField label={t('selection')}>
+          <div className="flex min-h-[2.5rem] items-center gap-2 rounded-md border border-input px-3">
+            <Checkbox
+              inputId="select-all-violations"
+              checked={violations.length > 0 && selected.size === violations.length}
+              onChange={toggleAll}
+            />
+            <label htmlFor="select-all-violations" className="text-sm font-semibold text-muted-foreground">
+              {t('selectAll')}
+            </label>
+          </div>
+        </FilterField>
+        <FilterField label={commonT('status')}>
+          <SelectButton
+            value={filter}
+            options={filterOptions}
+            onChange={(event) => {
+              if (event.value) {
+                setFilter(event.value);
+                setSelected(new Set());
+              }
+            }}
+            allowEmpty={false}
+            className="w-full"
+          />
+        </FilterField>
+      </FilterBar>
 
       <DataTable
         columns={columns}
         data={violations}
         isLoading={violationsQuery.isLoading}
-        emptyMessage={filter === 'undismissed' ? 'No active violations. Everything looks clean.' : 'No records match this filter.'}
+        minWidth="60rem"
+        emptyMessage={filter === 'undismissed' ? t('emptyActive') : t('emptyFiltered')}
       />
     </div>
   );

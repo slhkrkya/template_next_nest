@@ -13,6 +13,6 @@ export class GetRateLimitViolationsHandler implements IQueryHandler<GetRateLimit
 
   async execute(query: GetRateLimitViolationsQuery): Promise<PagedResult<any>> {
     await this.permissionChecker.check(query.user, 'RateLimits', 'Read')
-    return this.rateLimitViolationsService.findAll(query.pagination)
+    return this.rateLimitViolationsService.findAll(query.pagination, query.dismissed)
   }
 }

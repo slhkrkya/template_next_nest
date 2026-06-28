@@ -4,6 +4,7 @@ import { useTransition } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Dropdown } from 'primereact/dropdown';
+import { getPrimeOverlayAppendTo } from './FilterBar';
 
 interface Locale {
   code: string;
@@ -38,6 +39,7 @@ export function LanguageSwitcher() {
       disabled={isPending}
       className="w-28"
       aria-label={t('switch')}
+      appendTo={getPrimeOverlayAppendTo()}
       valueTemplate={(option: Locale | null) => (
         <span className="font-bold tracking-wide">{option?.flag ?? 'EN'}</span>
       )}

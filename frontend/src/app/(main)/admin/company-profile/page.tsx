@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axiosInstance from '@/lib/axios';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -27,34 +29,29 @@ interface CompanyProfile {
   createdAt: string;
 }
 
-const profileSchema = z.object({
-  name: z.string().min(1, 'Company name is required'),
+const createProfileSchema = (t: (key: any, params?: any) => string) => z.object({
+  name: z.string().min(1, t('companyNameRequired')),
 });
 
-type ProfileFormData = z.infer<typeof profileSchema>;
+type ProfileFormData = z.infer<ReturnType<typeof createProfileSchema>>;
 
 async function getCompanyProfile(): Promise<CompanyProfile> {
-  const res = await fetch('/api/admin/company-profile');
-  if (!res.ok) throw new Error('Failed to fetch company profile');
-  return res.json();
+  const res = await axiosInstance.get<CompanyProfile>('/tenants/me');
+  return res.data;
 }
 
 async function updateCompanyProfile(data: { name: string; logoUrl?: string | null }): Promise<CompanyProfile> {
-  const res = await fetch('/api/admin/company-profile', {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error('Failed to update company profile');
-  return res.json();
+  const res = await axiosInstance.patch<CompanyProfile>('/tenants/me', data);
+  return res.data;
 }
 
 async function uploadLogo(file: File): Promise<{ url: string }> {
   const formData = new FormData();
   formData.append('logo', file);
-  const res = await fetch('/api/admin/company-profile/logo', { method: 'POST', body: formData });
-  if (!res.ok) throw new Error('Failed to upload logo');
-  return res.json();
+  const res = await axiosInstance.post<{ url: string }>('/tenants/me/logo', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return res.data;
 }
 
 function statusSeverity(status: CompanyProfile['subscriptionStatus']) {
@@ -65,6 +62,8 @@ function statusSeverity(status: CompanyProfile['subscriptionStatus']) {
 }
 
 export default function CompanyProfilePage() {
+  const t = useTranslations('companyProfile');
+  const commonT = useTranslations('common');
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -78,7 +77,7 @@ export default function CompanyProfilePage() {
     reset,
     formState: { errors, isDirty },
   } = useForm<ProfileFormData>({
-    resolver: zodResolver(profileSchema),
+    resolver: zodResolver(createProfileSchema(t)),
     defaultValues: { name: '' },
   });
 
@@ -126,12 +125,12 @@ export default function CompanyProfilePage() {
   return (
     <div className="max-w-5xl">
       <PageHeader
-        title="Company Profile"
-        subtitle="Manage your tenant identity and review subscription details."
+        title={t('title')}
+        subtitle={t('subtitle')}
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card title="Identity">
+        <Card title={t('identity')}>
           <form onSubmit={handleSubmit((data) => saveMutation.mutate(data))} className="space-y-5">
             <button
               type="button"
@@ -152,9 +151,9 @@ export default function CompanyProfilePage() {
                 className="bg-primary/10 text-primary"
               />
               <span className="text-sm font-semibold text-foreground">
-                {logoFile ? logoFile.name : 'Click or drag to upload logo'}
+                {logoFile ? logoFile.name : t('uploadLogo')}
               </span>
-              <span className="text-xs text-muted-foreground">PNG, JPG, SVG or WebP. Max 2 MB.</span>
+              <span className="text-xs text-muted-foreground">{t('logoHelp')}</span>
             </button>
             <input
               ref={fileRef}
@@ -165,29 +164,29 @@ export default function CompanyProfilePage() {
             />
 
             {profileQuery.isLoading ? (
-              <div className="text-sm text-muted-foreground">Loading profile...</div>
+              <div className="text-sm text-muted-foreground">{t('loadingProfile')}</div>
             ) : (
               <div>
                 <label htmlFor="company-name" className="mb-2 block text-sm font-semibold text-foreground">
-                  Company Name
+                  {t('companyName')} <span className="text-rose-600">*</span>
                 </label>
                 <InputText
                   id="company-name"
                   {...register('name')}
                   invalid={!!errors.name}
                   className="w-full"
-                  placeholder="Acme Corporation"
+                  placeholder={t('companyNamePlaceholder')}
                 />
                 {errors.name && <small className="mt-1 block text-rose-600">{errors.name.message}</small>}
               </div>
             )}
 
             {saveMutation.isError && <Message severity="error" text={(saveMutation.error as Error).message} />}
-            {saved && <Message severity="success" text="Saved" />}
+            {saved && <Message severity="success" text={commonT('saved')} />}
 
             <Button
               type="submit"
-              label="Save Changes"
+              label={commonT('saveChanges')}
               icon="pi pi-save"
               loading={saveMutation.isPending}
               disabled={!isFormDirty}
@@ -195,40 +194,40 @@ export default function CompanyProfilePage() {
           </form>
         </Card>
 
-        <Card title="Subscription">
+        <Card title={t('subscription')}>
           {profileQuery.isLoading ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">Loading subscription...</div>
+            <div className="py-8 text-center text-sm text-muted-foreground">{t('loadingSubscription')}</div>
           ) : profile ? (
             <div className="space-y-5">
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-muted p-4">
-                  <p className="m-0 text-xs font-semibold uppercase text-muted-foreground">Plan</p>
+                  <p className="m-0 text-xs font-semibold uppercase text-muted-foreground">{t('plan')}</p>
                   <p className="m-0 mt-2 text-lg font-bold text-foreground">{profile.subscriptionPlan}</p>
                 </div>
                 <div className="rounded-xl bg-muted p-4">
-                  <p className="m-0 text-xs font-semibold uppercase text-muted-foreground">Status</p>
+                  <p className="m-0 text-xs font-semibold uppercase text-muted-foreground">{commonT('status')}</p>
                   <div className="mt-2">
                     <Tag value={profile.subscriptionStatus} severity={statusSeverity(profile.subscriptionStatus)} />
                   </div>
                 </div>
               </div>
               <div className="rounded-xl bg-muted p-4">
-                <p className="m-0 text-xs font-semibold uppercase text-muted-foreground">Expires</p>
+                <p className="m-0 text-xs font-semibold uppercase text-muted-foreground">{t('expires')}</p>
                 <p className="m-0 mt-2 text-sm font-semibold text-foreground">
                   {profile.subscriptionExpiresAt
                     ? format(new Date(profile.subscriptionExpiresAt), 'MMMM d, yyyy')
-                    : 'No expiry date'}
+                    : t('noExpiryDate')}
                 </p>
               </div>
               <div>
                 <div className="mb-2 flex justify-between text-sm text-muted-foreground">
-                  <span>User seats</span>
+                  <span>{t('userSeats')}</span>
                   <span>{profile.currentUsers} / {profile.maxUsers}</span>
                 </div>
                 <ProgressBar value={usagePct} />
               </div>
               <p className="m-0 text-sm text-muted-foreground">
-                Member since {format(new Date(profile.createdAt), 'MMMM yyyy')}.
+                {t('memberSince', { date: format(new Date(profile.createdAt), 'MMMM yyyy') })}
               </p>
             </div>
           ) : null}

@@ -1,10 +1,8 @@
 import { ICommand } from '@nestjs/cqrs';
-import { UpdateUserDto } from '../dto';
 
-export class UpdateUserCommand implements ICommand {
+export class ToggleActiveUserCommand implements ICommand {
   constructor(
     public readonly id: string,
-    public readonly dto: UpdateUserDto,
     public readonly tenantId?: string,
   ) {}
 }

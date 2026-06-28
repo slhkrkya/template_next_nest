@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axiosInstance from '@/lib/axios';
 import { format } from 'date-fns';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
@@ -12,6 +13,7 @@ import { InputText } from 'primereact/inputtext';
 import { Tag } from 'primereact/tag';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { DataTable, type Column } from '@/components/shared/DataTable';
+import { FilterBar, FilterField, getPrimeOverlayAppendTo } from '@/components/shared/FilterBar';
 import { PageHeader } from '@/components/shared/PageHeader';
 import UserForm from './components/UserForm';
 
@@ -39,31 +41,24 @@ async function getUsers(params: {
   role?: string;
   status?: string;
 }): Promise<UsersResponse> {
-  const qs = new URLSearchParams({
-    page: String(params.page),
-    pageSize: String(params.pageSize),
-    ...(params.search ? { search: params.search } : {}),
-    ...(params.role ? { role: params.role } : {}),
-    ...(params.status ? { status: params.status } : {}),
+  const res = await axiosInstance.get<UsersResponse>('/users', {
+    params: {
+      page: params.page,
+      limit: params.pageSize,
+      ...(params.search ? { search: params.search } : {}),
+      ...(params.status === 'active' ? { isActive: 'true' } : params.status === 'inactive' ? { isActive: 'false' } : {}),
+    },
   });
-  const res = await fetch(`/api/admin/users?${qs}`);
-  if (!res.ok) throw new Error('Failed to fetch users');
-  return res.json();
+  return res.data;
 }
 
 async function deleteUser(id: string) {
-  const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error('Failed to delete user');
+  await axiosInstance.delete(`/users/${id}`);
 }
 
-async function toggleUserStatus(id: string, isActive: boolean) {
-  const res = await fetch(`/api/admin/users/${id}/status`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ isActive }),
-  });
-  if (!res.ok) throw new Error('Failed to update status');
-  return res.json();
+async function toggleUserStatus(id: string) {
+  const res = await axiosInstance.patch(`/users/${id}/toggle-active`);
+  return res.data;
 }
 
 function StatusBadge({ active }: { active: boolean }) {
@@ -114,8 +109,7 @@ export default function UsersPage() {
   });
 
   const toggleMutation = useMutation({
-    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
-      toggleUserStatus(id, isActive),
+    mutationFn: ({ id }: { id: string }) => toggleUserStatus(id),
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['admin', 'users'] }),
   });
 
@@ -157,7 +151,7 @@ export default function UsersPage() {
       render: (_, user) => (
         <InputSwitch
           checked={user.isActive}
-          onChange={(event) => toggleMutation.mutate({ id: user.id, isActive: !!event.value })}
+          onChange={() => toggleMutation.mutate({ id: user.id })}
         />
       ),
     },
@@ -200,40 +194,55 @@ export default function UsersPage() {
         }
       />
 
-      <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4">
-        <span className="p-input-icon-left min-w-64 flex-1">
-          <i className="pi pi-search" />
-          <InputText
-            value={search}
-            onChange={(event) => handleSearch(event.target.value)}
-            placeholder={t('users.searchByNameOrEmail')}
+      <FilterBar>
+        <FilterField label={t('common.search')}>
+          <span className="p-input-icon-left block w-full">
+            <i className="pi pi-search" />
+            <InputText
+              value={search}
+              onChange={(event) => handleSearch(event.target.value)}
+              placeholder={t('users.searchByNameOrEmail')}
+              className="w-full"
+            />
+          </span>
+        </FilterField>
+        <FilterField label={t('roles.title')} htmlFor="users-role-filter">
+          <Dropdown
+            inputId="users-role-filter"
+            value={roleFilter}
+            options={roleOptions}
+            onChange={(event) => {
+              setRoleFilter(event.value ?? '');
+              setPage(1);
+            }}
+            placeholder={t('users.allRoles')}
             className="w-full"
+            showClear
+            appendTo={getPrimeOverlayAppendTo()}
           />
-        </span>
-        <Dropdown
-          value={roleFilter}
-          options={roleOptions}
-          onChange={(event) => {
-            setRoleFilter(event.value);
-            setPage(1);
-          }}
-          className="w-44"
-        />
-        <Dropdown
-          value={statusFilter}
-          options={statusOptions}
-          onChange={(event) => {
-            setStatusFilter(event.value);
-            setPage(1);
-          }}
-          className="w-44"
-        />
-      </div>
+        </FilterField>
+        <FilterField label={t('common.status')} htmlFor="users-status-filter">
+          <Dropdown
+            inputId="users-status-filter"
+            value={statusFilter}
+            options={statusOptions}
+            onChange={(event) => {
+              setStatusFilter(event.value ?? '');
+              setPage(1);
+            }}
+            placeholder={t('users.allStatuses')}
+            className="w-full"
+            showClear
+            appendTo={getPrimeOverlayAppendTo()}
+          />
+        </FilterField>
+      </FilterBar>
 
       <DataTable
         columns={columns}
         data={users}
         isLoading={usersQuery.isLoading}
+        minWidth="52rem"
         pagination={{ page, pageSize, totalCount: total, onPageChange: setPage }}
         emptyMessage={t('users.noUsersFound')}
       />

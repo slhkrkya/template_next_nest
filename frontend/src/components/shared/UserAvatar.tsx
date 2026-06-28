@@ -65,7 +65,7 @@ export function UserAvatar({
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={src}
-          alt={alt ?? name ?? 'User avatar'}
+          alt={alt ?? name ?? displayInitials}
           className={cn(
             'rounded-full object-cover ring-2 ring-background',
             sizeClass,
@@ -77,7 +77,7 @@ export function UserAvatar({
             'rounded-full ring-2 ring-background flex items-center justify-center bg-primary font-semibold text-primary-foreground select-none',
             sizeClass,
           )}
-          aria-label={alt ?? name ?? 'User avatar'}
+          aria-label={alt ?? name ?? displayInitials}
           role="img"
         >
           {displayInitials}
@@ -91,7 +91,7 @@ export function UserAvatar({
             dotSizeClass,
             STATUS_CLASSES[status],
           )}
-          aria-label={`Status: ${status}`}
+          aria-label={status}
         />
       )}
     </div>

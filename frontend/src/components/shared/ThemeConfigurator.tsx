@@ -5,6 +5,7 @@ import { Button } from 'primereact/button';
 import { InputSwitch } from 'primereact/inputswitch';
 import { SelectButton } from 'primereact/selectbutton';
 import { Sidebar as PrimeSidebar } from 'primereact/sidebar';
+import { useTranslations } from 'next-intl';
 import { updateThemePreference } from '@/lib/api/users.api';
 import { useAppToast } from '@/providers/prime-provider';
 import { useAuthStore } from '@/store/auth.store';
@@ -23,11 +24,20 @@ interface ThemeConfiguratorProps {
 }
 
 export function ThemeConfigurator({ visible, onHide }: ThemeConfiguratorProps) {
+  const t = useTranslations('theme');
   const { toast } = useAppToast();
   const [isSaving, setIsSaving] = useState(false);
   const { preference, updatePreference } = useThemeStore();
   const updateUser = useAuthStore((state) => state.updateUser);
   const themeGroups = groupThemeOptions();
+  const inputStyleOptions = INPUT_STYLE_OPTIONS.map((option) => ({
+    ...option,
+    label: option.value === 'filled' ? t('inputStyle.filled') : t('inputStyle.outlined'),
+  }));
+  const colorSchemeOptions = COLOR_SCHEME_OPTIONS.map((option) => ({
+    ...option,
+    label: option.value === 'dark' ? t('dark') : t('light'),
+  }));
 
   async function persistPreference(partial: Partial<UserThemePreference>) {
     const next = updatePreference(partial);
@@ -40,7 +50,7 @@ export function ThemeConfigurator({ visible, onHide }: ThemeConfiguratorProps) {
       updateUser({ themePreference: saved });
     } catch {
       toast({
-        title: 'Theme preference could not be saved',
+        title: t('saveFailed'),
         variant: 'destructive',
       });
     } finally {
@@ -57,14 +67,14 @@ export function ThemeConfigurator({ visible, onHide }: ThemeConfiguratorProps) {
       header={
         <div className="flex items-center gap-2">
           <i className="pi pi-palette text-primary" />
-          <span className="font-bold">Theme</span>
+          <span className="font-bold">{t('theme')}</span>
         </div>
       }
     >
       <div className="space-y-6 pb-4">
         <section className="border-b border-border pb-5">
           <div className="mb-3 flex items-center justify-between gap-4">
-            <span className="font-semibold text-foreground">Scale</span>
+            <span className="font-semibold text-foreground">{t('scale')}</span>
             <div className="flex items-center gap-1">
               <Button
                 type="button"
@@ -74,7 +84,7 @@ export function ThemeConfigurator({ visible, onHide }: ThemeConfiguratorProps) {
                 severity="secondary"
                 disabled={preference.scale <= SCALE_OPTIONS[0]}
                 onClick={() => persistPreference({ scale: preference.scale - 1 })}
-                aria-label="Decrease scale"
+                aria-label={t('decreaseScale')}
               />
               <div className="flex items-center gap-1 px-1">
                 {SCALE_OPTIONS.map((scale) => (
@@ -85,7 +95,7 @@ export function ThemeConfigurator({ visible, onHide }: ThemeConfiguratorProps) {
                       preference.scale === scale ? 'bg-primary' : 'bg-muted'
                     }`}
                     onClick={() => persistPreference({ scale })}
-                    aria-label={`Set scale ${scale}`}
+                    aria-label={t('setScale', { scale })}
                   />
                 ))}
               </div>
@@ -97,7 +107,7 @@ export function ThemeConfigurator({ visible, onHide }: ThemeConfiguratorProps) {
                 severity="secondary"
                 disabled={preference.scale >= SCALE_OPTIONS[SCALE_OPTIONS.length - 1]}
                 onClick={() => persistPreference({ scale: preference.scale + 1 })}
-                aria-label="Increase scale"
+                aria-label={t('increaseScale')}
               />
             </div>
           </div>
@@ -105,16 +115,16 @@ export function ThemeConfigurator({ visible, onHide }: ThemeConfiguratorProps) {
 
         <section className="border-b border-border pb-5">
           <div className="mb-4 flex items-center justify-between gap-4">
-            <span className="font-semibold text-foreground">Input Style</span>
+            <span className="font-semibold text-foreground">{t('inputStyle.title')}</span>
             <SelectButton
               value={preference.inputStyle}
-              options={INPUT_STYLE_OPTIONS}
+              options={inputStyleOptions}
               allowEmpty={false}
               onChange={(event) => event.value && persistPreference({ inputStyle: event.value })}
             />
           </div>
           <div className="flex items-center justify-between gap-4">
-            <span className="font-semibold text-foreground">Ripple Effect</span>
+            <span className="font-semibold text-foreground">{t('rippleEffect')}</span>
             <InputSwitch
               checked={preference.ripple}
               onChange={(event) => persistPreference({ ripple: !!event.value })}
@@ -124,10 +134,10 @@ export function ThemeConfigurator({ visible, onHide }: ThemeConfiguratorProps) {
 
         <section className="border-b border-border pb-5">
           <div className="flex items-center justify-between gap-4">
-            <span className="font-semibold text-foreground">Dark Mode</span>
+            <span className="font-semibold text-foreground">{t('darkMode')}</span>
             <SelectButton
               value={preference.colorScheme}
-              options={COLOR_SCHEME_OPTIONS}
+              options={colorSchemeOptions}
               allowEmpty={false}
               onChange={(event) => event.value && persistPreference({ colorScheme: event.value })}
             />
@@ -136,7 +146,7 @@ export function ThemeConfigurator({ visible, onHide }: ThemeConfiguratorProps) {
 
         <section>
           <div className="mb-4 flex items-center justify-between">
-            <span className="font-semibold text-foreground">Themes</span>
+            <span className="font-semibold text-foreground">{t('themes')}</span>
             {isSaving && <i className="pi pi-spin pi-spinner text-sm text-muted-foreground" />}
           </div>
 

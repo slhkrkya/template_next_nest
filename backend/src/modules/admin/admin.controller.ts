@@ -4,11 +4,13 @@ import {
   Query,
   ParseIntPipe,
   DefaultValuePipe,
+  UseGuards,
 } from '@nestjs/common'
 import { QueryBus } from '@nestjs/cqrs'
 import { AuditLogFilters, SystemLogFilters } from './admin.service'
 import { AuthenticatedUser } from '../../common/types'
 import { CurrentUser } from '../../common/decorators/current-user.decorator'
+import { SuperAdminGuard } from '../../common/guards/superadmin.guard'
 import {
   GetDashboardStatsQuery,
   GetAuditLogsQuery,
@@ -16,6 +18,7 @@ import {
   GetDailyLoginStatsQuery,
 } from './queries'
 
+@UseGuards(SuperAdminGuard)
 @Controller('admin')
 export class AdminController {
   constructor(private readonly queryBus: QueryBus) {}

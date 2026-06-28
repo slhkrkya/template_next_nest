@@ -7,6 +7,7 @@ import { Button } from 'primereact/button';
 import { Card } from 'primereact/card';
 import { InputText } from 'primereact/inputtext';
 import { Skeleton } from 'primereact/skeleton';
+import { useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { useAppToast } from '@/providers/prime-provider';
@@ -16,6 +17,8 @@ import { switchTenant } from '@/lib/api/auth.api';
 import type { Tenant } from '@/types';
 
 export default function TenantSelectPage() {
+  const t = useTranslations('tenants');
+  const commonT = useTranslations('common');
   const router = useRouter();
   const { toast } = useAppToast();
   const { user, setAuth } = useAuthStore();
@@ -35,7 +38,7 @@ export default function TenantSelectPage() {
       setTenants(result.data);
       setFiltered(result.data);
     } catch {
-      toast({ title: 'Failed to load tenants', variant: 'destructive' });
+      toast({ title: t('loadFailed'), variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
@@ -66,14 +69,12 @@ export default function TenantSelectPage() {
         accessToken,
       );
       toast({
-        title: tenant
-          ? `Switched to ${tenant.name}`
-          : 'Switched to global context',
+        title: tenant ? t('switchedTenant', { name: tenant.name }) : t('switchedGlobal'),
         variant: 'success',
       });
       router.push(id ? '/admin/dashboard' : '/super-admin/tenants');
     } catch {
-      toast({ title: 'Failed to switch tenant', variant: 'destructive' });
+      toast({ title: t('switchFailed'), variant: 'destructive' });
     } finally {
       setSwitching(null);
     }
@@ -82,8 +83,8 @@ export default function TenantSelectPage() {
   return (
     <div>
       <PageHeader
-        title="Switch Tenant Context"
-        subtitle="Select a tenant to manage, or return to the global super-admin view."
+        title={t('switchTitle')}
+        subtitle={t('switchSubtitle')}
       />
 
       <button
@@ -98,9 +99,9 @@ export default function TenantSelectPage() {
       >
         <Avatar icon="pi pi-globe" shape="circle" size="large" className="bg-primary text-primary-foreground" />
         <div className="min-w-0 flex-1">
-          <p className="m-0 text-sm font-semibold text-foreground">All Tenants (Global View)</p>
+          <p className="m-0 text-sm font-semibold text-foreground">{t('globalView')}</p>
           <p className="m-0 mt-1 text-xs text-muted-foreground">
-            Manage all tenants without a specific context.
+            {t('globalViewDescription')}
           </p>
         </div>
         {activeTenantId === null && <i className="pi pi-check-circle text-xl text-primary" />}
@@ -112,7 +113,7 @@ export default function TenantSelectPage() {
         <InputText
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search tenants..."
+          placeholder={t('search')}
           className="w-full"
         />
       </span>
@@ -125,7 +126,7 @@ export default function TenantSelectPage() {
         </div>
       ) : filtered.length === 0 ? (
         <Card>
-          <div className="py-10 text-center text-sm text-muted-foreground">No tenants match your search.</div>
+          <div className="py-10 text-center text-sm text-muted-foreground">{t('noMatch')}</div>
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -163,7 +164,7 @@ export default function TenantSelectPage() {
                 <div className="mt-4 flex items-center justify-between">
                   <StatusBadge status={tenant.status} />
                   <span className="text-xs text-muted-foreground">
-                    Max {tenant.maxUsers.toLocaleString()} users
+                    {t('maxUsers', { count: tenant.maxUsers.toLocaleString() })}
                   </span>
                 </div>
               </button>
@@ -175,7 +176,7 @@ export default function TenantSelectPage() {
       <div className="mt-8">
         <Button
           type="button"
-          label="Go Back"
+          label={commonT('goBack')}
           icon="pi pi-arrow-left"
           severity="secondary"
           text

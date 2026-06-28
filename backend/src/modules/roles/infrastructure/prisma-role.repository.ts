@@ -32,7 +32,7 @@ export class PrismaRoleRepository implements IRoleRepository {
     return raw ? this.toEntity(raw) : null
   }
 
-  async findAll(tenantId?: string): Promise<RoleEntity[]> {
+  async findAll(): Promise<RoleEntity[]> {
     const raw = await this.prisma.operationClaim.findMany({ orderBy: { name: 'asc' } })
     return raw.map(r => this.toEntity(r))
   }
@@ -57,14 +57,14 @@ export class PrismaRoleRepository implements IRoleRepository {
     await this.prisma.operationClaim.delete({ where: { id } })
   }
 
-  async assignToUser(userId: string, roleId: string): Promise<void> {
-    const exists = await this.prisma.userOperationClaim.findFirst({ where: { userId, operationClaimId: roleId } })
+  async assignToUser(userId: string, roleId: string, tenantId?: string): Promise<void> {
+    const exists = await this.prisma.userOperationClaim.findFirst({ where: { userId, operationClaimId: roleId, tenantId: tenantId ?? null } })
     if (!exists) {
-      await this.prisma.userOperationClaim.create({ data: { userId, operationClaimId: roleId } })
+      await this.prisma.userOperationClaim.create({ data: { userId, operationClaimId: roleId, tenantId: tenantId ?? null } })
     }
   }
 
-  async removeFromUser(userId: string, roleId: string): Promise<void> {
-    await this.prisma.userOperationClaim.deleteMany({ where: { userId, operationClaimId: roleId } })
+  async removeFromUser(userId: string, roleId: string, tenantId?: string): Promise<void> {
+    await this.prisma.userOperationClaim.deleteMany({ where: { userId, operationClaimId: roleId, tenantId: tenantId ?? null } })
   }
 }

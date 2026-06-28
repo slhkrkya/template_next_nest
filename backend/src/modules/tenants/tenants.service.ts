@@ -10,8 +10,17 @@ import { TenantStatus } from '@prisma/client'
 import { ITenantRepository, TENANT_REPOSITORY } from './domain/tenant.repository.interface'
 import { CreateTenantDto } from './dto/create-tenant.dto'
 import { UpdateTenantDto } from './dto/update-tenant.dto'
+import { UpdateMyProfileDto } from './dto/update-my-profile.dto'
 import { PaginationDto } from '../../common/dto/pagination.dto'
 import { PagedResult } from '../../common/types'
+import { PrismaService } from '../../prisma/prisma.service'
+
+function mapStatus(status: string): 'active' | 'trial' | 'expired' | 'cancelled' {
+  if (status === 'ACTIVE') return 'active'
+  if (status === 'TRIAL') return 'trial'
+  if (status === 'SUSPENDED') return 'expired'
+  return 'cancelled'
+}
 
 @Injectable()
 export class TenantsService {
@@ -19,6 +28,7 @@ export class TenantsService {
 
   constructor(
     @Inject(TENANT_REPOSITORY) private readonly tenants: ITenantRepository,
+    private readonly prisma: PrismaService,
   ) {}
 
   async findAll(query: PaginationDto): Promise<PagedResult<any>> {
@@ -108,5 +118,59 @@ export class TenantsService {
     // In a real implementation you'd store the context in the session/JWT or cache
     this.logger.log(`SuperAdmin ${superAdminUserId} switched context to tenant ${tenantId}`)
     return { message: `Switched to tenant "${tenant.name}"`, tenant }
+  }
+
+  async getTenantProfile(tenantId: string): Promise<any> {
+    const tenant = await this.tenants.findById(tenantId)
+    if (!tenant) throw new NotFoundException(`Tenant ${tenantId} not found`)
+
+    const currentUsers = await this.prisma.user.count({
+      where: { tenantId, isActive: true, deletedAt: null },
+    })
+
+    return {
+      id: tenant.id,
+      name: tenant.name,
+      logoUrl: tenant.logoPath ?? null,
+      subscriptionPlan: tenant.status === 'TRIAL' ? 'Trial' : 'Standard',
+      subscriptionStatus: mapStatus(tenant.status),
+      subscriptionExpiresAt: tenant.trialEndsAt?.toISOString() ?? null,
+      maxUsers: tenant.maxUsers,
+      currentUsers,
+      createdAt: tenant.createdAt.toISOString(),
+    }
+  }
+
+  async updateMyProfile(tenantId: string, dto: UpdateMyProfileDto): Promise<any> {
+    const tenant = await this.tenants.findById(tenantId)
+    if (!tenant) throw new NotFoundException(`Tenant ${tenantId} not found`)
+
+    const updated = await this.tenants.update(tenantId, {
+      ...(dto.name && { name: dto.name }),
+      ...(dto.logoUrl !== undefined && { logoPath: dto.logoUrl }),
+    })
+
+    const currentUsers = await this.prisma.user.count({
+      where: { tenantId, isActive: true, deletedAt: null },
+    })
+
+    return {
+      id: updated.id,
+      name: updated.name,
+      logoUrl: updated.logoPath ?? null,
+      subscriptionPlan: updated.status === 'TRIAL' ? 'Trial' : 'Standard',
+      subscriptionStatus: mapStatus(updated.status),
+      subscriptionExpiresAt: updated.trialEndsAt?.toISOString() ?? null,
+      maxUsers: updated.maxUsers,
+      currentUsers,
+      createdAt: updated.createdAt.toISOString(),
+    }
+  }
+
+  async updateTenantLogo(tenantId: string, logoPath: string): Promise<{ url: string }> {
+    const tenant = await this.tenants.findById(tenantId)
+    if (!tenant) throw new NotFoundException(`Tenant ${tenantId} not found`)
+    await this.tenants.update(tenantId, { logoPath })
+    return { url: logoPath }
   }
 }

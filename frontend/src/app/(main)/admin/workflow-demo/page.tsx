@@ -25,35 +25,28 @@ import { Card } from "primereact/card";
 import { Dialog } from "primereact/dialog";
 import { FileUpload, type FileUploadHandlerEvent } from "primereact/fileupload";
 import { Tag } from "primereact/tag";
+import { useTranslations } from "next-intl";
 
 const NODE_TYPES_CONFIG = [
   {
     type: "start",
-    label: "Start",
     icon: "pi pi-play",
     color: "#16a34a",
-    desc: "Entry point",
   },
   {
     type: "action",
-    label: "Action",
     icon: "pi pi-bolt",
     color: "#2563eb",
-    desc: "Perform a task",
   },
   {
     type: "decision",
-    label: "Decision",
     icon: "pi pi-question-circle",
     color: "#d97706",
-    desc: "Branch logic",
   },
   {
     type: "end",
-    label: "End",
     icon: "pi pi-stop-circle",
     color: "#dc2626",
-    desc: "Terminal state",
   },
 ];
 
@@ -122,68 +115,31 @@ const nodeTypes = {
   end: WorkflowNode,
 };
 
-const initialNodes: Node[] = [
-  {
-    id: "1",
-    type: "start",
-    position: { x: 250, y: 40 },
-    data: { label: "Start", icon: "pi pi-play", description: "Workflow begins" },
-  },
-  {
-    id: "2",
-    type: "action",
-    position: { x: 250, y: 160 },
-    data: { label: "Validate Input", icon: "pi pi-bolt", description: "Check request data" },
-  },
-  {
-    id: "3",
-    type: "decision",
-    position: { x: 230, y: 290 },
-    data: { label: "Valid?", icon: "pi pi-question-circle" },
-  },
-  {
-    id: "4",
-    type: "action",
-    position: { x: 120, y: 430 },
-    data: { label: "Process", icon: "pi pi-bolt", description: "Execute business logic" },
-  },
-  {
-    id: "5",
-    type: "end",
-    position: { x: 380, y: 430 },
-    data: { label: "Reject", icon: "pi pi-stop-circle", description: "Return error response" },
-  },
-  {
-    id: "6",
-    type: "end",
-    position: { x: 120, y: 560 },
-    data: { label: "Success", icon: "pi pi-stop-circle", description: "Return 200 OK" },
-  },
-];
-
-const initialEdges: Edge[] = [
-  { id: "e1-2", source: "1", target: "2", animated: true, style: { stroke: "hsl(var(--primary))" } },
-  { id: "e2-3", source: "2", target: "3", animated: true, style: { stroke: "hsl(var(--primary))" } },
-  {
-    id: "e3-4",
-    source: "3",
-    target: "4",
-    sourceHandle: "yes",
-    label: "Yes",
-    style: { stroke: "#16a34a" },
-    labelStyle: { fill: "#16a34a", fontSize: 11 },
-  },
-  {
-    id: "e3-5",
-    source: "3",
-    target: "5",
-    sourceHandle: "no",
-    label: "No",
-    style: { stroke: "#dc2626" },
-    labelStyle: { fill: "#dc2626", fontSize: 11 },
-  },
-  { id: "e4-6", source: "4", target: "6", animated: true, style: { stroke: "hsl(var(--primary))" } },
-];
+function createInitialEdges(t: (key: any, params?: any) => string): Edge[] {
+  return [
+    { id: "e1-2", source: "1", target: "2", animated: true, style: { stroke: "hsl(var(--primary))" } },
+    { id: "e2-3", source: "2", target: "3", animated: true, style: { stroke: "hsl(var(--primary))" } },
+    {
+      id: "e3-4",
+      source: "3",
+      target: "4",
+      sourceHandle: "yes",
+      label: t("common.yes"),
+      style: { stroke: "#16a34a" },
+      labelStyle: { fill: "#16a34a", fontSize: 11 },
+    },
+    {
+      id: "e3-5",
+      source: "3",
+      target: "5",
+      sourceHandle: "no",
+      label: t("common.no"),
+      style: { stroke: "#dc2626" },
+      labelStyle: { fill: "#dc2626", fontSize: 11 },
+    },
+    { id: "e4-6", source: "4", target: "6", animated: true, style: { stroke: "hsl(var(--primary))" } },
+  ];
+}
 
 function saveWorkflow(nodes: Node[], edges: Edge[]) {
   const data = JSON.stringify({ nodes, edges }, null, 2);
@@ -199,7 +155,53 @@ function saveWorkflow(nodes: Node[], edges: Edge[]) {
 let nodeCounter = 10;
 
 export default function WorkflowDemoPage() {
+  const t = useTranslations();
   const { toast } = useAppToast();
+  const nodeCopy = {
+    start: { label: t("workflow.nodes.start.label"), desc: t("workflow.nodes.start.desc") },
+    action: { label: t("workflow.nodes.action.label"), desc: t("workflow.nodes.action.desc") },
+    decision: { label: t("workflow.nodes.decision.label"), desc: t("workflow.nodes.decision.desc") },
+    end: { label: t("workflow.nodes.end.label"), desc: t("workflow.nodes.end.desc") },
+  };
+  const initialNodes: Node[] = [
+    {
+      id: "1",
+      type: "start",
+      position: { x: 250, y: 40 },
+      data: { label: nodeCopy.start.label, icon: "pi pi-play", description: t("workflow.demo.workflowBegins") },
+    },
+    {
+      id: "2",
+      type: "action",
+      position: { x: 250, y: 160 },
+      data: { label: t("workflow.demo.validateInput"), icon: "pi pi-bolt", description: t("workflow.demo.checkRequestData") },
+    },
+    {
+      id: "3",
+      type: "decision",
+      position: { x: 230, y: 290 },
+      data: { label: t("workflow.demo.valid"), icon: "pi pi-question-circle" },
+    },
+    {
+      id: "4",
+      type: "action",
+      position: { x: 120, y: 430 },
+      data: { label: t("workflow.demo.process"), icon: "pi pi-bolt", description: t("workflow.demo.executeBusinessLogic") },
+    },
+    {
+      id: "5",
+      type: "end",
+      position: { x: 380, y: 430 },
+      data: { label: t("workflow.demo.reject"), icon: "pi pi-stop-circle", description: t("workflow.demo.returnError") },
+    },
+    {
+      id: "6",
+      type: "end",
+      position: { x: 120, y: 560 },
+      data: { label: t("workflow.demo.success"), icon: "pi pi-stop-circle", description: t("workflow.demo.returnOk") },
+    },
+  ];
+  const initialEdges = createInitialEdges(t);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNodeType, setSelectedNodeType] = useState("action");
@@ -226,9 +228,9 @@ export default function WorkflowDemoPage() {
       type: selectedNodeType,
       position: { x: 200 + Math.random() * 200, y: 100 + Math.random() * 200 },
       data: {
-        label: config.label,
+        label: nodeCopy[config.type as keyof typeof nodeCopy].label,
         icon: config.icon,
-        description: config.desc,
+        description: nodeCopy[config.type as keyof typeof nodeCopy].desc,
       },
     };
 
@@ -238,8 +240,8 @@ export default function WorkflowDemoPage() {
   function handleSave() {
     saveWorkflow(nodes, edges);
     toast({
-      title: "Workflow exported",
-      description: "The current flow was downloaded as workflow.json.",
+      title: t("workflow.exported"),
+      description: t("workflow.exportedDescription"),
       variant: "success",
     });
   }
@@ -260,8 +262,8 @@ export default function WorkflowDemoPage() {
           setNodes(data.nodes);
           setEdges(data.edges);
           toast({
-            title: "Workflow loaded",
-            description: `${data.nodes.length} nodes and ${data.edges.length} edges imported.`,
+            title: t("workflow.loaded"),
+            description: t("workflow.loadedDescription", { nodes: data.nodes.length, edges: data.edges.length }),
             variant: "success",
           });
           return;
@@ -270,8 +272,8 @@ export default function WorkflowDemoPage() {
         throw new Error("Invalid workflow shape.");
       } catch {
         toast({
-          title: "Invalid workflow file",
-          description: "Select a JSON file with nodes and edges arrays.",
+          title: t("workflow.invalidFile"),
+          description: t("workflow.invalidFileDescription"),
           variant: "destructive",
         });
       }
@@ -289,8 +291,8 @@ export default function WorkflowDemoPage() {
   return (
     <div className="flex h-[calc(100vh-4rem)] min-h-[42rem] flex-col gap-4 p-6">
       <PageHeader
-        title="Workflow Editor"
-        subtitle="Visually design and export workflow definitions as JSON."
+        title={t("workflow.title")}
+        subtitle={t("workflow.subtitle")}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <FileUpload
@@ -299,11 +301,11 @@ export default function WorkflowDemoPage() {
               accept="application/json,.json"
               customUpload
               auto
-              chooseLabel="Load JSON"
+              chooseLabel={t("workflow.loadJson")}
               chooseOptions={{ icon: "pi pi-upload", className: "p-button-outlined" }}
               uploadHandler={handleLoad}
             />
-            <Button label="Export JSON" icon="pi pi-download" onClick={handleSave} />
+            <Button label={t("workflow.exportJson")} icon="pi pi-download" onClick={handleSave} />
           </div>
         }
       />
@@ -313,7 +315,7 @@ export default function WorkflowDemoPage() {
           <Card>
             <div className="flex flex-col gap-3">
               <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                Node Types
+                {t("workflow.nodeTypes")}
               </div>
               {NODE_TYPES_CONFIG.map((config) => (
                 <button
@@ -334,25 +336,25 @@ export default function WorkflowDemoPage() {
                   </span>
                   <span className="min-w-0">
                     <span className="block text-sm font-semibold text-foreground">
-                      {config.label}
+                      {nodeCopy[config.type as keyof typeof nodeCopy].label}
                     </span>
                     <span className="block truncate text-xs text-muted-foreground">
-                      {config.desc}
+                      {nodeCopy[config.type as keyof typeof nodeCopy].desc}
                     </span>
                   </span>
                 </button>
               ))}
-              <Button label="Add Node" icon="pi pi-plus" onClick={addNode} className="w-full" />
+              <Button label={t("workflow.addNode")} icon="pi pi-plus" onClick={addNode} className="w-full" />
             </div>
           </Card>
 
           <Card>
             <div className="flex flex-col gap-3">
               <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                Canvas
+                {t("workflow.canvas")}
               </div>
               <Button
-                label="Reset Demo"
+                label={t("workflow.resetDemo")}
                 icon="pi pi-refresh"
                 outlined
                 onClick={() => {
@@ -361,7 +363,7 @@ export default function WorkflowDemoPage() {
                 }}
               />
               <Button
-                label="Clear All"
+                label={t("workflow.clearAll")}
                 icon="pi pi-trash"
                 severity="danger"
                 outlined
@@ -373,14 +375,14 @@ export default function WorkflowDemoPage() {
           <Card>
             <div className="flex flex-col gap-3 text-sm text-muted-foreground">
               <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                Tips
+                {t("workflow.tips")}
               </div>
               {[
-                "Drag nodes to reposition",
-                "Connect handles to draw edges",
-                "Select and Delete to remove",
-                "Decision nodes branch Yes/No",
-                "Export JSON to save your flow",
+                t("workflow.tipDrag"),
+                t("workflow.tipConnect"),
+                t("workflow.tipDelete"),
+                t("workflow.tipDecision"),
+                t("workflow.tipExport"),
               ].map((tip) => (
                 <div key={tip} className="flex items-start gap-2">
                   <i className="pi pi-check mt-1 text-xs text-emerald-500" />
@@ -416,8 +418,8 @@ export default function WorkflowDemoPage() {
               />
               <Panel position="top-right">
                 <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 shadow-sm">
-                  <Tag value={`${nodes.length} nodes`} severity="info" />
-                  <Tag value={`${edges.length} edges`} severity="success" />
+                  <Tag value={t("workflow.nodeCount", { count: nodes.length })} severity="info" />
+                  <Tag value={t("workflow.edgeCount", { count: edges.length })} severity="success" />
                 </div>
               </Panel>
             </ReactFlow>
@@ -426,20 +428,20 @@ export default function WorkflowDemoPage() {
       </div>
 
       <Dialog
-        header="Clear workflow"
+        header={t("workflow.clearWorkflow")}
         visible={clearDialogVisible}
         onHide={() => setClearDialogVisible(false)}
         style={{ width: "28rem" }}
         modal
         footer={
           <div className="flex justify-end gap-2">
-            <Button label="Cancel" icon="pi pi-times" text onClick={() => setClearDialogVisible(false)} />
-            <Button label="Clear" icon="pi pi-trash" severity="danger" onClick={handleClear} />
+            <Button label={t("common.cancel")} icon="pi pi-times" text onClick={() => setClearDialogVisible(false)} />
+            <Button label={t("common.clear")} icon="pi pi-trash" severity="danger" onClick={handleClear} />
           </div>
         }
       >
         <p className="m-0 text-sm text-muted-foreground">
-          This will remove every node and edge from the canvas.
+          {t("workflow.clearDescription")}
         </p>
       </Dialog>
     </div>

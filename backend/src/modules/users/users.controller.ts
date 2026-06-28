@@ -110,8 +110,9 @@ export class UsersController {
 
   @Get(':id')
   @RequirePermission('Users', 'read')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findById(id);
+  findOne(@Param('id') id: string, @GetUser() user: AuthenticatedUser) {
+    const tenantId = user?.isSuperAdmin === true ? undefined : user?.tenantId ?? undefined;
+    return this.usersService.findById(id, tenantId);
   }
 
   @Post()
@@ -127,19 +128,22 @@ export class UsersController {
 
   @Patch(':id')
   @RequirePermission('Users', 'update')
-  update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
-    return this.usersService.updateUser(id, dto);
+  update(@Param('id') id: string, @Body() dto: UpdateUserDto, @GetUser() user: AuthenticatedUser) {
+    const tenantId = user?.isSuperAdmin === true ? undefined : user?.tenantId ?? undefined;
+    return this.usersService.updateUser(id, dto, tenantId);
   }
 
   @Delete(':id')
   @RequirePermission('Users', 'delete')
-  softDelete(@Param('id') id: string) {
-    return this.usersService.softDelete(id);
+  softDelete(@Param('id') id: string, @GetUser() user: AuthenticatedUser) {
+    const tenantId = user?.isSuperAdmin === true ? undefined : user?.tenantId ?? undefined;
+    return this.usersService.softDelete(id, tenantId);
   }
 
   @Patch(':id/toggle-active')
   @RequirePermission('Users', 'update')
-  toggleActive(@Param('id') id: string) {
-    return this.usersService.toggleActive(id);
+  toggleActive(@Param('id') id: string, @GetUser() user: AuthenticatedUser) {
+    const tenantId = user?.isSuperAdmin === true ? undefined : user?.tenantId ?? undefined;
+    return this.usersService.toggleActive(id, tenantId);
   }
 }

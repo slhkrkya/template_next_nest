@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common'
 import { CqrsModule } from '@nestjs/cqrs'
 import { AdminController } from './admin.controller'
+import { TenantLogsController } from './tenant-logs.controller'
 import { AdminService } from './admin.service'
 import { PrismaModule } from '../../prisma/prisma.module'
+import { CommonModule } from '../../common/common.module'
 import {
   GetDashboardStatsHandler,
   GetAuditLogsHandler,
@@ -19,8 +21,8 @@ const QueryHandlers = [
 ]
 
 @Module({
-  imports: [PrismaModule, CqrsModule],
-  controllers: [AdminController],
+  imports: [PrismaModule, CqrsModule, CommonModule],
+  controllers: [AdminController, TenantLogsController],
   providers: [AdminService, ...QueryHandlers, ...CommandHandlers],
   exports: [AdminService],
 })

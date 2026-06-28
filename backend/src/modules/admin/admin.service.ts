@@ -10,6 +10,7 @@ export interface DashboardStats {
 
 export interface AuditLogFilters {
   userId?: string;
+  tenantId?: string;
   entityName?: string;
   action?: string;
   dateFrom?: string;
@@ -21,6 +22,7 @@ export interface AuditLogFilters {
 export interface SystemLogFilters {
   level?: string;
   source?: string;
+  tenantId?: string;
   dateFrom?: string;
   dateTo?: string;
   page?: number;
@@ -66,6 +68,7 @@ export class AdminService {
   async getAuditLogs(filters: AuditLogFilters) {
     const {
       userId,
+      tenantId,
       entityName,
       action,
       dateFrom,
@@ -77,6 +80,7 @@ export class AdminService {
     const where: Record<string, unknown> = {};
 
     if (userId) where.userId = userId;
+    if (tenantId !== undefined) where.tenantId = tenantId;
     if (entityName) where.entityName = entityName;
     if (action) where.action = action;
 
@@ -124,6 +128,7 @@ export class AdminService {
     const {
       level,
       source,
+      tenantId,
       dateFrom,
       dateTo,
       page = 1,
@@ -134,6 +139,7 @@ export class AdminService {
 
     if (level) where.level = level;
     if (source) where.source = source;
+    if (tenantId !== undefined) where.tenantId = tenantId;
 
     if (dateFrom || dateTo) {
       const createdAt: Record<string, Date> = {};
@@ -176,7 +182,7 @@ export class AdminService {
       SELECT
         DATE("createdAt") AS date,
         COUNT(*)::int AS count
-      FROM "AuditLog"
+      FROM "audit_logs"
       WHERE
         action = 'LOGIN'
         AND "createdAt" >= ${thirtyDaysAgo}

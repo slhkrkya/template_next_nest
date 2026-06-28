@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
+import { useTranslations } from 'next-intl';
 import {
   Plus,
   CheckCircle,
@@ -41,6 +42,8 @@ const STATUS_ACTION_MAP: Record<string, TenantStatus> = {
 };
 
 export default function TenantsPage() {
+  const t = useTranslations('tenants');
+  const commonT = useTranslations('common');
   const { toast } = useAppToast();
 
   const [tenants, setTenants] = useState<Tenant[]>([]);
@@ -68,7 +71,7 @@ export default function TenantsPage() {
       setTenants(result.data);
       setTotalCount(result.totalCount);
     } catch {
-      toast({ title: 'Failed to load tenants', variant: 'destructive' });
+      toast({ title: t('loadFailed'), variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
@@ -84,16 +87,20 @@ export default function TenantsPage() {
     setIsMutating(true);
     try {
       await createTenant({
-        name: values.name,
-        slug: values.slug,
+        name: values.name.trim(),
+        slug: values.slug.trim(),
         maxUsers: values.maxUsers,
         trialEndsAt: values.trialEndsAt || undefined,
+        adminFirstName: values.adminFirstName.trim(),
+        adminLastName: values.adminLastName.trim(),
+        adminEmail: values.adminEmail.trim().toLowerCase(),
+        adminPassword: values.adminPassword,
       });
-      toast({ title: 'Tenant created successfully' });
+      toast({ title: t('createdSuccessfully') });
       setDialogMode(null);
       fetchTenants();
     } catch {
-      toast({ title: 'Failed to create tenant', variant: 'destructive' });
+      toast({ title: t('createFailed'), variant: 'destructive' });
     } finally {
       setIsMutating(false);
     }
@@ -110,16 +117,15 @@ export default function TenantsPage() {
         maxUsers: values.maxUsers,
         trialEndsAt: values.trialEndsAt || undefined,
       });
-      // Also update status if changed
       if (values.status !== editingTenant.status) {
         await updateTenantStatus(editingTenant.id, values.status);
       }
-      toast({ title: 'Tenant updated successfully' });
+      toast({ title: t('updatedSuccessfully') });
       setDialogMode(null);
       setEditingTenant(null);
       fetchTenants();
     } catch {
-      toast({ title: 'Failed to update tenant', variant: 'destructive' });
+      toast({ title: t('updateFailed'), variant: 'destructive' });
     } finally {
       setIsMutating(false);
     }
@@ -139,16 +145,16 @@ export default function TenantsPage() {
     try {
       if (action === 'delete') {
         await deleteTenant(tenant.id);
-        toast({ title: 'Tenant deleted' });
+        toast({ title: t('deleted') });
       } else {
         await updateTenantStatus(tenant.id, STATUS_ACTION_MAP[action]);
         toast({
-          title: `Tenant ${action === 'activate' ? 'activated' : 'suspended'}`,
+          title: action === 'activate' ? t('activated') : t('suspended'),
         });
       }
       fetchTenants();
     } catch {
-      toast({ title: 'Action failed', variant: 'destructive' });
+      toast({ title: commonT('actionFailed'), variant: 'destructive' });
     } finally {
       setIsMutating(false);
       setConfirm({ open: false, action: null, tenant: null });
@@ -159,7 +165,7 @@ export default function TenantsPage() {
 
   const columns: Column<Tenant>[] = [
     {
-      header: 'Name',
+      header: commonT('name'),
       key: 'name',
       render: (_, row) => (
         <div className="flex flex-col">
@@ -169,12 +175,12 @@ export default function TenantsPage() {
       ),
     },
     {
-      header: 'Status',
+      header: commonT('status'),
       key: 'status',
       render: (_, row) => <StatusBadge status={row.status} />,
     },
     {
-      header: 'Trial Ends',
+      header: t('trialEnds'),
       key: 'trialEndsAt',
       render: (_, row) =>
         row.trialEndsAt ? (
@@ -186,7 +192,7 @@ export default function TenantsPage() {
         ),
     },
     {
-      header: 'Users',
+      header: t('users'),
       key: 'maxUsers',
       render: (_, row) => (
         <span className="tabular-nums text-sm">
@@ -195,7 +201,7 @@ export default function TenantsPage() {
       ),
     },
     {
-      header: 'Created',
+      header: commonT('created'),
       key: 'createdAt',
       render: (_, row) => (
         <span className="tabular-nums text-sm text-muted-foreground">
@@ -204,7 +210,7 @@ export default function TenantsPage() {
       ),
     },
     {
-      header: 'Actions',
+      header: commonT('actions'),
       key: 'id',
       className: 'w-56',
       render: (_, row) => (
@@ -215,7 +221,7 @@ export default function TenantsPage() {
             severity="secondary"
             text
             rounded
-            aria-label="Edit"
+            aria-label={commonT('edit')}
             onClick={() => {
               setEditingTenant(row);
               setDialogMode('edit');
@@ -228,7 +234,7 @@ export default function TenantsPage() {
               severity="success"
               text
               rounded
-              aria-label="Activate"
+              aria-label={commonT('activate')}
               onClick={() => openConfirm('activate', row)}
             />
           )}
@@ -239,7 +245,7 @@ export default function TenantsPage() {
               severity="warning"
               text
               rounded
-              aria-label="Suspend"
+              aria-label={commonT('suspend')}
               onClick={() => openConfirm('suspend', row)}
             />
           )}
@@ -249,7 +255,7 @@ export default function TenantsPage() {
             severity="danger"
             text
             rounded
-            aria-label="Delete"
+            aria-label={commonT('delete')}
             onClick={() => openConfirm('delete', row)}
           />
         </div>
@@ -261,21 +267,21 @@ export default function TenantsPage() {
 
   const confirmConfig = {
     activate: {
-      title: 'Activate Tenant',
-      description: `Activate "${confirm.tenant?.name}"? They will regain full access to the platform.`,
-      label: 'Activate',
+      title: t('activateTenant'),
+      description: t('activateConfirm', { name: confirm.tenant?.name ?? '' }),
+      label: commonT('activate'),
       variant: 'default' as const,
     },
     suspend: {
-      title: 'Suspend Tenant',
-      description: `Suspend "${confirm.tenant?.name}"? Their users will be unable to log in until reactivated.`,
-      label: 'Suspend',
+      title: t('suspendTenant'),
+      description: t('suspendConfirm', { name: confirm.tenant?.name ?? '' }),
+      label: commonT('suspend'),
       variant: 'default' as const,
     },
     delete: {
-      title: 'Delete Tenant',
-      description: `Permanently delete "${confirm.tenant?.name}"? This action cannot be undone.`,
-      label: 'Delete',
+      title: t('deleteTenant'),
+      description: t('deleteConfirm', { name: confirm.tenant?.name ?? '' }),
+      label: commonT('delete'),
       variant: 'destructive' as const,
     },
   };
@@ -285,12 +291,12 @@ export default function TenantsPage() {
   return (
     <div>
       <PageHeader
-        title="Tenants"
-        subtitle="Manage all tenant organisations on this platform."
+        title={t('title')}
+        subtitle={t('superAdminSubtitle')}
         actions={
           <Button type="button" onClick={() => setDialogMode('create')}>
             <Plus className="mr-2 h-4 w-4" />
-            New Tenant
+            {t('newTenant')}
           </Button>
         }
       />
@@ -303,14 +309,15 @@ export default function TenantsPage() {
           setSearch(val);
           setPage(1);
         }}
-        searchPlaceholder="Search tenants…"
+        searchPlaceholder={t('search')}
+        minWidth="60rem"
         pagination={{
           page,
           pageSize: PAGE_SIZE,
           totalCount,
           onPageChange: setPage,
         }}
-        emptyMessage="No tenants found."
+        emptyMessage={t('noTenantsFound')}
       />
 
       {/* Create / Edit Dialog */}
@@ -320,7 +327,7 @@ export default function TenantsPage() {
             setDialogMode(null);
             setEditingTenant(null);
         }}
-        header={dialogMode === 'create' ? 'Create Tenant' : 'Edit Tenant'}
+        header={dialogMode === 'create' ? t('createTenant') : t('editTenant')}
         modal
         className="w-[92vw] max-w-lg"
       >

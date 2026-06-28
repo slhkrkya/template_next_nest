@@ -228,3 +228,103 @@
 .dark .dark\:hover\:border-slate-700:hover {
   border-color: hsl(var(--primary) / 0.4) !important;
 }
+
+.p-inputtext,
+.p-password .p-inputtext,
+.p-inputnumber .p-inputtext,
+.p-calendar .p-inputtext,
+.p-dropdown,
+.p-multiselect,
+.p-treeselect,
+.p-cascadeselect {
+  background: hsl(var(--card)) !important;
+  border-color: hsl(var(--input)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.p-inputtext::placeholder,
+.p-password .p-inputtext::placeholder,
+.p-inputnumber .p-inputtext::placeholder,
+.p-calendar .p-inputtext::placeholder,
+.p-dropdown .p-dropdown-label.p-placeholder,
+.p-multiselect .p-multiselect-label.p-placeholder,
+.p-treeselect .p-treeselect-label.p-placeholder,
+.p-cascadeselect .p-cascadeselect-label.p-placeholder {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.p-dropdown .p-dropdown-label,
+.p-multiselect .p-multiselect-label,
+.p-treeselect .p-treeselect-label,
+.p-cascadeselect .p-cascadeselect-label,
+.p-dropdown .p-dropdown-trigger,
+.p-multiselect .p-multiselect-trigger,
+.p-treeselect .p-treeselect-trigger,
+.p-cascadeselect .p-cascadeselect-trigger,
+.p-password .p-password-icon,
+.p-calendar .p-datepicker-trigger {
+  color: hsl(var(--foreground)) !important;
+}
+
+.p-inputtext:enabled:hover,
+.p-dropdown:not(.p-disabled):hover,
+.p-multiselect:not(.p-disabled):hover,
+.p-treeselect:not(.p-disabled):hover,
+.p-cascadeselect:not(.p-disabled):hover {
+  border-color: hsl(var(--primary) / 0.6) !important;
+}
+
+.p-inputtext:enabled:focus,
+.p-dropdown:not(.p-disabled).p-focus,
+.p-multiselect:not(.p-disabled).p-focus,
+.p-treeselect:not(.p-disabled).p-focus,
+.p-cascadeselect:not(.p-disabled).p-focus {
+  border-color: hsl(var(--ring)) !important;
+  box-shadow: 0 0 0 1px hsl(var(--ring) / 0.35) !important;
+}
+
+.p-inputgroup-addon,
+.p-dropdown-panel,
+.p-multiselect-panel,
+.p-treeselect-panel,
+.p-cascadeselect-panel,
+.p-datepicker,
+.p-password-panel {
+  background: hsl(var(--popover)) !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--popover-foreground)) !important;
+}
+
+.p-dropdown-panel .p-dropdown-header,
+.p-multiselect-panel .p-multiselect-header,
+.p-treeselect-panel .p-treeselect-header {
+  background: hsl(var(--muted)) !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item,
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item,
+.p-treeselect-panel .p-treenode-content,
+.p-cascadeselect-panel .p-cascadeselect-item,
+.p-datepicker table td > span,
+.p-datepicker .p-datepicker-header {
+  color: hsl(var(--foreground)) !important;
+}
+
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item:not(.p-highlight):not(.p-disabled).p-focus,
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover,
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item:not(.p-highlight):not(.p-disabled).p-focus,
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item:not(.p-highlight):not(.p-disabled):hover,
+.p-treeselect-panel .p-treenode-content:not(.p-highlight):hover,
+.p-cascadeselect-panel .p-cascadeselect-item:not(.p-highlight):not(.p-disabled):hover,
+.p-datepicker table td > span:not(.p-highlight):not(.p-disabled):hover {
+  background: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+.p-inputtext:disabled,
+.p-disabled,
+.p-component:disabled {
+  opacity: 0.65;
+}

@@ -11,6 +11,7 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import { Message } from 'primereact/message';
 import { Tag } from 'primereact/tag';
 import { DataTable, type Column } from '@/components/shared/DataTable';
+import { getPrimeOverlayAppendTo } from '@/components/shared/FilterBar';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { useAppToast } from '@/providers/prime-provider';
 import {
@@ -120,6 +121,7 @@ function CreateNotifForm({
             options={typeOptions}
             onChange={(event) => setType(event.value)}
             className="w-full"
+            appendTo={getPrimeOverlayAppendTo()}
           />
         </div>
         <div>
@@ -144,7 +146,7 @@ function CreateNotifForm({
           type="url"
           value={link}
           onChange={(event) => setLink(event.target.value)}
-          placeholder="https://example.com"
+          placeholder={t('linkPlaceholder')}
           className="w-full"
         />
       </div>
@@ -269,6 +271,7 @@ export default function NotificationsAdminPage() {
         data={notifications}
         isLoading={isLoading}
         searchPlaceholder={t('searchNotifications')}
+        minWidth="44rem"
         pagination={{ page, pageSize: PAGE_SIZE, totalCount, onPageChange: setPage }}
         emptyMessage={t('noNotificationsFound')}
       />

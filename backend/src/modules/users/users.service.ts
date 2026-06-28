@@ -3,6 +3,7 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from './commands/create-user.command';
 import { UpdateUserCommand } from './commands/update-user.command';
 import { DeleteUserCommand } from './commands/delete-user.command';
+import { ToggleActiveUserCommand } from './commands/toggle-active-user.command';
 import { UpdateProfileCommand } from './commands/update-profile.command';
 import { UpdateSettingsCommand } from './commands/update-settings.command';
 import { UpdateThemePreferenceCommand } from './commands/update-theme-preference.command';
@@ -43,24 +44,24 @@ export class UsersService {
     );
   }
 
-  findById(id: string) {
-    return this.queryBus.execute(new GetUserByIdQuery(id));
+  findById(id: string, tenantId?: string) {
+    return this.queryBus.execute(new GetUserByIdQuery(id, tenantId));
   }
 
   createUser(dto: CreateUserDto, tenantId?: string) {
     return this.commandBus.execute(new CreateUserCommand(dto, tenantId));
   }
 
-  updateUser(id: string, dto: UpdateUserDto) {
-    return this.commandBus.execute(new UpdateUserCommand(id, dto));
+  updateUser(id: string, dto: UpdateUserDto, tenantId?: string) {
+    return this.commandBus.execute(new UpdateUserCommand(id, dto, tenantId));
   }
 
-  softDelete(id: string) {
-    return this.commandBus.execute(new DeleteUserCommand(id));
+  softDelete(id: string, tenantId?: string) {
+    return this.commandBus.execute(new DeleteUserCommand(id, tenantId));
   }
 
-  toggleActive(id: string) {
-    return this.commandBus.execute(new UpdateUserCommand(id, { isActive: undefined } as any));
+  toggleActive(id: string, tenantId?: string) {
+    return this.commandBus.execute(new ToggleActiveUserCommand(id, tenantId));
   }
 
   updateProfile(userId: string, dto: UpdateProfileDto) {

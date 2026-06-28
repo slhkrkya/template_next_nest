@@ -259,15 +259,15 @@ export default function PermissionsPage() {
   );
 
   const renderScopeHeader = (scope: ScopeType) => (
-    <div className="flex min-w-28 flex-col items-center gap-2">
+    <div className="flex w-24 flex-col items-center gap-1">
       <Tag value={t(SCOPE_META[scope].labelKey)} severity={SCOPE_META[scope].severity} />
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5">
         <Button
           type="button"
           label={commonT("all")}
           size="small"
           text
-          className="px-2 py-1 text-xs"
+          className="px-1 py-1 text-xs"
           onClick={() => toggleAllScope(scope, true)}
           disabled={!selectedId}
         />
@@ -277,7 +277,7 @@ export default function PermissionsPage() {
           label={commonT("none")}
           size="small"
           text
-          className="px-2 py-1 text-xs"
+          className="px-1 py-1 text-xs"
           onClick={() => toggleAllScope(scope, false)}
           disabled={!selectedId}
         />
@@ -367,7 +367,7 @@ export default function PermissionsPage() {
           </div>
         </Card>
 
-        <Card>
+        <Card className="min-w-0 overflow-hidden">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex flex-col gap-1">
               <div className="flex flex-wrap items-center gap-2">
@@ -404,17 +404,17 @@ export default function PermissionsPage() {
               stripedRows
               scrollable
               scrollHeight="calc(100vh - 22rem)"
-              className="arca-data-table"
-              tableStyle={{ minWidth: "54rem" }}
+              className="arca-data-table w-full"
+              tableStyle={{ minWidth: "48rem" }}
             >
               <Column
                 field="entityName"
                 header={t("entity")}
-                frozen
+                style={{ width: "15rem", minWidth: "15rem" }}
                 body={(permission: PermissionEntry) => (
-                  <div className="flex items-center gap-2">
-                    <i className="pi pi-database text-primary" />
-                    <span className="font-mono text-sm text-foreground">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <i className="pi pi-database shrink-0 text-primary" />
+                    <span className="truncate font-mono text-sm text-foreground" title={permission.entityName}>
                       {permission.entityName}
                     </span>
                   </div>
@@ -425,7 +425,7 @@ export default function PermissionsPage() {
                   key={scope}
                   header={renderScopeHeader(scope)}
                   body={(permission: PermissionEntry) => renderScopeCell(permission, scope)}
-                  style={{ textAlign: "center" }}
+                  style={{ textAlign: "center", width: "7rem", minWidth: "7rem" }}
                 />
               ))}
               <Column
@@ -442,7 +442,7 @@ export default function PermissionsPage() {
                     </div>
                   );
                 }}
-                style={{ textAlign: "center", width: "6rem" }}
+                style={{ textAlign: "center", width: "6rem", minWidth: "6rem" }}
               />
             </DataTable>
           )}

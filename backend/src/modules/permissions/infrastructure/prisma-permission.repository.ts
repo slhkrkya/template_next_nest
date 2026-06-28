@@ -101,6 +101,15 @@ export class PrismaPermissionRepository implements IPermissionRepository {
     })
   }
 
+  async clearRolePermissionsFromUser(operationClaimId: string, userId: string, tenantId?: string): Promise<void> {
+    const rolePerms = await this.prisma.roleEntityPermission.findMany({ where: { operationClaimId } })
+    if (rolePerms.length === 0) return
+    const entityNames = rolePerms.map(rp => rp.entityName)
+    await this.prisma.userEntityPermission.deleteMany({
+      where: { userId, tenantId: tenantId ?? null, entityName: { in: entityNames } },
+    })
+  }
+
   async findAllEntities(): Promise<{ name: string; displayName: string }[]> {
     const data = await this.prisma.permissionEntity.findMany({ where: { isActive: true }, orderBy: { displayOrder: 'asc' } })
     return data.map(e => ({ name: e.name, displayName: e.displayName }))

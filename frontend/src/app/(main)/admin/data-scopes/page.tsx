@@ -1,7 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axiosInstance from '@/lib/axios';
+import { useAuthStore } from '@/store/auth.store';
 import { Avatar } from 'primereact/avatar';
 import { Button } from 'primereact/button';
 import { Card } from 'primereact/card';
@@ -9,6 +12,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { SelectButton } from 'primereact/selectbutton';
 import { Tag } from 'primereact/tag';
 import { DataTable, type Column } from '@/components/shared/DataTable';
+import { FilterBar, FilterField, getPrimeOverlayAppendTo } from '@/components/shared/FilterBar';
 import { PageHeader } from '@/components/shared/PageHeader';
 
 type ScopeType = 'SELF' | 'DEPARTMENT' | 'ALL';
@@ -31,58 +35,43 @@ interface Entity {
   name: string;
 }
 
-const scopeOptions: Array<{ label: string; value: ScopeType }> = [
-  { label: 'Self', value: 'SELF' },
-  { label: 'Department', value: 'DEPARTMENT' },
-  { label: 'All', value: 'ALL' },
-];
-
 async function getUsers(): Promise<UserOption[]> {
-  const res = await fetch('/api/admin/users?pageSize=200');
-  if (!res.ok) throw new Error('Failed');
-  const data = await res.json();
-  return data.data ?? [];
+  const res = await axiosInstance.get<{ data: UserOption[] }>('/users', { params: { limit: 200 } });
+  return res.data.data ?? [];
 }
 
 async function getUserDataScopes(userId: string): Promise<DataScope[]> {
-  const res = await fetch(`/api/admin/data-scopes/users/${userId}`);
-  if (!res.ok) throw new Error('Failed to fetch data scopes');
-  return res.json();
+  const res = await axiosInstance.get<DataScope[]>(`/data-scopes/${userId}`);
+  return res.data;
 }
 
 async function getEntities(): Promise<Entity[]> {
-  const res = await fetch('/api/admin/entities');
-  if (!res.ok) throw new Error('Failed');
-  return res.json();
+  const res = await axiosInstance.get<{ name: string }[]>('/permissions/entities');
+  return res.data.map((e) => ({ id: e.name, name: e.name }));
 }
 
-async function updateDataScope(userId: string, entityName: string, scopeType: ScopeType): Promise<DataScope> {
-  const res = await fetch(`/api/admin/data-scopes/users/${userId}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ entityName, scopeType }),
-  });
-  if (!res.ok) throw new Error('Failed to update scope');
-  return res.json();
-}
-
-async function addDataScope(userId: string, entityName: string, scopeType: ScopeType): Promise<DataScope> {
-  const res = await fetch(`/api/admin/data-scopes/users/${userId}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ entityName, scopeType }),
-  });
-  if (!res.ok) throw new Error('Failed to add scope');
-  return res.json();
+async function upsertDataScope(userId: string, tenantId: string, entityName: string, scopeType: ScopeType): Promise<DataScope> {
+  const res = await axiosInstance.post<DataScope>('/data-scopes', { userId, tenantId, entityName, scopeType });
+  return res.data;
 }
 
 function ScopeTag({ value }: { value: ScopeType }) {
+  const t = useTranslations('dataScopes');
   const severity = value === 'ALL' ? 'danger' : value === 'DEPARTMENT' ? 'warning' : 'info';
-  return <Tag value={scopeOptions.find((option) => option.value === value)?.label ?? value} severity={severity} />;
+  const label = {
+    SELF: t('scope.SELF'),
+    DEPARTMENT: t('scope.DEPARTMENT'),
+    ALL: t('scope.ALL'),
+  }[value];
+
+  return <Tag value={label} severity={severity} />;
 }
 
 export default function DataScopesPage() {
+  const t = useTranslations('dataScopes');
+  const commonT = useTranslations('common');
   const queryClient = useQueryClient();
+  const currentTenantId = useAuthStore((s) => s.user?.tenantId ?? '');
   const [selectedUserId, setSelectedUserId] = useState('');
   const [addEntityName, setAddEntityName] = useState('');
   const [addScopeType, setAddScopeType] = useState<ScopeType>('SELF');
@@ -102,7 +91,7 @@ export default function DataScopesPage() {
 
   const updateMutation = useMutation({
     mutationFn: ({ entityName, scopeType }: { entityName: string; scopeType: ScopeType }) =>
-      updateDataScope(selectedUserId, entityName, scopeType),
+      upsertDataScope(selectedUserId, currentTenantId, entityName, scopeType),
     onSuccess: (_, vars) => {
       setPendingChanges((prev) => {
         const next = { ...prev };
@@ -114,7 +103,7 @@ export default function DataScopesPage() {
   });
 
   const addMutation = useMutation({
-    mutationFn: () => addDataScope(selectedUserId, addEntityName, addScopeType),
+    mutationFn: () => upsertDataScope(selectedUserId, currentTenantId, addEntityName, addScopeType),
     onSuccess: () => {
       setAddEntityName('');
       setAddScopeType('SELF');
@@ -125,6 +114,11 @@ export default function DataScopesPage() {
   const scopes = scopesQuery.data ?? [];
   const users = usersQuery.data ?? [];
   const entities = entitiesQuery.data ?? [];
+  const scopeOptions: Array<{ label: string; value: ScopeType }> = [
+    { label: t('scope.SELF'), value: 'SELF' },
+    { label: t('scope.DEPARTMENT'), value: 'DEPARTMENT' },
+    { label: t('scope.ALL'), value: 'ALL' },
+  ];
   const selectedUser = users.find((user) => user.id === selectedUserId);
   const entitiesWithoutScope = entities
     .filter((entity) => !scopes.some((scope) => scope.entityName === entity.name))
@@ -136,10 +130,10 @@ export default function DataScopesPage() {
   }));
 
   const columns: Column<DataScope>[] = [
-    { header: 'Entity', key: 'entityName', render: (_, scope) => <span className="font-mono text-sm">{scope.entityName}</span> },
-    { header: 'Current Scope', key: 'scopeType', render: (_, scope) => <ScopeTag value={scope.scopeType} /> },
+    { header: t('entity'), key: 'entityName', render: (_, scope) => <span className="font-mono text-sm">{scope.entityName}</span> },
+    { header: t('currentScope'), key: 'scopeType', render: (_, scope) => <ScopeTag value={scope.scopeType} /> },
     {
-      header: 'Change To',
+      header: t('changeTo'),
       key: 'changeTo',
       render: (_, scope) => (
         <SelectButton
@@ -151,13 +145,13 @@ export default function DataScopesPage() {
       ),
     },
     {
-      header: 'Save',
+      header: commonT('save'),
       key: 'save',
       className: 'w-28',
       render: (_, scope) => (
         <Button
           type="button"
-          label="Save"
+          label={commonT('save')}
           size="small"
           disabled={!pendingChanges[scope.entityName]}
           loading={updateMutation.isPending}
@@ -170,25 +164,28 @@ export default function DataScopesPage() {
   return (
     <div>
       <PageHeader
-        title="Data Scopes"
-        subtitle="Control which data records each user can view and modify per entity type."
+        title={t('title')}
+        subtitle={t('subtitle')}
       />
 
       <Card className="mb-5">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="min-w-72 flex-1">
-            <label htmlFor="user-select" className="mb-2 block text-sm font-semibold text-foreground">Select User</label>
-            <Dropdown
-              inputId="user-select"
-              value={selectedUserId}
-              options={userOptions}
-              onChange={(event) => setSelectedUserId(event.value)}
-              placeholder="Choose a user"
-              filter
-              className="w-full"
-              loading={usersQuery.isLoading}
-            />
-          </div>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
+          <FilterBar className="flex-1 !mb-0 !shadow-none">
+            <FilterField label={t('selectUser')} htmlFor="user-select">
+              <Dropdown
+                inputId="user-select"
+                value={selectedUserId}
+                options={userOptions}
+                onChange={(event) => setSelectedUserId(event.value ?? '')}
+                placeholder={t('chooseUser')}
+                filter
+                className="w-full"
+                loading={usersQuery.isLoading}
+                showClear
+                appendTo={getPrimeOverlayAppendTo()}
+              />
+            </FilterField>
+          </FilterBar>
           {selectedUser && (
             <div className="flex items-center gap-3 rounded-xl bg-primary/10 px-4 py-3">
               <Avatar label={`${selectedUser.firstName[0]}${selectedUser.lastName[0]}`} shape="circle" className="bg-primary text-primary-foreground" />
@@ -203,44 +200,54 @@ export default function DataScopesPage() {
 
       {selectedUserId ? (
         <Card>
-          <div className="mb-4 flex flex-wrap items-end gap-3">
-            <div className="min-w-64">
-              <label htmlFor="entity-select" className="mb-2 block text-sm font-semibold text-foreground">Add Entity</label>
+          <FilterBar
+            actions={
+              <Button
+                type="button"
+                label={t('addScope')}
+                icon="pi pi-plus"
+                disabled={!addEntityName}
+                loading={addMutation.isPending}
+                onClick={() => addMutation.mutate()}
+              />
+            }
+          >
+            <FilterField label={t('addEntity')} htmlFor="entity-select">
               <Dropdown
                 inputId="entity-select"
                 value={addEntityName}
                 options={entitiesWithoutScope}
-                onChange={(event) => setAddEntityName(event.value)}
-                placeholder="Select entity"
+                onChange={(event) => setAddEntityName(event.value ?? '')}
+                placeholder={t('selectEntity')}
                 filter
                 className="w-full"
+                showClear
+                appendTo={getPrimeOverlayAppendTo()}
               />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-foreground">Scope</label>
-              <SelectButton value={addScopeType} options={scopeOptions} onChange={(event) => event.value && setAddScopeType(event.value)} allowEmpty={false} />
-            </div>
-            <Button
-              type="button"
-              label="Add Scope"
-              icon="pi pi-plus"
-              disabled={!addEntityName}
-              loading={addMutation.isPending}
-              onClick={() => addMutation.mutate()}
-            />
-          </div>
+            </FilterField>
+            <FilterField label={t('scopeLabel')}>
+              <SelectButton
+                value={addScopeType}
+                options={scopeOptions}
+                onChange={(event) => event.value && setAddScopeType(event.value)}
+                allowEmpty={false}
+                className="w-full"
+              />
+            </FilterField>
+          </FilterBar>
 
           <DataTable
             columns={columns}
             data={scopes}
             isLoading={scopesQuery.isLoading}
-            emptyMessage="No data scopes configured for this user."
+            minWidth="44rem"
+            emptyMessage={t('emptyForUser')}
           />
         </Card>
       ) : (
         <Card>
           <div className="py-12 text-center text-sm text-muted-foreground">
-            Select a user above to configure their data scopes.
+            {t('selectUserHelp')}
           </div>
         </Card>
       )}

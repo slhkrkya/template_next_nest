@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import axiosInstance from '@/lib/axios';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { Button } from 'primereact/button';
@@ -11,7 +12,9 @@ import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { Tag } from 'primereact/tag';
+import { useTranslations } from 'next-intl';
 import { DataTable, type Column } from '@/components/shared/DataTable';
+import { FilterBar, FilterField, getPrimeOverlayAppendTo } from '@/components/shared/FilterBar';
 import { PageHeader } from '@/components/shared/PageHeader';
 
 interface AuditLog {
@@ -33,13 +36,7 @@ interface AuditLogsResponse {
 }
 
 const pageSize = 15;
-const actionOptions = [
-  { label: 'All Actions', value: '' },
-  ...['CREATE', 'READ', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT'].map((action) => ({
-    label: action,
-    value: action,
-  })),
-];
+const auditActions = ['CREATE', 'READ', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT'] as const;
 
 async function getAuditLogs(params: {
   page: number;
@@ -50,22 +47,27 @@ async function getAuditLogs(params: {
   action?: string;
   userId?: string;
 }): Promise<AuditLogsResponse> {
-  const qs = new URLSearchParams({ page: String(params.page), pageSize: String(params.pageSize) });
-  if (params.dateFrom) qs.set('dateFrom', params.dateFrom);
-  if (params.dateTo) qs.set('dateTo', params.dateTo);
-  if (params.entityName) qs.set('entityName', params.entityName);
-  if (params.action) qs.set('action', params.action);
-  if (params.userId) qs.set('userId', params.userId);
-  const res = await fetch(`/api/admin/audit-logs?${qs}`);
-  if (!res.ok) throw new Error('Failed to fetch audit logs');
-  return res.json();
+  const res = await axiosInstance.get<AuditLogsResponse>('/admin/audit-logs', {
+    params: {
+      page: params.page,
+      limit: params.pageSize,
+      ...(params.dateFrom && { dateFrom: params.dateFrom }),
+      ...(params.dateTo && { dateTo: params.dateTo }),
+      ...(params.entityName && { entityName: params.entityName }),
+      ...(params.action && { action: params.action }),
+      ...(params.userId && { userId: params.userId }),
+    },
+  });
+  return res.data;
 }
 
 async function getEntities(): Promise<string[]> {
-  const res = await fetch('/api/admin/entities');
-  if (!res.ok) return [];
-  const data: { name: string }[] = await res.json();
-  return data.map((entity) => entity.name);
+  try {
+    const res = await axiosInstance.get<{ name: string }[]>('/permissions/entities');
+    return res.data.map((e) => e.name);
+  } catch {
+    return [];
+  }
 }
 
 function actionSeverity(action: string) {
@@ -87,13 +89,14 @@ function JsonDiff({
   oldValues: Record<string, unknown> | null;
   newValues: Record<string, unknown> | null;
 }) {
+  const t = useTranslations('auditLogs');
   const allKeys = Array.from(new Set([
     ...Object.keys(oldValues ?? {}),
     ...Object.keys(newValues ?? {}),
   ]));
 
   if (allKeys.length === 0) {
-    return <p className="m-0 text-sm text-muted-foreground">No value changes recorded.</p>;
+    return <p className="m-0 text-sm text-muted-foreground">{t('noValueChanges')}</p>;
   }
 
   const rows = allKeys.map((key) => ({
@@ -112,17 +115,17 @@ function JsonDiff({
     >
       <PrimeColumn
         field="key"
-        header="Field"
+        header={t('field')}
         body={(row) => <span className="font-mono text-sm text-primary">{row.key}</span>}
       />
       <PrimeColumn
         field="before"
-        header="Before"
+        header={t('before')}
         body={(row) => <span className="break-all text-sm text-rose-600">{row.before}</span>}
       />
       <PrimeColumn
         field="after"
-        header="After"
+        header={t('after')}
         body={(row) => <span className="break-all text-sm text-emerald-600">{row.after}</span>}
       />
     </PrimeDataTable>
@@ -159,6 +162,8 @@ function downloadCSV(logs: AuditLog[]) {
 }
 
 export default function AuditLogsPage() {
+  const t = useTranslations('auditLogs');
+  const commonT = useTranslations('common');
   const [page, setPage] = useState(1);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -176,14 +181,21 @@ export default function AuditLogsPage() {
   const entitiesQuery = useQuery({ queryKey: ['entity-names'], queryFn: getEntities });
   const logs = logsQuery.data?.data ?? [];
   const total = logsQuery.data?.total ?? 0;
+  const actionOptions = [
+    { label: t('allActions'), value: '' },
+    ...auditActions.map((action) => ({
+      label: action,
+      value: action,
+    })),
+  ];
   const entityOptions = [
-    { label: 'All Entities', value: '' },
+    { label: t('allEntities'), value: '' },
     ...(entitiesQuery.data ?? []).map((entity) => ({ label: entity, value: entity })),
   ];
 
   const columns: Column<AuditLog>[] = [
     {
-      header: 'User',
+      header: t('user'),
       key: 'userName',
       render: (_, log) => (
         <div>
@@ -192,12 +204,12 @@ export default function AuditLogsPage() {
         </div>
       ),
     },
-    { header: 'Entity', key: 'entityName', render: (_, log) => <span className="font-mono text-sm text-muted-foreground">{log.entityName}</span> },
-    { header: 'Action', key: 'action', render: (_, log) => <ActionBadge action={log.action} /> },
-    { header: 'Entity ID', key: 'entityId', render: (_, log) => <span className="font-mono text-xs text-muted-foreground">{log.entityId}</span> },
-    { header: 'IP Address', key: 'ipAddress', render: (_, log) => <span className="font-mono text-xs text-muted-foreground">{log.ipAddress}</span> },
+    { header: t('entity'), key: 'entityName', render: (_, log) => <span className="font-mono text-sm text-muted-foreground">{log.entityName}</span> },
+    { header: t('action'), key: 'action', render: (_, log) => <ActionBadge action={log.action} /> },
+    { header: t('entityId'), key: 'entityId', render: (_, log) => <span className="font-mono text-xs text-muted-foreground">{log.entityId}</span> },
+    { header: t('ipAddress'), key: 'ipAddress', render: (_, log) => <span className="font-mono text-xs text-muted-foreground">{log.ipAddress}</span> },
     {
-      header: 'Time',
+      header: t('time'),
       key: 'createdAt',
       render: (_, log) => (
         <span className="text-xs tabular-nums text-muted-foreground">
@@ -216,7 +228,7 @@ export default function AuditLogsPage() {
           severity="secondary"
           text
           rounded
-          aria-label="View details"
+          aria-label={t('viewDetails')}
           onClick={() => setDetailLog(log)}
         />
       ),
@@ -235,12 +247,12 @@ export default function AuditLogsPage() {
   return (
     <div>
       <PageHeader
-        title="Audit Logs"
-        subtitle="Complete record of all system actions, including who did what and when."
+        title={t('title')}
+        subtitle={t('subtitle')}
         actions={
           <Button
             type="button"
-            label="Export CSV"
+            label={t('exportCsv')}
             icon="pi pi-download"
             severity="secondary"
             outlined
@@ -250,27 +262,102 @@ export default function AuditLogsPage() {
         }
       />
 
-      <div className="mb-5 flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4">
-        <Calendar value={toDate(dateFrom)} onChange={(event) => { setDateFrom(toIsoDate(event.value)); setPage(1); }} placeholder="From" dateFormat="yy-mm-dd" showIcon />
-        <Calendar value={toDate(dateTo)} onChange={(event) => { setDateTo(toIsoDate(event.value)); setPage(1); }} placeholder="To" dateFormat="yy-mm-dd" showIcon />
-        <Dropdown value={entityFilter} options={entityOptions} onChange={(event) => { setEntityFilter(event.value); setPage(1); }} className="w-48" loading={entitiesQuery.isLoading} />
-        <Dropdown value={actionFilter} options={actionOptions} onChange={(event) => { setActionFilter(event.value); setPage(1); }} className="w-44" />
-        <InputText value={userIdFilter} onChange={(event) => { setUserIdFilter(event.target.value); setPage(1); }} placeholder="User ID" className="w-48" />
-        <Button type="button" label="Clear" icon="pi pi-filter-slash" severity="secondary" outlined onClick={resetFilters} />
-      </div>
+      <FilterBar
+        actions={
+          <Button type="button" label={commonT('clear')} icon="pi pi-filter-slash" severity="secondary" outlined onClick={resetFilters} />
+        }
+      >
+        <FilterField label={t('from')} htmlFor="audit-from">
+          <Calendar
+            inputId="audit-from"
+            value={toDate(dateFrom)}
+            onChange={(event) => {
+              setDateFrom(toIsoDate(event.value));
+              setPage(1);
+            }}
+            placeholder={t('from')}
+            dateFormat="yy-mm-dd"
+            showIcon
+            showButtonBar
+            appendTo={getPrimeOverlayAppendTo()}
+            className="w-full"
+          />
+        </FilterField>
+        <FilterField label={t('to')} htmlFor="audit-to">
+          <Calendar
+            inputId="audit-to"
+            value={toDate(dateTo)}
+            onChange={(event) => {
+              setDateTo(toIsoDate(event.value));
+              setPage(1);
+            }}
+            placeholder={t('to')}
+            dateFormat="yy-mm-dd"
+            showIcon
+            showButtonBar
+            appendTo={getPrimeOverlayAppendTo()}
+            className="w-full"
+          />
+        </FilterField>
+        <FilterField label={t('entity')} htmlFor="audit-entity">
+          <Dropdown
+            inputId="audit-entity"
+            value={entityFilter}
+            options={entityOptions}
+            onChange={(event) => {
+              setEntityFilter(event.value ?? '');
+              setPage(1);
+            }}
+            placeholder={t('allEntities')}
+            className="w-full"
+            loading={entitiesQuery.isLoading}
+            filter
+            showClear
+            appendTo={getPrimeOverlayAppendTo()}
+          />
+        </FilterField>
+        <FilterField label={t('action')} htmlFor="audit-action">
+          <Dropdown
+            inputId="audit-action"
+            value={actionFilter}
+            options={actionOptions}
+            onChange={(event) => {
+              setActionFilter(event.value ?? '');
+              setPage(1);
+            }}
+            placeholder={t('allActions')}
+            className="w-full"
+            showClear
+            appendTo={getPrimeOverlayAppendTo()}
+          />
+        </FilterField>
+        <FilterField label={t('userId')} htmlFor="audit-user">
+          <InputText
+            id="audit-user"
+            value={userIdFilter}
+            onChange={(event) => {
+              setUserIdFilter(event.target.value);
+              setPage(1);
+            }}
+            placeholder={t('userId')}
+            className="w-full"
+          />
+        </FilterField>
+      </FilterBar>
 
       <DataTable
         columns={columns}
         data={logs}
         isLoading={logsQuery.isLoading}
+        minWidth="56rem"
         pagination={{ page, pageSize, totalCount: total, onPageChange: setPage }}
-        emptyMessage="No audit logs found."
+        emptyMessage={t('empty')}
       />
 
       <Dialog
         visible={!!detailLog}
         onHide={() => setDetailLog(null)}
-        header="Audit Log Detail"
+        header={t('detail')}
         modal
         className="w-[92vw] max-w-4xl"
       >
@@ -278,11 +365,11 @@ export default function AuditLogsPage() {
           <div className="space-y-5">
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               {[
-                ['User', detailLog.userName],
-                ['Entity', detailLog.entityName],
-                ['Entity ID', detailLog.entityId],
-                ['IP Address', detailLog.ipAddress],
-                ['Time', format(new Date(detailLog.createdAt), 'PPpp')],
+                [t('user'), detailLog.userName],
+                [t('entity'), detailLog.entityName],
+                [t('entityId'), detailLog.entityId],
+                [t('ipAddress'), detailLog.ipAddress],
+                [t('time'), format(new Date(detailLog.createdAt), 'PPpp')],
               ].map(([label, value]) => (
                 <div key={label} className="rounded-lg bg-muted p-3">
                   <p className="m-0 text-xs font-semibold uppercase text-muted-foreground">{label}</p>
@@ -290,7 +377,7 @@ export default function AuditLogsPage() {
                 </div>
               ))}
               <div className="rounded-lg bg-muted p-3">
-                <p className="m-0 text-xs font-semibold uppercase text-muted-foreground">Action</p>
+                <p className="m-0 text-xs font-semibold uppercase text-muted-foreground">{t('action')}</p>
                 <div className="mt-1"><ActionBadge action={detailLog.action} /></div>
               </div>
             </div>

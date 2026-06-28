@@ -8,7 +8,9 @@ import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { Tag } from 'primereact/tag';
+import { useTranslations } from 'next-intl';
 import { DataTable, type Column } from '@/components/shared/DataTable';
+import { FilterBar, FilterField, getPrimeOverlayAppendTo } from '@/components/shared/FilterBar';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { useAppToast } from '@/providers/prime-provider';
 import axiosInstance from '@/lib/axios';
@@ -33,15 +35,7 @@ interface LogFilters {
 
 const PAGE_SIZE = 20;
 const DEFAULT_FILTERS: LogFilters = { level: '', source: '', dateFrom: '', dateTo: '' };
-
-const levelOptions = [
-  { label: 'All levels', value: '' },
-  { label: 'DEBUG', value: 'DEBUG' },
-  { label: 'INFO', value: 'INFO' },
-  { label: 'WARN', value: 'WARN' },
-  { label: 'ERROR', value: 'ERROR' },
-  { label: 'FATAL', value: 'FATAL' },
-];
+const logLevels: LogLevel[] = ['DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'];
 
 async function getSystemLogs(params: {
   page: number;
@@ -77,82 +71,89 @@ function toIsoDate(value: Date | Date[] | null | undefined) {
   return value instanceof Date ? value.toISOString().slice(0, 10) : '';
 }
 
-function FilterBar({
+function SystemLogFilterBar({
   filters,
+  levelOptions,
   onChange,
   onReset,
 }: {
   filters: LogFilters;
+  levelOptions: { label: string; value: string }[];
   onChange: (filters: LogFilters) => void;
   onReset: () => void;
 }) {
+  const t = useTranslations('systemLogs');
+  const commonT = useTranslations('common');
+
   function set<K extends keyof LogFilters>(key: K, value: LogFilters[K]) {
     onChange({ ...filters, [key]: value });
   }
 
   return (
-    <div className="mb-5 flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4">
-      <div className="min-w-40">
-        <label htmlFor="log-level" className="mb-2 block text-xs font-semibold uppercase text-muted-foreground">
-          Level
-        </label>
+    <FilterBar
+      actions={
+        <Button
+          type="button"
+          label={commonT('clear')}
+          icon="pi pi-filter-slash"
+          severity="secondary"
+          outlined
+          onClick={onReset}
+        />
+      }
+    >
+      <FilterField label={t('level')} htmlFor="log-level">
         <Dropdown
           inputId="log-level"
           value={filters.level}
           options={levelOptions}
-          onChange={(event) => set('level', event.value)}
+          onChange={(event) => set('level', event.value ?? '')}
+          placeholder={t('allLevels')}
           className="w-full"
+          showClear
+          appendTo={getPrimeOverlayAppendTo()}
         />
-      </div>
-      <div className="min-w-48">
-        <label htmlFor="log-source" className="mb-2 block text-xs font-semibold uppercase text-muted-foreground">
-          Source
-        </label>
+      </FilterField>
+      <FilterField label={t('source')} htmlFor="log-source">
         <InputText
           id="log-source"
           value={filters.source}
           onChange={(event) => set('source', event.target.value)}
-          placeholder="AuthService"
+          placeholder={t('sourcePlaceholder')}
           className="w-full"
         />
-      </div>
-      <div>
-        <label htmlFor="log-from" className="mb-2 block text-xs font-semibold uppercase text-muted-foreground">
-          From
-        </label>
+      </FilterField>
+      <FilterField label={t('from')} htmlFor="log-from">
         <Calendar
           inputId="log-from"
           value={toDate(filters.dateFrom)}
           onChange={(event) => set('dateFrom', toIsoDate(event.value))}
           dateFormat="yy-mm-dd"
           showIcon
+          showButtonBar
+          appendTo={getPrimeOverlayAppendTo()}
+          className="w-full"
         />
-      </div>
-      <div>
-        <label htmlFor="log-to" className="mb-2 block text-xs font-semibold uppercase text-muted-foreground">
-          To
-        </label>
+      </FilterField>
+      <FilterField label={t('to')} htmlFor="log-to">
         <Calendar
           inputId="log-to"
           value={toDate(filters.dateTo)}
           onChange={(event) => set('dateTo', toIsoDate(event.value))}
           dateFormat="yy-mm-dd"
           showIcon
+          showButtonBar
+          appendTo={getPrimeOverlayAppendTo()}
+          className="w-full"
         />
-      </div>
-      <Button
-        type="button"
-        label="Reset"
-        icon="pi pi-filter-slash"
-        severity="secondary"
-        outlined
-        onClick={onReset}
-      />
-    </div>
+      </FilterField>
+    </FilterBar>
   );
 }
 
 function LogDetail({ log, onClose }: { log: SystemLog | null; onClose: () => void }) {
+  const t = useTranslations('systemLogs');
+
   return (
     <Dialog
       visible={!!log}
@@ -164,7 +165,7 @@ function LogDetail({ log, onClose }: { log: SystemLog | null; onClose: () => voi
             <span className="font-mono text-sm text-muted-foreground">{log.source}</span>
           </span>
         ) : (
-          'Log detail'
+          t('detail')
         )
       }
       modal
@@ -173,18 +174,18 @@ function LogDetail({ log, onClose }: { log: SystemLog | null; onClose: () => voi
       {log && (
         <div className="space-y-5">
           <div>
-            <p className="m-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Timestamp</p>
+            <p className="m-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('timestamp')}</p>
             <p className="m-0 mt-1 font-mono text-sm tabular-nums">
               {format(new Date(log.createdAt), "yyyy-MM-dd HH:mm:ss 'UTC'")}
             </p>
           </div>
           <div>
-            <p className="m-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Message</p>
+            <p className="m-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('message')}</p>
             <p className="m-0 mt-1 text-sm leading-6">{log.message}</p>
           </div>
           {log.meta && Object.keys(log.meta).length > 0 && (
             <div>
-              <p className="m-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Metadata</p>
+              <p className="m-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('metadata')}</p>
               <pre className="mt-2 max-h-80 overflow-auto rounded-lg bg-muted p-4 text-xs leading-6 text-foreground font-mono">
                 {JSON.stringify(log.meta, null, 2)}
               </pre>
@@ -197,6 +198,7 @@ function LogDetail({ log, onClose }: { log: SystemLog | null; onClose: () => voi
 }
 
 export default function SystemLogsPage() {
+  const t = useTranslations('systemLogs');
   const { toast } = useAppToast();
   const [logs, setLogs] = useState<SystemLog[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -221,11 +223,11 @@ export default function SystemLogsPage() {
       setLogs(result.data);
       setTotalCount(result.totalCount);
     } catch {
-      toast({ title: 'Failed to load system logs', variant: 'destructive' });
+      toast({ title: t('loadFailed'), variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
-  }, [page, search, filters, toast]);
+  }, [page, search, filters, toast, t]);
 
   useEffect(() => {
     setPage(1);
@@ -235,12 +237,17 @@ export default function SystemLogsPage() {
     fetchLogs();
   }, [fetchLogs]);
 
+  const levelOptions = [
+    { label: t('allLevels'), value: '' },
+    ...logLevels.map((level) => ({ label: level, value: level })),
+  ];
+
   const columns: Column<SystemLog>[] = [
-    { header: 'Level', key: 'level', className: 'w-28', render: (_, row) => <LevelBadge level={row.level} /> },
-    { header: 'Message', key: 'message', render: (_, row) => <span className="line-clamp-2 text-sm">{row.message}</span> },
-    { header: 'Source', key: 'source', className: 'w-44', render: (_, row) => <span className="font-mono text-xs text-muted-foreground">{row.source}</span> },
+    { header: t('level'), key: 'level', className: 'w-28', render: (_, row) => <LevelBadge level={row.level} /> },
+    { header: t('message'), key: 'message', render: (_, row) => <span className="line-clamp-2 text-sm">{row.message}</span> },
+    { header: t('source'), key: 'source', className: 'w-44', render: (_, row) => <span className="font-mono text-xs text-muted-foreground">{row.source}</span> },
     {
-      header: 'Time',
+      header: t('time'),
       key: 'createdAt',
       className: 'w-44',
       render: (_, row) => (
@@ -260,7 +267,7 @@ export default function SystemLogsPage() {
           severity="secondary"
           text
           rounded
-          aria-label="View log details"
+          aria-label={t('viewDetails')}
           onClick={() => setSelectedLog(row)}
         />
       ),
@@ -270,18 +277,24 @@ export default function SystemLogsPage() {
   return (
     <div>
       <PageHeader
-        title="System Logs"
-        subtitle="Monitor application events, errors, and warnings."
+        title={t('title')}
+        subtitle={t('subtitle')}
       />
-      <FilterBar filters={filters} onChange={setFilters} onReset={() => setFilters(DEFAULT_FILTERS)} />
+      <SystemLogFilterBar
+        filters={filters}
+        levelOptions={levelOptions}
+        onChange={setFilters}
+        onReset={() => setFilters(DEFAULT_FILTERS)}
+      />
       <DataTable
         columns={columns}
         data={logs}
         isLoading={isLoading}
         onSearch={setSearch}
-        searchPlaceholder="Search messages..."
+        searchPlaceholder={t('searchMessages')}
+        minWidth="54rem"
         pagination={{ page, pageSize: PAGE_SIZE, totalCount, onPageChange: setPage }}
-        emptyMessage="No logs found for the selected filters."
+        emptyMessage={t('empty')}
       />
       <LogDetail log={selectedLog} onClose={() => setSelectedLog(null)} />
     </div>

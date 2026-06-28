@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import axiosInstance from '@/lib/axios';
 import { useQuery } from '@tanstack/react-query';
 import { useTheme } from 'next-themes';
 import { useTranslations } from 'next-intl';
@@ -47,21 +48,22 @@ interface AuditLog {
 }
 
 async function getDashboardStats() {
-  const res = await fetch('/api/admin/dashboard/stats');
-  if (!res.ok) throw new Error('Failed to fetch dashboard stats');
-  return res.json() as Promise<{
-    totalUsers: number;
-    activeUsers: number;
-    totalTenants: number;
-    newUsersToday: number;
-    dailyLogins: { date: string; count: number }[];
-  }>;
+  const [statsRes, loginRes] = await Promise.all([
+    axiosInstance.get<{ totalUsers: number; activeUsers: number; totalTenants: number; recentSignups: number }>('/admin/dashboard-stats'),
+    axiosInstance.get<{ date: string; count: number }[]>('/admin/daily-login-stats'),
+  ]);
+  return {
+    totalUsers: statsRes.data.totalUsers,
+    activeUsers: statsRes.data.activeUsers,
+    totalTenants: statsRes.data.totalTenants,
+    newUsersToday: statsRes.data.recentSignups,
+    dailyLogins: loginRes.data,
+  };
 }
 
 async function getAuditLogs() {
-  const res = await fetch('/api/admin/audit-logs?limit=10');
-  if (!res.ok) throw new Error('Failed to fetch audit logs');
-  return res.json() as Promise<{ data: AuditLog[] }>;
+  const res = await axiosInstance.get<{ data: AuditLog[] }>('/admin/audit-logs', { params: { limit: 10 } });
+  return res.data;
 }
 
 function ActionBadge({ action }: { action: string }) {
@@ -251,6 +253,7 @@ export default function AdminDashboardPage() {
             columns={logColumns}
             data={logs}
             isLoading={logsQuery.isLoading}
+            minWidth="40rem"
             emptyMessage={t('dashboard.noAuditLogs')}
           />
         </Card>

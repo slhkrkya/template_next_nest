@@ -19,7 +19,8 @@ const createSchema = (t: (key: any, params?: any) => string) => z
       .min(8, t('validation.passwordMin'))
       .regex(/[A-Z]/, t('validation.passwordUppercase'))
       .regex(/[a-z]/, t('validation.passwordLowercase'))
-      .regex(/[0-9]/, t('validation.passwordNumber')),
+      .regex(/[0-9]/, t('validation.passwordNumber'))
+      .regex(/[\W_]/, t('validation.passwordSpecial')),
     confirmPassword: z.string().min(1, t('validation.confirmPasswordRequired')),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -101,7 +102,7 @@ export default function ResetPasswordPage() {
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
         <div>
           <label htmlFor="password" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
-            {t('auth.newPassword')}
+            {t('auth.newPassword')} <span className="text-rose-600">*</span>
           </label>
           <Controller
             control={control}
@@ -127,7 +128,7 @@ export default function ResetPasswordPage() {
 
         <div>
           <label htmlFor="confirmPassword" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
-            {t('auth.confirmNewPassword')}
+            {t('auth.confirmNewPassword')} <span className="text-rose-600">*</span>
           </label>
           <Controller
             control={control}

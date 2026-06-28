@@ -24,6 +24,7 @@ import { Public } from '../../common/decorators/public.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { AuditLog } from '../../common/decorators';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { SuperAdminGuard } from '../../common/guards/superadmin.guard';
 import { CsrfGuard, CsrfService } from '../../common/csrf';
 import { AuthService } from './auth.service';
 import {
@@ -200,7 +201,7 @@ export class AuthController {
   // ---------------------------------------------------------------------------
   // POST /auth/switch-tenant
   // ---------------------------------------------------------------------------
-  @UseGuards(JwtAuthGuard, CsrfGuard)
+  @UseGuards(JwtAuthGuard, CsrfGuard, SuperAdminGuard)
   @Post('switch-tenant')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()

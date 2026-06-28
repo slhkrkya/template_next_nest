@@ -20,8 +20,9 @@ export class UpsertRolePermissionDto {
   @IsString()
   entityName: string;
 
+  @IsOptional()
   @IsEnum(AccessLevel)
-  accessLevel: AccessLevel;
+  accessLevel?: AccessLevel;
 
   @IsBoolean()
   @IsOptional()

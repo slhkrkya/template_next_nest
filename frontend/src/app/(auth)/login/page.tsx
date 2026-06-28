@@ -110,7 +110,7 @@ export default function LoginPage() {
             htmlFor="email"
             className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300"
           >
-            {t('auth.emailAddress')}
+            {t('auth.emailAddress')} <span className="text-rose-600">*</span>
           </label>
           <InputText
             id="email"
@@ -130,7 +130,7 @@ export default function LoginPage() {
               htmlFor="password"
               className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
             >
-              {t('auth.password')}
+              {t('auth.password')} <span className="text-rose-600">*</span>
             </label>
             <Link
               href="/forgot-password"

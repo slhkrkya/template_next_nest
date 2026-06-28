@@ -1,6 +1,7 @@
 export * from './create-user.command';
 export * from './update-user.command';
 export * from './delete-user.command';
+export * from './toggle-active-user.command';
 export * from './update-profile.command';
 export * from './update-settings.command';
 export * from './update-theme-preference.command';
@@ -9,6 +10,7 @@ export * from './save-table-preferences.command';
 export * from './handlers/create-user.handler';
 export * from './handlers/update-user.handler';
 export * from './handlers/delete-user.handler';
+export * from './handlers/toggle-active-user.handler';
 export * from './handlers/update-profile.handler';
 export * from './handlers/update-settings.handler';
 export * from './handlers/update-theme-preference.handler';
@@ -18,6 +20,7 @@ export * from './handlers/save-table-preferences.handler';
 import { CreateUserHandler } from './handlers/create-user.handler';
 import { UpdateUserHandler } from './handlers/update-user.handler';
 import { DeleteUserHandler } from './handlers/delete-user.handler';
+import { ToggleActiveUserHandler } from './handlers/toggle-active-user.handler';
 import { UpdateProfileHandler } from './handlers/update-profile.handler';
 import { UpdateSettingsHandler } from './handlers/update-settings.handler';
 import { UpdateThemePreferenceHandler } from './handlers/update-theme-preference.handler';
@@ -28,6 +31,7 @@ export const CommandHandlers = [
   CreateUserHandler,
   UpdateUserHandler,
   DeleteUserHandler,
+  ToggleActiveUserHandler,
   UpdateProfileHandler,
   UpdateSettingsHandler,
   UpdateThemePreferenceHandler,

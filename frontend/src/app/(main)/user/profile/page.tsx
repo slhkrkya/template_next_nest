@@ -13,6 +13,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
 import { TabPanel, TabView } from 'primereact/tabview';
+import { getPrimeOverlayAppendTo } from '@/components/shared/FilterBar';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppToast } from '@/providers/prime-provider';
 import { changePassword, updateProfile } from '@/lib/api/users.api';
@@ -38,7 +39,8 @@ const createPasswordSchema = (t: (key: any, params?: any) => string) => z
       .min(8, t('validation.passwordMin'))
       .regex(/[A-Z]/, t('validation.passwordUppercase'))
       .regex(/[a-z]/, t('validation.passwordLowercase'))
-      .regex(/[0-9]/, t('validation.passwordNumber')),
+      .regex(/[0-9]/, t('validation.passwordNumber'))
+      .regex(/[\W_]/, t('validation.passwordSpecial')),
     confirmPassword: z.string().min(1, t('validation.confirmPasswordRequired')),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
@@ -51,16 +53,39 @@ type SettingsFormData = z.infer<typeof settingsSchema>;
 type PasswordFormData = z.infer<ReturnType<typeof createPasswordSchema>>;
 
 const timezoneOptions = [
-  { label: 'UTC', value: 'UTC' },
-  { label: 'Eastern Time (US)', value: 'America/New_York' },
-  { label: 'Central Time (US)', value: 'America/Chicago' },
-  { label: 'Pacific Time (US)', value: 'America/Los_Angeles' },
-  { label: 'London', value: 'Europe/London' },
-  { label: 'Paris', value: 'Europe/Paris' },
-  { label: 'Istanbul', value: 'Europe/Istanbul' },
-  { label: 'Tokyo', value: 'Asia/Tokyo' },
-  { label: 'Sydney', value: 'Australia/Sydney' },
+  { labelKey: 'utc', value: 'UTC' },
+  { labelKey: 'easternUs', value: 'America/New_York' },
+  { labelKey: 'centralUs', value: 'America/Chicago' },
+  { labelKey: 'pacificUs', value: 'America/Los_Angeles' },
+  { labelKey: 'london', value: 'Europe/London' },
+  { labelKey: 'paris', value: 'Europe/Paris' },
+  { labelKey: 'istanbul', value: 'Europe/Istanbul' },
+  { labelKey: 'tokyo', value: 'Asia/Tokyo' },
+  { labelKey: 'sydney', value: 'Australia/Sydney' },
 ];
+
+function timezoneLabel(t: (key: any) => string, labelKey: string) {
+  switch (labelKey) {
+    case 'easternUs':
+      return t('profile.timezones.easternUs');
+    case 'centralUs':
+      return t('profile.timezones.centralUs');
+    case 'pacificUs':
+      return t('profile.timezones.pacificUs');
+    case 'london':
+      return t('profile.timezones.london');
+    case 'paris':
+      return t('profile.timezones.paris');
+    case 'istanbul':
+      return t('profile.timezones.istanbul');
+    case 'tokyo':
+      return t('profile.timezones.tokyo');
+    case 'sydney':
+      return t('profile.timezones.sydney');
+    default:
+      return t('profile.timezones.utc');
+  }
+}
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
@@ -144,18 +169,18 @@ function PersonalInfoTab({ user }: { user: any }) {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="firstName" className="mb-2 block text-sm font-semibold text-foreground">{t('auth.firstName')}</label>
+          <label htmlFor="firstName" className="mb-2 block text-sm font-semibold text-foreground">{t('auth.firstName')} <span className="text-rose-600">*</span></label>
           <InputText id="firstName" autoComplete="given-name" {...register('firstName')} invalid={!!errors.firstName} className="w-full" />
           <FieldError message={errors.firstName?.message} />
         </div>
         <div>
-          <label htmlFor="lastName" className="mb-2 block text-sm font-semibold text-foreground">{t('auth.lastName')}</label>
+          <label htmlFor="lastName" className="mb-2 block text-sm font-semibold text-foreground">{t('auth.lastName')} <span className="text-rose-600">*</span></label>
           <InputText id="lastName" autoComplete="family-name" {...register('lastName')} invalid={!!errors.lastName} className="w-full" />
           <FieldError message={errors.lastName?.message} />
         </div>
         <div>
           <label htmlFor="mobile" className="mb-2 block text-sm font-semibold text-foreground">{t('profile.mobileNumber')}</label>
-          <InputText id="mobile" autoComplete="tel" placeholder="+1 (555) 000-0000" {...register('mobile')} invalid={!!errors.mobile} className="w-full" />
+          <InputText id="mobile" autoComplete="tel" placeholder={t('profile.mobilePlaceholder')} {...register('mobile')} invalid={!!errors.mobile} className="w-full" />
           <FieldError message={errors.mobile?.message} />
         </div>
         <div>
@@ -175,6 +200,8 @@ function PersonalInfoTab({ user }: { user: any }) {
                 }}
                 dateFormat="yy-mm-dd"
                 showIcon
+                showButtonBar
+                appendTo={getPrimeOverlayAppendTo()}
                 className="w-full"
               />
             )}
@@ -202,6 +229,10 @@ function SettingsTab({ user }: { user: any }) {
     { label: t('theme.dark'), value: 'dark' },
     { label: t('profile.systemDefault'), value: 'system' },
   ];
+  const localizedTimezoneOptions = timezoneOptions.map((option) => ({
+    label: timezoneLabel(t, option.labelKey),
+    value: option.value,
+  }));
   const {
     control,
     handleSubmit,
@@ -229,11 +260,11 @@ function SettingsTab({ user }: { user: any }) {
       {[
         ['language', t('profile.language'), languageOptions],
         ['theme', t('profile.theme'), themeOptions],
-        ['timezone', t('profile.timezone'), timezoneOptions],
+        ['timezone', t('profile.timezone'), localizedTimezoneOptions],
       ].map(([name, label, options]) => (
         <div key={name as string}>
           <label htmlFor={name as string} className="mb-2 block text-sm font-semibold text-foreground">
-            {label as string}
+            {label as string} <span className="text-rose-600">*</span>
           </label>
           <Controller
             control={control}
@@ -245,6 +276,8 @@ function SettingsTab({ user }: { user: any }) {
                 options={options as Array<{ label: string; value: string }>}
                 onChange={(event) => field.onChange(event.value)}
                 className="w-full"
+                filter={name === 'timezone'}
+                appendTo={getPrimeOverlayAppendTo()}
               />
             )}
           />
@@ -294,7 +327,7 @@ function ChangePasswordTab() {
       ].map(([name, label, autoComplete]) => (
         <div key={name}>
           <label htmlFor={name} className="mb-2 block text-sm font-semibold text-foreground">
-            {label}
+            {label} <span className="text-rose-600">*</span>
           </label>
           <Controller
             control={control}

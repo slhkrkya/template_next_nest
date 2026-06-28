@@ -66,8 +66,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
           exception instanceof Error ? exception.stack : undefined,
         );
       } else {
+        const detail = errors?.length ? ` | ${JSON.stringify(errors)}` : '';
         this.logger.warn(
-          `[${request.method}] ${request.url} - ${statusCode} ${message}`,
+          `[${request.method}] ${request.url} - ${statusCode} ${message}${detail}`,
         );
       }
     } else {
@@ -98,6 +99,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
           level: statusCode >= 500 ? 'ERROR' : 'WARN',
           message: typeof message === 'string' ? message : JSON.stringify(message),
           source: request.url,
+          tenantId: (request.tenantId as string | undefined) ?? null,
           stackTrace:
             statusCode >= 500 && exception instanceof Error
               ? exception.stack

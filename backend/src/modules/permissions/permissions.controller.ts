@@ -7,11 +7,13 @@ import {
   Body,
   Request,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../../common/types';
+import { SuperAdminGuard } from '../../common/guards/superadmin.guard';
 import { UpsertUserPermissionDto } from './dto/upsert-user-permission.dto';
 import { UpsertRolePermissionDto } from './dto/upsert-role-permission.dto';
 import { BulkDeleteDto } from './dto/bulk-delete.dto';
@@ -70,14 +72,19 @@ export class PermissionsController {
   }
 
   @Post('user')
+  @UseGuards(SuperAdminGuard)
   upsertUserPermission(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: UpsertUserPermissionDto,
+    @Request() req: any,
   ) {
-    return this.commandBus.execute(new UpsertUserPermissionCommand(user, dto));
+    return this.commandBus.execute(
+      new UpsertUserPermissionCommand(user, { ...dto, tenantId: req.tenantId }),
+    );
   }
 
   @Post('role')
+  @UseGuards(SuperAdminGuard)
   upsertRolePermission(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: UpsertRolePermissionDto,
@@ -86,6 +93,7 @@ export class PermissionsController {
   }
 
   @Delete('user/bulk')
+  @UseGuards(SuperAdminGuard)
   bulkDeleteUserPermissions(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: BulkDeleteDto,
@@ -94,6 +102,7 @@ export class PermissionsController {
   }
 
   @Delete('role/bulk')
+  @UseGuards(SuperAdminGuard)
   bulkDeleteRolePermissions(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: BulkDeleteDto,

@@ -16,7 +16,6 @@ const PERMISSION_ENTITIES = [
   { name: 'IpBans', displayName: 'IP Bans', displayOrder: 60 },
   { name: 'RateLimits', displayName: 'Rate Limits', displayOrder: 70 },
   { name: 'DataScopes', displayName: 'Data Scopes', displayOrder: 80 },
-  { name: 'Tenants', displayName: 'Tenants', displayOrder: 90 },
   { name: 'SubscriptionPlans', displayName: 'Subscription Plans', displayOrder: 100 },
   { name: 'Notifications', displayName: 'Notifications', displayOrder: 110 },
   { name: 'EntityWorkflows', displayName: 'Entity Workflows', displayOrder: 120 },

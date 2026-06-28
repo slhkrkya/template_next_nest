@@ -17,8 +17,6 @@ export class UpsertUserPermissionDto {
   @IsUUID()
   userId: string;
 
-  @IsOptional()
-  @IsUUID()
   tenantId?: string;
 
   @IsString()

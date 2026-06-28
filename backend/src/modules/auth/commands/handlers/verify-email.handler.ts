@@ -68,10 +68,10 @@ export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand> {
         await this.tenantRepo.update(user.tenantId, { isActive: true });
       }
 
-      // 2. 'User' operationClaim ata
+      // 2. 'Admin' operationClaim ata (self-registered user = tenant owner)
       const defaultClaimAssigned = await this.authRepo.assignOperationClaimByName(
         user.id,
-        'User',
+        'Admin',
         user.tenantId,
       );
 
@@ -83,7 +83,7 @@ export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand> {
 
       // 3. Role permission'larını kullanıcıya sync et
       if (user.tenantId) {
-        const userRole = await this.roleRepo.findByName('User');
+        const userRole = await this.roleRepo.findByName('Admin');
         if (userRole) {
           await this.permissionRepo.syncRolePermissionsToUser(
             userRole.id,

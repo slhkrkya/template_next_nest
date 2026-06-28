@@ -32,10 +32,15 @@ export function ThemeToggle({ variant = 'icon-only' }: ThemeToggleProps) {
   }
 
   if (variant === 'labeled') {
+    const colorSchemeOptions = COLOR_SCHEME_OPTIONS.map((option) => ({
+      ...option,
+      label: option.value === 'dark' ? t('dark') : t('light'),
+    }));
+
     return (
       <SelectButton
         value={preference.colorScheme}
-        options={COLOR_SCHEME_OPTIONS}
+        options={colorSchemeOptions}
         onChange={(event) => event.value && setColorScheme(event.value)}
         allowEmpty={false}
         aria-label={t('theme')}

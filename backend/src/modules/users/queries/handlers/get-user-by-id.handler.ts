@@ -1,5 +1,5 @@
 ﻿import { IQueryHandler, QueryHandler } from '@nestjs/cqrs'
-import { Inject, Injectable } from '@nestjs/common'
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common'
 import { IUserRepository, USER_REPOSITORY } from '../../domain/user.repository.interface'
 import { EntityNotFoundException } from '../../../../core/exceptions/domain.exception'
 import { GetUserByIdQuery } from '../get-user-by-id.query'
@@ -14,6 +14,9 @@ export class GetUserByIdHandler implements IQueryHandler<GetUserByIdQuery> {
   async execute(query: GetUserByIdQuery) {
     const user = await this.users.findById(query.id)
     if (!user) throw new EntityNotFoundException('User', query.id)
+    if (query.tenantId !== undefined && user.tenantId !== query.tenantId) {
+      throw new ForbiddenException('Access denied')
+    }
     return user.toPlain()
   }
 }

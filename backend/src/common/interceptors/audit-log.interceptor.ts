@@ -51,7 +51,12 @@ export class AuditLogInterceptor implements NestInterceptor {
               },
             });
           } catch (err) {
-            this.logger.error('Failed to write audit log entry', err);
+            // P2003 = FK constraint — userId from JWT no longer exists in DB (e.g. after DB reset)
+            if ((err as any)?.code === 'P2003') {
+              this.logger.debug('Audit log skipped: userId from JWT not found in DB');
+            } else {
+              this.logger.error('Failed to write audit log entry', err);
+            }
           }
         },
         error: async () => {
@@ -68,7 +73,11 @@ export class AuditLogInterceptor implements NestInterceptor {
               },
             });
           } catch (logErr) {
-            this.logger.error('Failed to write audit log error entry', logErr);
+            if ((logErr as any)?.code === 'P2003') {
+              this.logger.debug('Audit log skipped: userId from JWT not found in DB');
+            } else {
+              this.logger.error('Failed to write audit log error entry', logErr);
+            }
           }
         },
       }),

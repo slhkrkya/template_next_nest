@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axiosInstance from '@/lib/axios';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -14,6 +16,7 @@ import { Message } from 'primereact/message';
 import { Tag } from 'primereact/tag';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { DataTable, type Column } from '@/components/shared/DataTable';
+import { getPrimeOverlayAppendTo } from '@/components/shared/FilterBar';
 import { PageHeader } from '@/components/shared/PageHeader';
 
 interface IpBan {
@@ -25,39 +28,36 @@ interface IpBan {
   bannedBy: string;
 }
 
-const banSchema = z.object({
+const createBanSchema = (t: (key: any, params?: any) => string) => z.object({
   ipAddress: z
     .string()
-    .min(1, 'IP address is required')
+    .min(1, t('ipRequired'))
     .regex(
       /^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$|^([0-9a-fA-F:]+)(\/\d{1,3})?$/,
-      'Enter a valid IPv4 or IPv6 address (CIDR notation supported)',
+      t('ipValidation'),
     ),
-  reason: z.string().min(1, 'Reason is required'),
+  reason: z.string().min(1, t('reasonRequired')),
   expiresAt: z.string().optional(),
 });
 
-type BanFormData = z.infer<typeof banSchema>;
+type BanFormData = z.infer<ReturnType<typeof createBanSchema>>;
 
 async function getIpBans(): Promise<IpBan[]> {
-  const res = await fetch('/api/admin/ip-bans');
-  if (!res.ok) throw new Error('Failed to fetch IP bans');
-  return res.json();
+  const res = await axiosInstance.get<{ data: IpBan[] } | IpBan[]>('/ip-bans');
+  return Array.isArray(res.data) ? res.data : (res.data as { data: IpBan[] }).data;
 }
 
 async function createIpBan(data: BanFormData): Promise<IpBan> {
-  const res = await fetch('/api/admin/ip-bans', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...data, expiresAt: data.expiresAt || null }),
+  const res = await axiosInstance.post<IpBan>('/ip-bans/ban', {
+    ip: data.ipAddress,
+    reason: data.reason,
+    expiresAt: data.expiresAt || undefined,
   });
-  if (!res.ok) throw new Error('Failed to create IP ban');
-  return res.json();
+  return res.data;
 }
 
-async function unbanIp(id: string): Promise<void> {
-  const res = await fetch(`/api/admin/ip-bans/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error('Failed to remove IP ban');
+async function unbanIp(ipAddress: string): Promise<void> {
+  await axiosInstance.delete(`/ip-bans/unban/${encodeURIComponent(ipAddress)}`);
 }
 
 function FieldError({ message }: { message?: string }) {
@@ -66,6 +66,8 @@ function FieldError({ message }: { message?: string }) {
 }
 
 export default function IpBansPage() {
+  const t = useTranslations('ipBans');
+  const commonT = useTranslations('common');
   const queryClient = useQueryClient();
   const [addOpen, setAddOpen] = useState(false);
   const [unbanTarget, setUnbanTarget] = useState<IpBan | null>(null);
@@ -81,7 +83,7 @@ export default function IpBansPage() {
   });
 
   const unbanMutation = useMutation({
-    mutationFn: () => unbanIp(unbanTarget!.id),
+    mutationFn: () => unbanIp(unbanTarget!.ipAddress),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ip-bans'] });
       setUnbanTarget(null);
@@ -96,7 +98,7 @@ export default function IpBansPage() {
     watch,
     formState: { errors },
   } = useForm<BanFormData>({
-    resolver: zodResolver(banSchema),
+    resolver: zodResolver(createBanSchema(t)),
     defaultValues: { ipAddress: '', reason: '', expiresAt: '' },
   });
 
@@ -108,10 +110,10 @@ export default function IpBansPage() {
   }
 
   const columns: Column<IpBan>[] = [
-    { header: 'IP Address', key: 'ipAddress', render: (_, ban) => <span className="font-mono font-semibold">{ban.ipAddress}</span> },
-    { header: 'Reason', key: 'reason', render: (_, ban) => <span className="line-clamp-2 text-sm text-muted-foreground">{ban.reason}</span> },
+    { header: t('ipAddress'), key: 'ipAddress', render: (_, ban) => <span className="font-mono font-semibold">{ban.ipAddress}</span> },
+    { header: t('reason'), key: 'reason', render: (_, ban) => <span className="line-clamp-2 text-sm text-muted-foreground">{ban.reason}</span> },
     {
-      header: 'Banned At',
+      header: t('bannedAt'),
       key: 'bannedAt',
       render: (_, ban) => (
         <span className="text-xs tabular-nums text-muted-foreground">
@@ -120,25 +122,25 @@ export default function IpBansPage() {
       ),
     },
     {
-      header: 'Expires',
+      header: t('expires'),
       key: 'expiresAt',
       render: (_, ban) =>
         ban.expiresAt === null ? (
-          <Tag value="Permanent" severity="danger" />
+          <Tag value={t('permanent')} severity="danger" />
         ) : isExpired(ban) ? (
-          <Tag value="Expired" severity="secondary" />
+          <Tag value={t('expired')} severity="secondary" />
         ) : (
           <Tag value={format(new Date(ban.expiresAt), 'MMM d, yyyy')} severity="warning" />
         ),
     },
-    { header: 'Banned By', key: 'bannedBy', render: (_, ban) => <span className="text-sm text-muted-foreground">{ban.bannedBy}</span> },
+    { header: t('bannedBy'), key: 'bannedBy', render: (_, ban) => <span className="text-sm text-muted-foreground">{ban.bannedBy}</span> },
     {
-      header: 'Action',
+      header: commonT('actions'),
       key: 'id',
       render: (_, ban) => (
         <Button
           type="button"
-          label="Unban"
+          label={t('unban')}
           icon="pi pi-unlock"
           severity="danger"
           outlined
@@ -152,39 +154,40 @@ export default function IpBansPage() {
   return (
     <div>
       <PageHeader
-        title="IP Bans"
-        subtitle="Block specific IP addresses or ranges from accessing the platform."
-        actions={<Button type="button" label="Add Ban" icon="pi pi-plus" onClick={() => setAddOpen(true)} />}
+        title={t('title')}
+        subtitle={t('subtitle')}
+        actions={<Button type="button" label={t('addBan')} icon="pi pi-plus" onClick={() => setAddOpen(true)} />}
       />
 
       <DataTable
         columns={columns}
         data={bans}
         isLoading={bansQuery.isLoading}
-        emptyMessage="No IP bans configured. The platform is accessible to all IPs."
+        minWidth="56rem"
+        emptyMessage={t('empty')}
       />
 
       <Dialog
         visible={addOpen}
         onHide={() => setAddOpen(false)}
-        header="Add IP Ban"
+        header={t('addIpBan')}
         modal
         className="w-[92vw] max-w-lg"
       >
         <form className="flex flex-col gap-4" onSubmit={handleSubmit((data) => addMutation.mutate(data))}>
           <div>
-            <label htmlFor="ipAddress" className="mb-2 block text-sm font-semibold text-foreground">IP Address</label>
-            <InputText id="ipAddress" {...register('ipAddress')} invalid={!!errors.ipAddress} className="w-full" placeholder="192.168.1.100 or 10.0.0.0/8" />
-            <small className="mt-1 block text-muted-foreground">IPv4 or IPv6. CIDR notation supported for ranges.</small>
+            <label htmlFor="ipAddress" className="mb-2 block text-sm font-semibold text-foreground">{t('ipAddress')} <span className="text-rose-600">*</span></label>
+            <InputText id="ipAddress" {...register('ipAddress')} invalid={!!errors.ipAddress} className="w-full" placeholder={t('ipPlaceholder')} />
+            <small className="mt-1 block text-muted-foreground">{t('ipHelp')}</small>
             <FieldError message={errors.ipAddress?.message} />
           </div>
           <div>
-            <label htmlFor="reason" className="mb-2 block text-sm font-semibold text-foreground">Reason</label>
-            <InputText id="reason" {...register('reason')} invalid={!!errors.reason} className="w-full" placeholder="Describe why this IP is being banned" />
+            <label htmlFor="reason" className="mb-2 block text-sm font-semibold text-foreground">{t('reason')} <span className="text-rose-600">*</span></label>
+            <InputText id="reason" {...register('reason')} invalid={!!errors.reason} className="w-full" placeholder={t('reasonPlaceholder')} />
             <FieldError message={errors.reason?.message} />
           </div>
           <div>
-            <label htmlFor="expiresAt" className="mb-2 block text-sm font-semibold text-foreground">Expires At</label>
+            <label htmlFor="expiresAt" className="mb-2 block text-sm font-semibold text-foreground">{t('expiresAt')}</label>
             <Calendar
               inputId="expiresAt"
               value={expiresAt ? new Date(expiresAt) : null}
@@ -195,23 +198,25 @@ export default function IpBansPage() {
               showTime
               hourFormat="24"
               showIcon
+              showButtonBar
+              appendTo={getPrimeOverlayAppendTo()}
               className="w-full"
             />
-            <small className="mt-1 block text-muted-foreground">Leave blank for a permanent ban.</small>
+            <small className="mt-1 block text-muted-foreground">{t('expiresHelp')}</small>
           </div>
           {addMutation.isError && <Message severity="error" text={(addMutation.error as Error).message} />}
           <div className="flex justify-end gap-2">
-            <Button type="button" label="Cancel" severity="secondary" outlined onClick={() => setAddOpen(false)} />
-            <Button type="submit" label="Add Ban" icon="pi pi-lock" loading={addMutation.isPending} />
+            <Button type="button" label={commonT('cancel')} severity="secondary" outlined onClick={() => setAddOpen(false)} />
+            <Button type="submit" label={t('addBan')} icon="pi pi-lock" loading={addMutation.isPending} />
           </div>
         </form>
       </Dialog>
 
       <ConfirmDialog
         open={!!unbanTarget}
-        title="Remove IP Ban"
-        description={`Allow ${unbanTarget?.ipAddress} access again? This cannot be undone automatically.`}
-        confirmLabel="Remove Ban"
+        title={t('removeIpBan')}
+        description={t('removeConfirm', { ip: unbanTarget?.ipAddress ?? '' })}
+        confirmLabel={t('removeBan')}
         variant="destructive"
         onConfirm={() => unbanMutation.mutate()}
         onCancel={() => setUnbanTarget(null)}

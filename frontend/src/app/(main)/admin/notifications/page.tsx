@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axiosInstance from '@/lib/axios';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -16,6 +17,7 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import { Message } from 'primereact/message';
 import { SelectButton } from 'primereact/selectbutton';
 import { Tag } from 'primereact/tag';
+import { FilterBar, FilterField, getPrimeOverlayAppendTo } from '@/components/shared/FilterBar';
 import { PageHeader } from '@/components/shared/PageHeader';
 
 interface Notification {
@@ -53,21 +55,20 @@ const createNotifSchema = (t: (key: any, params?: any) => string) => z
 type NotifFormData = z.infer<ReturnType<typeof createNotifSchema>>;
 
 async function getAdminNotifications(): Promise<Notification[]> {
-  const res = await fetch('/api/admin/notifications');
-  if (!res.ok) throw new Error('Failed');
-  return res.json();
+  const res = await axiosInstance.get<{ data: Notification[] } | Notification[]>('/notifications/my');
+  return Array.isArray(res.data) ? res.data : (res.data as { data: Notification[] }).data;
 }
 
 async function markRead(id: string): Promise<void> {
-  await fetch(`/api/admin/notifications/${id}/read`, { method: 'PATCH' });
+  await axiosInstance.patch(`/notifications/${id}/read`);
 }
 
 async function markAllRead(): Promise<void> {
-  await fetch('/api/admin/notifications/read-all', { method: 'PATCH' });
+  await axiosInstance.patch('/notifications/read-all');
 }
 
 async function deleteNotif(id: string): Promise<void> {
-  await fetch(`/api/admin/notifications/${id}`, { method: 'DELETE' });
+  await axiosInstance.delete('/notifications/bulk', { data: { ids: [id] } });
 }
 
 async function createNotification(data: {
@@ -77,19 +78,12 @@ async function createNotification(data: {
   targetUserId?: string;
   isBroadcast: boolean;
 }): Promise<void> {
-  const res = await fetch('/api/admin/notifications', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error('Failed to create notification');
+  await axiosInstance.post('/notifications', data);
 }
 
 async function getUsers(): Promise<UserOption[]> {
-  const res = await fetch('/api/admin/users?pageSize=200');
-  if (!res.ok) throw new Error('Failed');
-  const data = await res.json();
-  return data.data ?? [];
+  const res = await axiosInstance.get<{ data: UserOption[] }>('/users', { params: { limit: 200 } });
+  return res.data.data ?? [];
 }
 
 function typeSeverity(type: Notification['type']) {
@@ -192,28 +186,33 @@ export default function AdminNotificationsPage() {
         }
       />
 
-      <div className="mb-5 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4">
-        <SelectButton
-          value={filter}
-          options={[
-            { label: t('common.all'), value: 'all' },
-            { label: `${t('notifications.unread')} (${unreadCount})`, value: 'unread' },
-          ]}
-          onChange={(event) => event.value && setFilter(event.value)}
-          allowEmpty={false}
-        />
-        <div className="flex-1" />
-        <Button
-          type="button"
-          label={t('notifications.markAllRead')}
-          icon="pi pi-check"
-          severity="secondary"
-          outlined
-          disabled={unreadCount === 0}
-          loading={markAllMutation.isPending}
-          onClick={() => markAllMutation.mutate()}
-        />
-      </div>
+      <FilterBar
+        actions={
+          <Button
+            type="button"
+            label={t('notifications.markAllRead')}
+            icon="pi pi-check"
+            severity="secondary"
+            outlined
+            disabled={unreadCount === 0}
+            loading={markAllMutation.isPending}
+            onClick={() => markAllMutation.mutate()}
+          />
+        }
+      >
+        <FilterField label={t('common.status')}>
+          <SelectButton
+            value={filter}
+            options={[
+              { label: t('common.all'), value: 'all' },
+              { label: `${t('notifications.unread')} (${unreadCount})`, value: 'unread' },
+            ]}
+            onChange={(event) => event.value && setFilter(event.value)}
+            allowEmpty={false}
+            className="w-full"
+          />
+        </FilterField>
+      </FilterBar>
 
       <div className="flex flex-col gap-3">
         {notifQuery.isLoading ? (
@@ -276,7 +275,7 @@ export default function AdminNotificationsPage() {
       >
         <form className="flex flex-col gap-4" onSubmit={handleSubmit((data) => createMutation.mutate(data))}>
           <div>
-            <label className="mb-2 block text-sm font-semibold text-foreground">{t('notifications.target')}</label>
+            <label className="mb-2 block text-sm font-semibold text-foreground">{t('notifications.target')} <span className="text-rose-600">*</span></label>
             <SelectButton
               value={target}
               options={targetOptions}
@@ -286,7 +285,7 @@ export default function AdminNotificationsPage() {
           </div>
           {target === 'user' && (
             <div>
-              <label htmlFor="targetUserId" className="mb-2 block text-sm font-semibold text-foreground">{t('notifications.targetUser')}</label>
+              <label htmlFor="targetUserId" className="mb-2 block text-sm font-semibold text-foreground">{t('notifications.targetUser')} <span className="text-rose-600">*</span></label>
               <Dropdown
                 inputId="targetUserId"
                 value={targetUserId}
@@ -296,21 +295,30 @@ export default function AdminNotificationsPage() {
                 filter
                 className="w-full"
                 loading={usersQuery.isLoading}
+                showClear
+                appendTo={getPrimeOverlayAppendTo()}
               />
               {errors.targetUserId && <small className="mt-1 block text-rose-600">{errors.targetUserId.message}</small>}
             </div>
           )}
           <div>
-            <label htmlFor="type" className="mb-2 block text-sm font-semibold text-foreground">{t('notifications.type')}</label>
-            <Dropdown inputId="type" value={type} options={typeOptions} onChange={(event) => setValue('type', event.value)} className="w-full" />
+            <label htmlFor="type" className="mb-2 block text-sm font-semibold text-foreground">{t('notifications.type')} <span className="text-rose-600">*</span></label>
+            <Dropdown
+              inputId="type"
+              value={type}
+              options={typeOptions}
+              onChange={(event) => setValue('type', event.value)}
+              className="w-full"
+              appendTo={getPrimeOverlayAppendTo()}
+            />
           </div>
           <div>
-            <label htmlFor="title" className="mb-2 block text-sm font-semibold text-foreground">{t('notifications.titleField')}</label>
+            <label htmlFor="title" className="mb-2 block text-sm font-semibold text-foreground">{t('notifications.titleField')} <span className="text-rose-600">*</span></label>
             <InputText id="title" {...register('title')} invalid={!!errors.title} className="w-full" placeholder={t('notifications.titlePlaceholder')} />
             {errors.title && <small className="mt-1 block text-rose-600">{errors.title.message}</small>}
           </div>
           <div>
-            <label htmlFor="message" className="mb-2 block text-sm font-semibold text-foreground">{t('notifications.messageField')}</label>
+            <label htmlFor="message" className="mb-2 block text-sm font-semibold text-foreground">{t('notifications.messageField')} <span className="text-rose-600">*</span></label>
             <InputTextarea id="message" {...register('message')} invalid={!!errors.message} className="w-full" rows={4} autoResize placeholder={t('notifications.messagePlaceholder')} />
             {errors.message && <small className="mt-1 block text-rose-600">{errors.message.message}</small>}
           </div>

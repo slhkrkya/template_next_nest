@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axiosInstance from '@/lib/axios';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -42,40 +43,27 @@ const createRoleSchema = (t: (key: any, params?: any) => string) => z.object({
 type RoleFormData = z.infer<ReturnType<typeof createRoleSchema>>;
 
 async function getRoles(): Promise<OperationClaim[]> {
-  const res = await fetch('/api/admin/operation-claims');
-  if (!res.ok) throw new Error('Failed to fetch roles');
-  return res.json();
+  const res = await axiosInstance.get<OperationClaim[]>('/roles');
+  return res.data;
 }
 
 async function getRoleUsers(roleId: string): Promise<ClaimUser[]> {
-  const res = await fetch(`/api/admin/operation-claims/${roleId}/users`);
-  if (!res.ok) throw new Error('Failed to fetch role users');
-  return res.json();
+  const res = await axiosInstance.get<ClaimUser[]>(`/roles/${roleId}/users`);
+  return res.data;
 }
 
 async function createRole(data: RoleFormData) {
-  const res = await fetch('/api/admin/operation-claims', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error('Failed to create role');
-  return res.json();
+  const res = await axiosInstance.post('/roles', data);
+  return res.data;
 }
 
 async function updateRole(id: string, data: RoleFormData) {
-  const res = await fetch(`/api/admin/operation-claims/${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error('Failed to update role');
-  return res.json();
+  const res = await axiosInstance.patch(`/roles/${id}`, data);
+  return res.data;
 }
 
 async function deleteRole(id: string) {
-  const res = await fetch(`/api/admin/operation-claims/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error('Failed to delete role');
+  await axiosInstance.delete(`/roles/${id}`);
 }
 
 function RoleForm({
@@ -107,8 +95,8 @@ function RoleForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
       <div>
-        <label htmlFor="role-name" className="mb-2 block text-sm font-semibold text-foreground">{t('roles.roleName')}</label>
-        <InputText id="role-name" {...register('name')} invalid={!!errors.name} className="w-full" placeholder="BILLING_MANAGER" />
+        <label htmlFor="role-name" className="mb-2 block text-sm font-semibold text-foreground">{t('roles.roleName')} <span className="text-rose-600">*</span></label>
+        <InputText id="role-name" {...register('name')} invalid={!!errors.name} className="w-full" placeholder={t('roles.roleNamePlaceholder')} />
         {errors.name && <small className="mt-1 block text-rose-600">{errors.name.message}</small>}
       </div>
       <div>
@@ -116,7 +104,7 @@ function RoleForm({
         <InputText id="role-description" {...register('description')} className="w-full" placeholder={t('roles.descriptionPlaceholder')} />
       </div>
       <div>
-        <label htmlFor="role-priority" className="mb-2 block text-sm font-semibold text-foreground">{t('roles.priority')}</label>
+        <label htmlFor="role-priority" className="mb-2 block text-sm font-semibold text-foreground">{t('roles.priority')} <span className="text-rose-600">*</span></label>
         <InputNumber
           inputId="role-priority"
           value={watch('priority')}
@@ -182,7 +170,7 @@ export default function RolesPage() {
     { header: t('roles.name'), key: 'name', render: (_, role) => <span className="font-mono text-sm font-semibold">{role.name}</span> },
     { header: t('roles.description'), key: 'description', render: (_, role) => <span className="text-sm text-muted-foreground">{role.description}</span> },
     { header: t('roles.priority'), key: 'priority', render: (_, role) => <Tag value={role.priority} severity="info" /> },
-    { header: t('users.title'), key: 'userCount', render: (_, role) => <span className="tabular-nums text-muted-foreground">{role.userCount.toLocaleString()}</span> },
+    { header: t('users.title'), key: 'userCount', render: (_, role) => <span className="tabular-nums text-muted-foreground">{(role.userCount ?? 0).toLocaleString()}</span> },
     {
       header: t('common.actions'),
       key: 'id',

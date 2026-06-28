@@ -10,6 +10,7 @@ import {
   ParseUUIDPipe,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common'
 import {
   ApiTags,
@@ -25,6 +26,7 @@ import { CreateTenantDto } from './dto/create-tenant.dto'
 import { UpdateTenantDto } from './dto/update-tenant.dto'
 import { AuthenticatedUser } from '../../common/types'
 import { CurrentUser } from '../../common/decorators/current-user.decorator'
+import { SuperAdminGuard } from '../../common/guards/superadmin.guard'
 
 import { GetTenantsQuery, GetTenantByIdQuery } from './queries'
 import {
@@ -45,6 +47,7 @@ class UpdateStatusDto {
   status: string
 }
 
+@UseGuards(SuperAdminGuard)
 @ApiTags('tenants')
 @ApiBearerAuth()
 @Controller('tenants')

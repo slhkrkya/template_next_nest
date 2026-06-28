@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common'
 import { CqrsModule } from '@nestjs/cqrs'
+import { MulterModule } from '@nestjs/platform-express'
 import { TenantsService } from './tenants.service'
 import { TenantsController } from './tenants.controller'
+import { TenantProfileController } from './tenant-profile.controller'
 import { TENANT_REPOSITORY } from './domain/tenant.repository.interface'
 import { PrismaTenantRepository } from './infrastructure/prisma-tenant.repository'
 import { PrismaModule } from '../../prisma/prisma.module'
@@ -30,8 +32,8 @@ const CommandHandlers = [
 ]
 
 @Module({
-  imports: [PrismaModule, CqrsModule, PermissionsModule, RolesModule],
-  controllers: [TenantsController],
+  imports: [PrismaModule, CqrsModule, PermissionsModule, RolesModule, MulterModule],
+  controllers: [TenantProfileController, TenantsController],
   providers: [
     TenantsService,
     { provide: TENANT_REPOSITORY, useClass: PrismaTenantRepository },

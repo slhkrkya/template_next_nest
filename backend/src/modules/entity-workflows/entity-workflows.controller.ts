@@ -15,7 +15,7 @@ import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam, ApiQuery } from '@nestj
 import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { CreateEntityWorkflowDto } from './dto/create-entity-workflow.dto'
 import { EntityWorkflowsQueryDto } from './entity-workflows.service'
-import { CurrentUser } from '../../common/decorators/current-user.decorator'
+import { GetUser, RequirePermission } from '../../common/decorators'
 import { AuthenticatedUser } from '../../common/types'
 import { GetEntityWorkflowsQuery, GetEntityWorkflowQuery } from './queries'
 import {
@@ -34,40 +34,44 @@ export class EntityWorkflowsController {
   ) {}
 
   @Get()
+  @RequirePermission('EntityWorkflows', 'read')
   @ApiOperation({ summary: 'List entity workflows, optionally filtered by tenantId and entityName' })
   @ApiQuery({ name: 'tenantId', required: false })
   @ApiQuery({ name: 'entityName', required: false })
   findAll(
-    @CurrentUser() user: AuthenticatedUser,
+    @GetUser() user: AuthenticatedUser,
     @Query() query: EntityWorkflowsQueryDto,
   ) {
     return this.queryBus.execute(new GetEntityWorkflowsQuery(user, query))
   }
 
   @Get(':id')
+  @RequirePermission('EntityWorkflows', 'read')
   @ApiOperation({ summary: 'Get an entity workflow by ID' })
   @ApiParam({ name: 'id', type: String })
   findOne(
-    @CurrentUser() user: AuthenticatedUser,
+    @GetUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.queryBus.execute(new GetEntityWorkflowQuery(user, id))
   }
 
   @Post()
+  @RequirePermission('EntityWorkflows', 'create')
   @ApiOperation({ summary: 'Create a new entity workflow' })
   create(
-    @CurrentUser() user: AuthenticatedUser,
+    @GetUser() user: AuthenticatedUser,
     @Body() dto: CreateEntityWorkflowDto,
   ) {
     return this.commandBus.execute(new CreateEntityWorkflowCommand(user, dto))
   }
 
   @Patch(':id')
+  @RequirePermission('EntityWorkflows', 'update')
   @ApiOperation({ summary: 'Update an entity workflow' })
   @ApiParam({ name: 'id', type: String })
   update(
-    @CurrentUser() user: AuthenticatedUser,
+    @GetUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: Partial<CreateEntityWorkflowDto>,
   ) {
@@ -75,11 +79,12 @@ export class EntityWorkflowsController {
   }
 
   @Delete(':id')
+  @RequirePermission('EntityWorkflows', 'delete')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete an entity workflow' })
   @ApiParam({ name: 'id', type: String })
   remove(
-    @CurrentUser() user: AuthenticatedUser,
+    @GetUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.commandBus.execute(new DeleteEntityWorkflowCommand(user, id))

@@ -5,7 +5,7 @@ import type { AuditLog, DailyLoginStat, DashboardStats, PagedResult, PaginationQ
  * Fetch aggregate statistics for the admin dashboard overview card.
  */
 export async function getDashboardStats(): Promise<DashboardStats> {
-  const response = await axiosInstance.get<DashboardStats>('/admin/stats')
+  const response = await axiosInstance.get<DashboardStats>('/admin/dashboard-stats')
   return response.data
 }
 

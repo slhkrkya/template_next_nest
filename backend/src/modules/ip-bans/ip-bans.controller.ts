@@ -8,6 +8,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common'
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam } from '@nestjs/swagger'
 import { CommandBus, QueryBus } from '@nestjs/cqrs'
@@ -15,9 +16,11 @@ import { BanIpDto } from './dto/ban-ip.dto'
 import { PaginationDto } from '../../common/dto/pagination.dto'
 import { CurrentUser } from '../../common/decorators/current-user.decorator'
 import { AuthenticatedUser } from '../../common/types'
+import { SuperAdminGuard } from '../../common/guards/superadmin.guard'
 import { GetIpBansQuery } from './queries'
 import { BanIpCommand, UnbanIpCommand } from './commands'
 
+@UseGuards(SuperAdminGuard)
 @ApiTags('ip-bans')
 @ApiBearerAuth()
 @Controller('ip-bans')

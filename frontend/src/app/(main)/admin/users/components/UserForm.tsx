@@ -5,12 +5,14 @@ import { useTranslations } from 'next-intl';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
+import axiosInstance from '@/lib/axios';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { Message } from 'primereact/message';
 import { Password } from 'primereact/password';
 import { InputSwitch } from 'primereact/inputswitch';
+import { getPrimeOverlayAppendTo } from '@/components/shared/FilterBar';
 import type { User } from '../page';
 
 const createCreateSchema = (t: (key: any, params?: any) => string) => z.object({
@@ -34,29 +36,13 @@ type CreateFormData = z.infer<ReturnType<typeof createCreateSchema>>;
 type EditFormData = z.infer<ReturnType<typeof createEditSchema>>;
 
 async function createUser(data: CreateFormData) {
-  const res = await fetch('/api/admin/users', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? 'Failed to create user');
-  }
-  return res.json();
+  const res = await axiosInstance.post('/users', data);
+  return res.data;
 }
 
 async function updateUser(id: string, data: EditFormData) {
-  const res = await fetch(`/api/admin/users/${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? 'Failed to update user');
-  }
-  return res.json();
+  const res = await axiosInstance.patch(`/users/${id}`, data);
+  return res.data;
 }
 
 interface UserFormProps {
@@ -112,26 +98,26 @@ export default function UserForm({ mode, user, onSuccess, onCancel }: UserFormPr
     <form className="flex flex-col gap-5" onSubmit={handleSubmit((data) => mutation.mutate(data))}>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="firstName" className="mb-2 block text-sm font-semibold text-foreground">{t('auth.firstName')}</label>
+          <label htmlFor="firstName" className="mb-2 block text-sm font-semibold text-foreground">{t('auth.firstName')} <span className="text-rose-600">*</span></label>
           <InputText id="firstName" {...register('firstName')} invalid={!!errors.firstName} className="w-full" placeholder={t('auth.placeholders.firstName')} />
           <FieldError message={errors.firstName?.message} />
         </div>
         <div>
-          <label htmlFor="lastName" className="mb-2 block text-sm font-semibold text-foreground">{t('auth.lastName')}</label>
+          <label htmlFor="lastName" className="mb-2 block text-sm font-semibold text-foreground">{t('auth.lastName')} <span className="text-rose-600">*</span></label>
           <InputText id="lastName" {...register('lastName')} invalid={!!errors.lastName} className="w-full" placeholder={t('auth.placeholders.lastName')} />
           <FieldError message={errors.lastName?.message} />
         </div>
       </div>
 
       <div>
-        <label htmlFor="email" className="mb-2 block text-sm font-semibold text-foreground">{t('auth.email')}</label>
+        <label htmlFor="email" className="mb-2 block text-sm font-semibold text-foreground">{t('auth.email')} <span className="text-rose-600">*</span></label>
         <InputText id="email" type="email" {...register('email')} invalid={!!errors.email} className="w-full" placeholder={t('auth.placeholders.email')} />
         <FieldError message={errors.email?.message} />
       </div>
 
       {isCreate && (
         <div>
-          <label htmlFor="password" className="mb-2 block text-sm font-semibold text-foreground">{t('auth.password')}</label>
+          <label htmlFor="password" className="mb-2 block text-sm font-semibold text-foreground">{t('auth.password')} <span className="text-rose-600">*</span></label>
           <Controller
             control={control}
             name={'password' as any}
@@ -153,7 +139,7 @@ export default function UserForm({ mode, user, onSuccess, onCancel }: UserFormPr
       )}
 
       <div>
-        <label htmlFor="role" className="mb-2 block text-sm font-semibold text-foreground">{t('roles.title')}</label>
+        <label htmlFor="role" className="mb-2 block text-sm font-semibold text-foreground">{t('roles.title')} <span className="text-rose-600">*</span></label>
         <Controller
           control={control}
           name="role"
@@ -165,6 +151,7 @@ export default function UserForm({ mode, user, onSuccess, onCancel }: UserFormPr
               onChange={(event) => field.onChange(event.value)}
               className="w-full"
               invalid={!!errors.role}
+              appendTo={getPrimeOverlayAppendTo()}
             />
           )}
         />

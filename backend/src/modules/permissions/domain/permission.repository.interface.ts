@@ -13,6 +13,7 @@ export interface IPermissionRepository {
   upsertRolePermission(data: Omit<RoleEntityPermissionProps, 'id' | 'createdAt' | 'updatedAt'>): Promise<RoleEntityPermissionEntity>
   deleteRolePermissions(ids: string[]): Promise<{ count: number }>
   syncRolePermissionsToUser(operationClaimId: string, userId: string, tenantId?: string): Promise<void>
+  clearRolePermissionsFromUser(operationClaimId: string, userId: string, tenantId?: string): Promise<void>
 
   // Entities list
   findAllEntities(): Promise<{ name: string; displayName: string }[]>

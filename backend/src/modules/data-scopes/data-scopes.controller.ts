@@ -10,7 +10,7 @@ import {
   HttpStatus,
 } from '@nestjs/common'
 import { CommandBus, QueryBus } from '@nestjs/cqrs'
-import { CurrentUser } from '../../common/decorators/current-user.decorator'
+import { GetUser, RequirePermission } from '../../common/decorators'
 import { AuthenticatedUser } from '../../common/types'
 import { CreateDataScopeDto } from './dto/create-data-scope.dto'
 import { GetUserDataScopesQuery } from './queries'
@@ -24,25 +24,28 @@ export class DataScopesController {
   ) {}
 
   @Get(':userId')
+  @RequirePermission('DataScopes', 'read')
   getUserDataScopes(
-    @CurrentUser() user: AuthenticatedUser,
+    @GetUser() user: AuthenticatedUser,
     @Param('userId', ParseUUIDPipe) userId: string,
   ) {
     return this.queryBus.execute(new GetUserDataScopesQuery(user, userId))
   }
 
   @Post()
+  @RequirePermission('DataScopes', 'create')
   upsertDataScope(
-    @CurrentUser() user: AuthenticatedUser,
+    @GetUser() user: AuthenticatedUser,
     @Body() dto: CreateDataScopeDto,
   ) {
     return this.commandBus.execute(new UpsertDataScopeCommand(user, dto))
   }
 
   @Delete(':userId/:entityName')
+  @RequirePermission('DataScopes', 'delete')
   @HttpCode(HttpStatus.NO_CONTENT)
   removeDataScope(
-    @CurrentUser() user: AuthenticatedUser,
+    @GetUser() user: AuthenticatedUser,
     @Param('userId', ParseUUIDPipe) userId: string,
     @Param('entityName') entityName: string,
   ) {

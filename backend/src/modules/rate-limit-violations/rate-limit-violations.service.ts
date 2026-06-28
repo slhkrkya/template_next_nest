@@ -17,10 +17,11 @@ export class RateLimitViolationsService {
     @Inject(RATE_LIMIT_VIOLATION_REPOSITORY) private readonly violations: IRateLimitViolationRepository,
   ) {}
 
-  async findAll(query: PaginationDto): Promise<PagedResult<any>> {
+  async findAll(query: PaginationDto, dismissed?: boolean): Promise<PagedResult<any>> {
     const { buildResult } = paginationHelper(query, 'createdAt')
 
-    const data = await this.violations.findAll()
+    const all = await this.violations.findAll()
+    const data = dismissed !== undefined ? all.filter((v: any) => v.isDismissed === dismissed) : all
     return buildResult(data, data.length)
   }
 

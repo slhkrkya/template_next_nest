@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common'
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger'
 import { CommandBus, QueryBus } from '@nestjs/cqrs'
-import { CurrentUser } from '../../common/decorators/current-user.decorator'
+import { GetUser, RequirePermission } from '../../common/decorators'
 import { AuthenticatedUser } from '../../common/types'
 import { CreateEmailParametersDto } from './dto/create-email-parameters.dto'
 import { GetEmailParametersQuery } from './queries'
@@ -25,25 +25,28 @@ export class EmailParametersController {
   ) {}
 
   @Get()
+  @RequirePermission('EmailParameters', 'read')
   @ApiOperation({ summary: "Get the current tenant's email parameters" })
-  findByTenant(@CurrentUser() user: AuthenticatedUser) {
+  findByTenant(@GetUser() user: AuthenticatedUser) {
     return this.queryBus.execute(new GetEmailParametersQuery(user))
   }
 
   @Post()
+  @RequirePermission('EmailParameters', 'create')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Create or update the current tenant's email parameters" })
   upsert(
-    @CurrentUser() user: AuthenticatedUser,
+    @GetUser() user: AuthenticatedUser,
     @Body() dto: CreateEmailParametersDto,
   ) {
     return this.commandBus.execute(new UpsertEmailParametersCommand(user, dto))
   }
 
   @Delete()
+  @RequirePermission('EmailParameters', 'delete')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Delete the current tenant's email parameters" })
-  remove(@CurrentUser() user: AuthenticatedUser) {
+  remove(@GetUser() user: AuthenticatedUser) {
     return this.commandBus.execute(new RemoveEmailParametersCommand(user))
   }
 }

@@ -56,7 +56,7 @@ function Breadcrumb() {
 
   return (
     <nav
-      aria-label="Breadcrumb"
+      aria-label={t('breadcrumb')}
       className="hidden items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground md:flex"
     >
       {segments.map((segment, index) => {
@@ -90,6 +90,7 @@ function Breadcrumb() {
 }
 
 function TenantContextBadge() {
+  const t = useTranslations('nav');
   const { user, setAuth } = useAuthStore();
   const router = useRouter();
 
@@ -115,10 +116,10 @@ function TenantContextBadge() {
         type="button"
         onClick={returnToGlobal}
         className="flex items-center gap-1 text-xs text-primary hover:text-primary/80"
-        title="Return to global mode"
+        title={t('returnGlobal')}
       >
         <ArrowLeft className="h-3 w-3" />
-        Global
+        {t('global')}
       </button>
     </div>
   );
@@ -319,7 +320,7 @@ export function Topbar({ onSidebarToggle, onMobileToggle }: TopbarProps) {
             text
             rounded
             onClick={() => setThemeConfigOpen(true)}
-            aria-label="Open theme configurator"
+            aria-label={t('openThemeConfigurator')}
           />
           <ThemeToggle />
           <NotificationDropdown />

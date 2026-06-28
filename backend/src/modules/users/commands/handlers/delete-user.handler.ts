@@ -1,5 +1,5 @@
 ﻿import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs'
-import { Inject, Injectable } from '@nestjs/common'
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common'
 import { IUserRepository, USER_REPOSITORY } from '../../domain/user.repository.interface'
 import { EntityNotFoundException } from '../../../../core/exceptions/domain.exception'
 import { DeleteUserCommand } from '../delete-user.command'
@@ -18,6 +18,9 @@ export class DeleteUserHandler implements ICommandHandler<DeleteUserCommand> {
 
     const user = await this.users.findById(id)
     if (!user) throw new EntityNotFoundException('User', id)
+    if (command.tenantId !== undefined && user.tenantId !== command.tenantId) {
+      throw new ForbiddenException('Access denied')
+    }
 
     await this.users.delete(id)
     this.eventBus.publish(new UserDeletedEvent(id, user.tenantId))

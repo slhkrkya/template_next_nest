@@ -18,14 +18,15 @@ const createPasswordSchema = (t: (key: any, params?: any) => string) => z
   .min(8, t('validation.passwordMin'))
   .regex(/[A-Z]/, t('validation.passwordUppercase'))
   .regex(/[a-z]/, t('validation.passwordLowercase'))
-  .regex(/[0-9]/, t('validation.passwordNumber'));
+  .regex(/[0-9]/, t('validation.passwordNumber'))
+  .regex(/[\W_]/, t('validation.passwordSpecial'));
 
 const createRegisterSchema = (t: (key: any, params?: any) => string) => z
   .object({
     firstName: z.string().min(1, t('validation.firstNameRequired')).max(50),
     lastName: z.string().min(1, t('validation.lastNameRequired')).max(50),
     email: z.string().email(t('validation.email')),
-    companyName: z.string().max(100).optional(),
+    companyName: z.string().trim().min(2, t('validation.companyNameMin')).max(100),
     password: createPasswordSchema(t),
     confirmPassword: z.string().min(1, t('validation.confirmPasswordRequired')),
   })
@@ -48,6 +49,7 @@ function PasswordStrength({ password }: { password: string }) {
     { label: t('passwordCheckUppercase'), ok: /[A-Z]/.test(password) },
     { label: t('passwordCheckLowercase'), ok: /[a-z]/.test(password) },
     { label: t('passwordCheckNumber'), ok: /[0-9]/.test(password) },
+    { label: t('passwordCheckSpecial'), ok: /[\W_]/.test(password) },
   ];
   const strength = checks.filter((check) => check.ok).length;
 
@@ -55,7 +57,7 @@ function PasswordStrength({ password }: { password: string }) {
 
   return (
     <div className="mt-3">
-      <ProgressBar value={strength * 25} showValue={false} className="h-2" />
+      <ProgressBar value={strength * 20} showValue={false} className="h-2" />
       <div className="mt-2 flex flex-wrap gap-2">
         {checks.map((check) => (
           <span
@@ -153,7 +155,7 @@ export default function RegisterPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="firstName" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
-              {t('auth.firstName')}
+              {t('auth.firstName')} <span className="text-rose-600">*</span>
             </label>
             <InputText
               id="firstName"
@@ -168,7 +170,7 @@ export default function RegisterPage() {
 
           <div>
             <label htmlFor="lastName" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
-              {t('auth.lastName')}
+              {t('auth.lastName')} <span className="text-rose-600">*</span>
             </label>
             <InputText
               id="lastName"
@@ -184,7 +186,7 @@ export default function RegisterPage() {
 
         <div>
           <label htmlFor="email" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
-            {t('auth.emailAddress')}
+            {t('auth.emailAddress')} <span className="text-rose-600">*</span>
           </label>
           <InputText
             id="email"
@@ -200,10 +202,7 @@ export default function RegisterPage() {
 
         <div>
           <label htmlFor="companyName" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
-            {t('auth.companyName')}{' '}
-            <span className="font-normal text-slate-400 dark:text-slate-500">
-              ({t('auth.optional')})
-            </span>
+            {t('auth.companyName')} <span className="text-rose-600">*</span>
           </label>
           <InputText
             id="companyName"
@@ -218,7 +217,7 @@ export default function RegisterPage() {
 
         <div>
           <label htmlFor="password" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
-            {t('auth.password')}
+            {t('auth.password')} <span className="text-rose-600">*</span>
           </label>
           <Controller
             control={control}
@@ -245,7 +244,7 @@ export default function RegisterPage() {
 
         <div>
           <label htmlFor="confirmPassword" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
-            {t('auth.confirmPassword')}
+            {t('auth.confirmPassword')} <span className="text-rose-600">*</span>
           </label>
           <Controller
             control={control}
