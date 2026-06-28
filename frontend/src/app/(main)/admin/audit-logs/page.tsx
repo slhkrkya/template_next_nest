@@ -93,7 +93,7 @@ function JsonDiff({
   ]));
 
   if (allKeys.length === 0) {
-    return <p className="m-0 text-sm text-slate-500">No value changes recorded.</p>;
+    return <p className="m-0 text-sm text-muted-foreground">No value changes recorded.</p>;
   }
 
   const rows = allKeys.map((key) => ({
@@ -187,20 +187,20 @@ export default function AuditLogsPage() {
       key: 'userName',
       render: (_, log) => (
         <div>
-          <p className="m-0 text-sm font-semibold text-slate-950 dark:text-slate-50">{log.userName}</p>
-          <p className="m-0 mt-1 font-mono text-xs text-slate-500">{log.userId}</p>
+          <p className="m-0 text-sm font-semibold text-foreground">{log.userName}</p>
+          <p className="m-0 mt-1 font-mono text-xs text-muted-foreground">{log.userId}</p>
         </div>
       ),
     },
-    { header: 'Entity', key: 'entityName', render: (_, log) => <span className="font-mono text-sm text-slate-500">{log.entityName}</span> },
+    { header: 'Entity', key: 'entityName', render: (_, log) => <span className="font-mono text-sm text-muted-foreground">{log.entityName}</span> },
     { header: 'Action', key: 'action', render: (_, log) => <ActionBadge action={log.action} /> },
-    { header: 'Entity ID', key: 'entityId', render: (_, log) => <span className="font-mono text-xs text-slate-500">{log.entityId}</span> },
-    { header: 'IP Address', key: 'ipAddress', render: (_, log) => <span className="font-mono text-xs text-slate-500">{log.ipAddress}</span> },
+    { header: 'Entity ID', key: 'entityId', render: (_, log) => <span className="font-mono text-xs text-muted-foreground">{log.entityId}</span> },
+    { header: 'IP Address', key: 'ipAddress', render: (_, log) => <span className="font-mono text-xs text-muted-foreground">{log.ipAddress}</span> },
     {
       header: 'Time',
       key: 'createdAt',
       render: (_, log) => (
-        <span className="text-xs tabular-nums text-slate-500">
+        <span className="text-xs tabular-nums text-muted-foreground">
           {format(new Date(log.createdAt), 'MMM d, HH:mm:ss')}
         </span>
       ),
@@ -250,7 +250,7 @@ export default function AuditLogsPage() {
         }
       />
 
-      <div className="mb-5 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+      <div className="mb-5 flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4">
         <Calendar value={toDate(dateFrom)} onChange={(event) => { setDateFrom(toIsoDate(event.value)); setPage(1); }} placeholder="From" dateFormat="yy-mm-dd" showIcon />
         <Calendar value={toDate(dateTo)} onChange={(event) => { setDateTo(toIsoDate(event.value)); setPage(1); }} placeholder="To" dateFormat="yy-mm-dd" showIcon />
         <Dropdown value={entityFilter} options={entityOptions} onChange={(event) => { setEntityFilter(event.value); setPage(1); }} className="w-48" loading={entitiesQuery.isLoading} />
@@ -284,13 +284,13 @@ export default function AuditLogsPage() {
                 ['IP Address', detailLog.ipAddress],
                 ['Time', format(new Date(detailLog.createdAt), 'PPpp')],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-lg bg-slate-50 p-3">
-                  <p className="m-0 text-xs font-semibold uppercase text-slate-500">{label}</p>
-                  <p className="m-0 mt-1 break-all text-sm font-semibold text-slate-950 dark:text-slate-50">{value}</p>
+                <div key={label} className="rounded-lg bg-muted p-3">
+                  <p className="m-0 text-xs font-semibold uppercase text-muted-foreground">{label}</p>
+                  <p className="m-0 mt-1 break-all text-sm font-semibold text-foreground">{value}</p>
                 </div>
               ))}
-              <div className="rounded-lg bg-slate-50 p-3">
-                <p className="m-0 text-xs font-semibold uppercase text-slate-500">Action</p>
+              <div className="rounded-lg bg-muted p-3">
+                <p className="m-0 text-xs font-semibold uppercase text-muted-foreground">Action</p>
                 <div className="mt-1"><ActionBadge action={detailLog.action} /></div>
               </div>
             </div>

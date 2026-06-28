@@ -112,26 +112,26 @@ export default function UserForm({ mode, user, onSuccess, onCancel }: UserFormPr
     <form className="flex flex-col gap-5" onSubmit={handleSubmit((data) => mutation.mutate(data))}>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="firstName" className="mb-2 block text-sm font-semibold text-slate-700">{t('auth.firstName')}</label>
+          <label htmlFor="firstName" className="mb-2 block text-sm font-semibold text-foreground">{t('auth.firstName')}</label>
           <InputText id="firstName" {...register('firstName')} invalid={!!errors.firstName} className="w-full" placeholder={t('auth.placeholders.firstName')} />
           <FieldError message={errors.firstName?.message} />
         </div>
         <div>
-          <label htmlFor="lastName" className="mb-2 block text-sm font-semibold text-slate-700">{t('auth.lastName')}</label>
+          <label htmlFor="lastName" className="mb-2 block text-sm font-semibold text-foreground">{t('auth.lastName')}</label>
           <InputText id="lastName" {...register('lastName')} invalid={!!errors.lastName} className="w-full" placeholder={t('auth.placeholders.lastName')} />
           <FieldError message={errors.lastName?.message} />
         </div>
       </div>
 
       <div>
-        <label htmlFor="email" className="mb-2 block text-sm font-semibold text-slate-700">{t('auth.email')}</label>
+        <label htmlFor="email" className="mb-2 block text-sm font-semibold text-foreground">{t('auth.email')}</label>
         <InputText id="email" type="email" {...register('email')} invalid={!!errors.email} className="w-full" placeholder={t('auth.placeholders.email')} />
         <FieldError message={errors.email?.message} />
       </div>
 
       {isCreate && (
         <div>
-          <label htmlFor="password" className="mb-2 block text-sm font-semibold text-slate-700">{t('auth.password')}</label>
+          <label htmlFor="password" className="mb-2 block text-sm font-semibold text-foreground">{t('auth.password')}</label>
           <Controller
             control={control}
             name={'password' as any}
@@ -153,7 +153,7 @@ export default function UserForm({ mode, user, onSuccess, onCancel }: UserFormPr
       )}
 
       <div>
-        <label htmlFor="role" className="mb-2 block text-sm font-semibold text-slate-700">{t('roles.title')}</label>
+        <label htmlFor="role" className="mb-2 block text-sm font-semibold text-foreground">{t('roles.title')}</label>
         <Controller
           control={control}
           name="role"
@@ -175,10 +175,10 @@ export default function UserForm({ mode, user, onSuccess, onCancel }: UserFormPr
         control={control}
         name="isActive"
         render={({ field }) => (
-          <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+          <div className="flex items-center justify-between rounded-xl border border-border bg-muted p-4">
             <div>
-              <p className="m-0 text-sm font-semibold text-slate-900 dark:text-slate-100">{t('users.accountActive')}</p>
-              <p className="m-0 mt-1 text-xs text-slate-500 dark:text-slate-400">
+              <p className="m-0 text-sm font-semibold text-foreground">{t('users.accountActive')}</p>
+              <p className="m-0 mt-1 text-xs text-muted-foreground">
                 {isActive ? t('users.accountActiveHelp') : t('users.accountInactiveHelp')}
               </p>
             </div>

@@ -60,7 +60,7 @@ export function ConfirmDialog({
       dismissableMask={!isLoading}
       className="w-[92vw] max-w-md"
     >
-      <p className="m-0 text-sm leading-6 text-slate-600 dark:text-slate-300">
+      <p className="m-0 text-sm leading-6 text-muted-foreground">
         {description}
       </p>
     </Dialog>

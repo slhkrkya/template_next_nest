@@ -57,7 +57,7 @@ function Breadcrumb() {
   return (
     <nav
       aria-label="Breadcrumb"
-      className="hidden items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-400 md:flex"
+      className="hidden items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground md:flex"
     >
       {segments.map((segment, index) => {
         const label =
@@ -71,12 +71,12 @@ function Breadcrumb() {
         return (
           <span key={segment} className="flex items-center gap-2">
             {index > 0 && (
-              <span className="text-slate-300 dark:text-slate-600">/</span>
+              <span className="text-border">/</span>
             )}
             <span
               className={
                 isLast
-                  ? 'font-semibold text-slate-950 dark:text-slate-100'
+                  ? 'font-semibold text-foreground'
                   : ''
               }
             >
@@ -90,15 +90,15 @@ function Breadcrumb() {
 }
 
 function TenantContextBadge() {
-  const { user, updateUser } = useAuthStore();
+  const { user, setAuth } = useAuthStore();
   const router = useRouter();
 
   if (!user?.isSuperAdmin || !user?.tenantId) return null;
 
   async function returnToGlobal() {
     try {
-      await switchTenant(null);
-      updateUser({ tenantId: undefined, tenantName: undefined });
+      const { accessToken } = await switchTenant(null);
+      setAuth({ ...user!, tenantId: undefined, tenantName: undefined }, accessToken);
       router.push('/super-admin/tenants');
     } catch {
       // Ignore; user can retry via tenant-select page.
@@ -152,8 +152,8 @@ function NotificationDropdown() {
       </Button>
 
       <OverlayPanel ref={panelRef} className="w-80">
-        <div className="flex items-center justify-between border-b border-slate-200 pb-3 dark:border-slate-700">
-          <span className="font-semibold text-slate-950 dark:text-slate-50">
+        <div className="flex items-center justify-between border-b border-border pb-3">
+          <span className="font-semibold text-foreground">
             {t('title')}
           </span>
           {unreadCount > 0 && (
@@ -170,19 +170,19 @@ function NotificationDropdown() {
 
         <div className="max-h-80 overflow-y-auto py-2">
           {recent.length === 0 ? (
-            <div className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+            <div className="py-8 text-center text-sm text-muted-foreground">
               {t('noNotifications')}
             </div>
           ) : (
             recent.map((notification) => (
               <div
                 key={notification.id}
-                className="rounded-md px-2 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50"
+                className="rounded-md px-2 py-3 hover:bg-accent"
               >
-                <p className="m-0 text-sm font-semibold text-slate-900 dark:text-slate-50">
+                <p className="m-0 text-sm font-semibold text-foreground">
                   {notification.title}
                 </p>
-                <p className="m-0 mt-1 line-clamp-2 text-xs text-slate-500 dark:text-slate-400">
+                <p className="m-0 mt-1 line-clamp-2 text-xs text-muted-foreground">
                   {notification.message}
                 </p>
               </div>
@@ -228,10 +228,10 @@ function UserDropdown() {
       label: `${user?.firstName ?? t('nav.user')} ${user?.lastName ?? ''}`.trim(),
       template: () => (
         <div className="px-3 py-2">
-          <p className="m-0 text-sm font-semibold text-slate-950 dark:text-slate-50">
+          <p className="m-0 text-sm font-semibold text-foreground">
             {user?.firstName} {user?.lastName}
           </p>
-          <p className="m-0 mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
+          <p className="m-0 mt-1 truncate text-xs text-muted-foreground">
             {user?.email}
           </p>
         </div>
@@ -268,10 +268,10 @@ function UserDropdown() {
             shape="circle"
             className="bg-primary text-primary-foreground"
           />
-          <span className="hidden text-sm font-semibold text-slate-700 dark:text-slate-200 md:block">
+          <span className="hidden text-sm font-semibold text-foreground md:block">
             {user?.firstName ?? t('nav.user')}
           </span>
-          <i className="pi pi-chevron-down text-xs text-slate-500 dark:text-slate-400" />
+          <i className="pi pi-chevron-down text-xs text-muted-foreground" />
         </span>
       </Button>
     </>
@@ -284,7 +284,7 @@ export function Topbar({ onSidebarToggle, onMobileToggle }: TopbarProps) {
 
   return (
     <>
-      <header className="arca-topbar sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-slate-200 px-4 shadow-sm dark:border-slate-800">
+      <header className="arca-topbar sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border px-4 shadow-sm">
         <div className="flex items-center gap-3">
           <Button
             type="button"

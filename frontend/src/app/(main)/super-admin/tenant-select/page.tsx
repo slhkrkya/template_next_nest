@@ -18,7 +18,7 @@ import type { Tenant } from '@/types';
 export default function TenantSelectPage() {
   const router = useRouter();
   const { toast } = useAppToast();
-  const { user, updateUser } = useAuthStore();
+  const { user, setAuth } = useAuthStore();
 
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [filtered, setFiltered] = useState<Tenant[]>([]);
@@ -60,11 +60,11 @@ export default function TenantSelectPage() {
     const id = tenant?.id ?? null;
     setSwitching(id ?? '__global__');
     try {
-      await switchTenant(id);
-      updateUser({
-        tenantId: id ?? undefined,
-        tenantName: tenant?.name ?? undefined,
-      });
+      const { accessToken } = await switchTenant(id);
+      setAuth(
+        { ...user!, tenantId: id ?? undefined, tenantName: tenant?.name ?? undefined },
+        accessToken,
+      );
       toast({
         title: tenant
           ? `Switched to ${tenant.name}`
@@ -98,8 +98,8 @@ export default function TenantSelectPage() {
       >
         <Avatar icon="pi pi-globe" shape="circle" size="large" className="bg-primary text-primary-foreground" />
         <div className="min-w-0 flex-1">
-          <p className="m-0 text-sm font-semibold text-slate-950 dark:text-slate-50">All Tenants (Global View)</p>
-          <p className="m-0 mt-1 text-xs text-slate-500">
+          <p className="m-0 text-sm font-semibold text-foreground">All Tenants (Global View)</p>
+          <p className="m-0 mt-1 text-xs text-muted-foreground">
             Manage all tenants without a specific context.
           </p>
         </div>
@@ -125,7 +125,7 @@ export default function TenantSelectPage() {
         </div>
       ) : filtered.length === 0 ? (
         <Card>
-          <div className="py-10 text-center text-sm text-slate-500">No tenants match your search.</div>
+          <div className="py-10 text-center text-sm text-muted-foreground">No tenants match your search.</div>
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -153,8 +153,8 @@ export default function TenantSelectPage() {
                       className="bg-primary/10 text-primary"
                     />
                     <div className="min-w-0">
-                      <p className="m-0 truncate text-sm font-semibold text-slate-950 dark:text-slate-50">{tenant.name}</p>
-                      <p className="m-0 mt-1 truncate font-mono text-xs text-slate-500">{tenant.slug}</p>
+                      <p className="m-0 truncate text-sm font-semibold text-foreground">{tenant.name}</p>
+                      <p className="m-0 mt-1 truncate font-mono text-xs text-muted-foreground">{tenant.slug}</p>
                     </div>
                   </div>
                   {isActive && <i className="pi pi-check-circle text-primary" />}
@@ -162,7 +162,7 @@ export default function TenantSelectPage() {
                 </div>
                 <div className="mt-4 flex items-center justify-between">
                   <StatusBadge status={tenant.status} />
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-muted-foreground">
                     Max {tenant.maxUsers.toLocaleString()} users
                   </span>
                 </div>

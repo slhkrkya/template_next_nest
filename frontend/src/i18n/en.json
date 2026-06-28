@@ -30,7 +30,7 @@
     "required": "Required"
   },
   "auth": {
-    "brand": "AdminPanel",
+    "brand": "Salih",
     "authentication": "Authentication",
     "brandSubtitle": "Multi-tenant operations suite",
     "multiTenantOperations": "Multi-tenant operations",

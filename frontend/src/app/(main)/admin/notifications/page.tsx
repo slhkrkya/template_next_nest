@@ -192,7 +192,7 @@ export default function AdminNotificationsPage() {
         }
       />
 
-      <div className="mb-5 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+      <div className="mb-5 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4">
         <SelectButton
           value={filter}
           options={[
@@ -217,9 +217,9 @@ export default function AdminNotificationsPage() {
 
       <div className="flex flex-col gap-3">
         {notifQuery.isLoading ? (
-          <Card><div className="py-8 text-center text-sm text-slate-500">{t('notifications.loadingNotifications')}</div></Card>
+          <Card><div className="py-8 text-center text-sm text-muted-foreground">{t('notifications.loadingNotifications')}</div></Card>
         ) : displayed.length === 0 ? (
-          <Card><div className="py-12 text-center text-sm text-slate-500">{filter === 'unread' ? t('notifications.noUnread') : t('notifications.noNotificationsYet')}</div></Card>
+          <Card><div className="py-12 text-center text-sm text-muted-foreground">{filter === 'unread' ? t('notifications.noUnread') : t('notifications.noNotificationsYet')}</div></Card>
         ) : (
           displayed.map((notification) => (
             <Card key={notification.id} className={notification.isRead ? '' : 'border-l-4 border-l-primary'}>
@@ -227,13 +227,13 @@ export default function AdminNotificationsPage() {
                 <Tag value={notification.type} severity={typeSeverity(notification.type)} />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="m-0 text-base font-semibold text-slate-950 dark:text-slate-50">{notification.title}</h2>
+                    <h2 className="m-0 text-base font-semibold text-foreground">{notification.title}</h2>
                     {notification.isBroadcast && <Tag value={t('notifications.broadcast')} severity="info" />}
                     {notification.targetUserName && <Tag value={t('notifications.toUser', { user: notification.targetUserName })} severity="warning" />}
                     {!notification.isRead && <span className="h-2 w-2 rounded-full bg-primary" />}
                   </div>
-                  <p className="m-0 mt-2 text-sm leading-6 text-slate-500">{notification.message}</p>
-                  <p className="m-0 mt-2 text-xs text-slate-400">
+                  <p className="m-0 mt-2 text-sm leading-6 text-muted-foreground">{notification.message}</p>
+                  <p className="m-0 mt-2 text-xs text-muted-foreground">
                     {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                     {' - '}
                     {format(new Date(notification.createdAt), 'MMM d, HH:mm')}
@@ -276,7 +276,7 @@ export default function AdminNotificationsPage() {
       >
         <form className="flex flex-col gap-4" onSubmit={handleSubmit((data) => createMutation.mutate(data))}>
           <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700">{t('notifications.target')}</label>
+            <label className="mb-2 block text-sm font-semibold text-foreground">{t('notifications.target')}</label>
             <SelectButton
               value={target}
               options={targetOptions}
@@ -286,7 +286,7 @@ export default function AdminNotificationsPage() {
           </div>
           {target === 'user' && (
             <div>
-              <label htmlFor="targetUserId" className="mb-2 block text-sm font-semibold text-slate-700">{t('notifications.targetUser')}</label>
+              <label htmlFor="targetUserId" className="mb-2 block text-sm font-semibold text-foreground">{t('notifications.targetUser')}</label>
               <Dropdown
                 inputId="targetUserId"
                 value={targetUserId}
@@ -301,16 +301,16 @@ export default function AdminNotificationsPage() {
             </div>
           )}
           <div>
-            <label htmlFor="type" className="mb-2 block text-sm font-semibold text-slate-700">{t('notifications.type')}</label>
+            <label htmlFor="type" className="mb-2 block text-sm font-semibold text-foreground">{t('notifications.type')}</label>
             <Dropdown inputId="type" value={type} options={typeOptions} onChange={(event) => setValue('type', event.value)} className="w-full" />
           </div>
           <div>
-            <label htmlFor="title" className="mb-2 block text-sm font-semibold text-slate-700">{t('notifications.titleField')}</label>
+            <label htmlFor="title" className="mb-2 block text-sm font-semibold text-foreground">{t('notifications.titleField')}</label>
             <InputText id="title" {...register('title')} invalid={!!errors.title} className="w-full" placeholder={t('notifications.titlePlaceholder')} />
             {errors.title && <small className="mt-1 block text-rose-600">{errors.title.message}</small>}
           </div>
           <div>
-            <label htmlFor="message" className="mb-2 block text-sm font-semibold text-slate-700">{t('notifications.messageField')}</label>
+            <label htmlFor="message" className="mb-2 block text-sm font-semibold text-foreground">{t('notifications.messageField')}</label>
             <InputTextarea id="message" {...register('message')} invalid={!!errors.message} className="w-full" rows={4} autoResize placeholder={t('notifications.messagePlaceholder')} />
             {errors.message && <small className="mt-1 block text-rose-600">{errors.message.message}</small>}
           </div>

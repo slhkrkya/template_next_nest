@@ -86,7 +86,7 @@ export function TenantForm({
   return (
     <form onSubmit={handleFormSubmit} className="flex flex-col gap-5">
       <div>
-        <label htmlFor="tenant-name" className="mb-2 block text-sm font-semibold text-slate-700">
+        <label htmlFor="tenant-name" className="mb-2 block text-sm font-semibold text-foreground">
           Name <span className="text-rose-600">*</span>
         </label>
         <InputText
@@ -100,7 +100,7 @@ export function TenantForm({
       </div>
 
       <div>
-        <label htmlFor="tenant-slug" className="mb-2 block text-sm font-semibold text-slate-700">
+        <label htmlFor="tenant-slug" className="mb-2 block text-sm font-semibold text-foreground">
           Slug <span className="text-rose-600">*</span>
         </label>
         <InputText
@@ -119,7 +119,7 @@ export function TenantForm({
         />
         <FieldError message={errors.slug?.message} />
         {!errors.slug && (
-          <small className="mt-1 block text-slate-500">
+          <small className="mt-1 block text-muted-foreground">
             {mode === 'create'
               ? 'Auto-generated from name. Used in URLs and cannot be changed later.'
               : 'Slug cannot be changed after creation.'}
@@ -128,7 +128,7 @@ export function TenantForm({
       </div>
 
       <div>
-        <label htmlFor="tenant-max-users" className="mb-2 block text-sm font-semibold text-slate-700">
+        <label htmlFor="tenant-max-users" className="mb-2 block text-sm font-semibold text-foreground">
           Max Users
         </label>
         <Controller
@@ -154,7 +154,7 @@ export function TenantForm({
       </div>
 
       <div>
-        <label htmlFor="tenant-trial-ends" className="mb-2 block text-sm font-semibold text-slate-700">
+        <label htmlFor="tenant-trial-ends" className="mb-2 block text-sm font-semibold text-foreground">
           Trial Ends At
         </label>
         <Controller
@@ -176,12 +176,12 @@ export function TenantForm({
             />
           )}
         />
-        <small className="mt-1 block text-slate-500">Leave blank for no trial expiry.</small>
+        <small className="mt-1 block text-muted-foreground">Leave blank for no trial expiry.</small>
       </div>
 
       {mode === 'edit' && (
         <div>
-          <label htmlFor="tenant-status" className="mb-2 block text-sm font-semibold text-slate-700">
+          <label htmlFor="tenant-status" className="mb-2 block text-sm font-semibold text-foreground">
             Status
           </label>
           <Controller

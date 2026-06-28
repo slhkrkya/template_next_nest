@@ -83,39 +83,39 @@ function PlanForm({
     <form onSubmit={handleSubmit} className="flex max-h-[70vh] flex-col gap-4 overflow-y-auto pr-1">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="plan-name" className="mb-2 block text-sm font-semibold text-slate-700">Internal Name</label>
+          <label htmlFor="plan-name" className="mb-2 block text-sm font-semibold text-foreground">Internal Name</label>
           <InputText id="plan-name" required value={values.name} onChange={(event) => set('name', event.target.value)} placeholder="pro" className="w-full" />
         </div>
         <div>
-          <label htmlFor="plan-display-name" className="mb-2 block text-sm font-semibold text-slate-700">Display Name</label>
+          <label htmlFor="plan-display-name" className="mb-2 block text-sm font-semibold text-foreground">Display Name</label>
           <InputText id="plan-display-name" required value={values.displayName} onChange={(event) => set('displayName', event.target.value)} placeholder="Pro Plan" className="w-full" />
         </div>
       </div>
 
       <div>
-        <label htmlFor="plan-description" className="mb-2 block text-sm font-semibold text-slate-700">Description</label>
+        <label htmlFor="plan-description" className="mb-2 block text-sm font-semibold text-foreground">Description</label>
         <InputTextarea id="plan-description" value={values.description} onChange={(event) => set('description', event.target.value)} placeholder="Best for growing teams" rows={3} autoResize className="w-full" />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
-          <label htmlFor="max-users" className="mb-2 block text-sm font-semibold text-slate-700">Max Users</label>
+          <label htmlFor="max-users" className="mb-2 block text-sm font-semibold text-foreground">Max Users</label>
           <InputNumber inputId="max-users" value={values.maxUsers} onValueChange={(event) => set('maxUsers', event.value ?? 1)} min={1} className="w-full" inputClassName="w-full" />
         </div>
         <div>
-          <label htmlFor="monthly-price" className="mb-2 block text-sm font-semibold text-slate-700">Monthly Price</label>
+          <label htmlFor="monthly-price" className="mb-2 block text-sm font-semibold text-foreground">Monthly Price</label>
           <InputNumber inputId="monthly-price" value={values.monthlyPrice} onValueChange={(event) => set('monthlyPrice', event.value ?? 0)} min={0} mode="currency" currency="USD" locale="en-US" className="w-full" inputClassName="w-full" />
         </div>
         <div>
-          <label htmlFor="yearly-price" className="mb-2 block text-sm font-semibold text-slate-700">Yearly Price</label>
+          <label htmlFor="yearly-price" className="mb-2 block text-sm font-semibold text-foreground">Yearly Price</label>
           <InputNumber inputId="yearly-price" value={values.yearlyPrice} onValueChange={(event) => set('yearlyPrice', event.value ?? 0)} min={0} mode="currency" currency="USD" locale="en-US" className="w-full" inputClassName="w-full" />
         </div>
       </div>
 
-      <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+      <div className="flex items-center justify-between rounded-xl border border-border bg-muted p-4">
         <div>
-          <p className="m-0 text-sm font-semibold text-slate-900 dark:text-slate-100">Active plan</p>
-          <p className="m-0 mt-1 text-xs text-slate-500 dark:text-slate-400">Inactive plans cannot be selected by new tenants.</p>
+          <p className="m-0 text-sm font-semibold text-foreground">Active plan</p>
+          <p className="m-0 mt-1 text-xs text-muted-foreground">Inactive plans cannot be selected by new tenants.</p>
         </div>
         <InputSwitch checked={values.isActive} onChange={(event) => set('isActive', event.value)} />
       </div>
@@ -149,13 +149,13 @@ function PlanCard({
       <div className="flex h-full flex-col gap-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="m-0 text-lg font-bold text-slate-950 dark:text-slate-50">{plan.displayName}</h2>
-            <p className="m-0 mt-1 font-mono text-xs text-slate-500">{plan.name}</p>
+            <h2 className="m-0 text-lg font-bold text-foreground">{plan.displayName}</h2>
+            <p className="m-0 mt-1 font-mono text-xs text-muted-foreground">{plan.name}</p>
           </div>
           <Tag value={plan.isActive ? 'Active' : 'Inactive'} severity={plan.isActive ? 'success' : 'secondary'} />
         </div>
 
-        {plan.description && <p className="m-0 text-sm leading-6 text-slate-500">{plan.description}</p>}
+        {plan.description && <p className="m-0 text-sm leading-6 text-muted-foreground">{plan.description}</p>}
 
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-xl bg-primary/10 p-4 text-center">
@@ -171,8 +171,8 @@ function PlanCard({
           </div>
         </div>
 
-        <div className="text-sm text-slate-500">
-          Max users: <span className="font-semibold text-slate-950 dark:text-slate-50">{plan.maxUsers.toLocaleString()}</span>
+        <div className="text-sm text-muted-foreground">
+          Max users: <span className="font-semibold text-foreground">{plan.maxUsers.toLocaleString()}</span>
         </div>
 
         <div className="mt-auto flex gap-2">
@@ -277,11 +277,11 @@ export default function SubscriptionPlansPage() {
       />
 
       {isLoading ? (
-        <Card><div className="py-12 text-center text-sm text-slate-500">Loading subscription plans...</div></Card>
+        <Card><div className="py-12 text-center text-sm text-muted-foreground">Loading subscription plans...</div></Card>
       ) : plans.length === 0 ? (
         <Card>
           <div className="py-12 text-center">
-            <p className="m-0 mb-4 text-sm text-slate-500">No subscription plans yet.</p>
+            <p className="m-0 mb-4 text-sm text-muted-foreground">No subscription plans yet.</p>
             <Button type="button" label="Create the first plan" icon="pi pi-plus" outlined onClick={() => setDialogOpen(true)} />
           </div>
         </Card>

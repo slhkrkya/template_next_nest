@@ -100,18 +100,18 @@ export default function EmailParametersPage() {
       />
 
       {configQuery.isLoading ? (
-        <Card><div className="py-10 text-center text-sm text-slate-500">Loading email configuration...</div></Card>
+        <Card><div className="py-10 text-center text-sm text-muted-foreground">Loading email configuration...</div></Card>
       ) : (
         <form onSubmit={handleSubmit((data) => saveMutation.mutate(data))} className="space-y-5">
           <Card title="SMTP Server">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-[2fr_1fr_1fr]">
               <div>
-                <label htmlFor="host" className="mb-2 block text-sm font-semibold text-slate-700">Host</label>
+                <label htmlFor="host" className="mb-2 block text-sm font-semibold text-foreground">Host</label>
                 <InputText id="host" {...register('host')} invalid={!!errors.host} className="w-full" placeholder="smtp.example.com" />
                 <FieldError message={errors.host?.message} />
               </div>
               <div>
-                <label htmlFor="port" className="mb-2 block text-sm font-semibold text-slate-700">Port</label>
+                <label htmlFor="port" className="mb-2 block text-sm font-semibold text-foreground">Port</label>
                 <Controller
                   control={control}
                   name="port"
@@ -126,10 +126,10 @@ export default function EmailParametersPage() {
                 name="secure"
                 render={({ field }) => (
                   <div>
-                    <label htmlFor="secure" className="mb-2 block text-sm font-semibold text-slate-700">Use TLS/SSL</label>
+                    <label htmlFor="secure" className="mb-2 block text-sm font-semibold text-foreground">Use TLS/SSL</label>
                     <div className="flex h-11 items-center gap-3">
                       <InputSwitch inputId="secure" checked={field.value} onChange={(event) => field.onChange(event.value)} />
-                      <span className="text-sm text-slate-500">{field.value ? 'TLS enabled' : 'Plain / STARTTLS'}</span>
+                      <span className="text-sm text-muted-foreground">{field.value ? 'TLS enabled' : 'Plain / STARTTLS'}</span>
                     </div>
                   </div>
                 )}
@@ -138,12 +138,12 @@ export default function EmailParametersPage() {
 
             <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label htmlFor="user" className="mb-2 block text-sm font-semibold text-slate-700">Username</label>
+                <label htmlFor="user" className="mb-2 block text-sm font-semibold text-foreground">Username</label>
                 <InputText id="user" {...register('user')} invalid={!!errors.user} className="w-full" autoComplete="username" />
                 <FieldError message={errors.user?.message} />
               </div>
               <div>
-                <label htmlFor="pass" className="mb-2 block text-sm font-semibold text-slate-700">Password</label>
+                <label htmlFor="pass" className="mb-2 block text-sm font-semibold text-foreground">Password</label>
                 <Controller
                   control={control}
                   name="pass"
@@ -168,12 +168,12 @@ export default function EmailParametersPage() {
           <Card title="Sender Details">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label htmlFor="fromEmail" className="mb-2 block text-sm font-semibold text-slate-700">From Email</label>
+                <label htmlFor="fromEmail" className="mb-2 block text-sm font-semibold text-foreground">From Email</label>
                 <InputText id="fromEmail" {...register('fromEmail')} invalid={!!errors.fromEmail} className="w-full" placeholder="noreply@company.com" />
                 <FieldError message={errors.fromEmail?.message} />
               </div>
               <div>
-                <label htmlFor="fromName" className="mb-2 block text-sm font-semibold text-slate-700">From Name</label>
+                <label htmlFor="fromName" className="mb-2 block text-sm font-semibold text-foreground">From Name</label>
                 <InputText id="fromName" {...register('fromName')} invalid={!!errors.fromName} className="w-full" placeholder="Acme Corp" />
                 <FieldError message={errors.fromName?.message} />
               </div>
@@ -194,12 +194,12 @@ export default function EmailParametersPage() {
       )}
 
       <Card title="Send Test Email" className="mt-5">
-        <p className="m-0 mb-4 text-sm text-slate-500">
+        <p className="m-0 mb-4 text-sm text-muted-foreground">
           Verify your SMTP settings are working by sending a test message.
         </p>
         <div className="flex flex-wrap items-end gap-3">
           <div className="min-w-72 flex-1">
-            <label htmlFor="testEmail" className="mb-2 block text-sm font-semibold text-slate-700">Send to</label>
+            <label htmlFor="testEmail" className="mb-2 block text-sm font-semibold text-foreground">Send to</label>
             <InputText id="testEmail" type="email" value={testEmail} onChange={(event) => setTestEmail(event.target.value)} className="w-full" placeholder="you@example.com" />
           </div>
           <Button

@@ -107,16 +107,16 @@ function RoleForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
       <div>
-        <label htmlFor="role-name" className="mb-2 block text-sm font-semibold text-slate-700">{t('roles.roleName')}</label>
+        <label htmlFor="role-name" className="mb-2 block text-sm font-semibold text-foreground">{t('roles.roleName')}</label>
         <InputText id="role-name" {...register('name')} invalid={!!errors.name} className="w-full" placeholder="BILLING_MANAGER" />
         {errors.name && <small className="mt-1 block text-rose-600">{errors.name.message}</small>}
       </div>
       <div>
-        <label htmlFor="role-description" className="mb-2 block text-sm font-semibold text-slate-700">{t('roles.description')}</label>
+        <label htmlFor="role-description" className="mb-2 block text-sm font-semibold text-foreground">{t('roles.description')}</label>
         <InputText id="role-description" {...register('description')} className="w-full" placeholder={t('roles.descriptionPlaceholder')} />
       </div>
       <div>
-        <label htmlFor="role-priority" className="mb-2 block text-sm font-semibold text-slate-700">{t('roles.priority')}</label>
+        <label htmlFor="role-priority" className="mb-2 block text-sm font-semibold text-foreground">{t('roles.priority')}</label>
         <InputNumber
           inputId="role-priority"
           value={watch('priority')}
@@ -180,9 +180,9 @@ export default function RolesPage() {
 
   const columns: Column<OperationClaim>[] = [
     { header: t('roles.name'), key: 'name', render: (_, role) => <span className="font-mono text-sm font-semibold">{role.name}</span> },
-    { header: t('roles.description'), key: 'description', render: (_, role) => <span className="text-sm text-slate-500">{role.description}</span> },
+    { header: t('roles.description'), key: 'description', render: (_, role) => <span className="text-sm text-muted-foreground">{role.description}</span> },
     { header: t('roles.priority'), key: 'priority', render: (_, role) => <Tag value={role.priority} severity="info" /> },
-    { header: t('users.title'), key: 'userCount', render: (_, role) => <span className="tabular-nums text-slate-500">{role.userCount.toLocaleString()}</span> },
+    { header: t('users.title'), key: 'userCount', render: (_, role) => <span className="tabular-nums text-muted-foreground">{role.userCount.toLocaleString()}</span> },
     {
       header: t('common.actions'),
       key: 'id',
@@ -210,19 +210,19 @@ export default function RolesPage() {
 
         <Card title={selectedRole ? t('roles.usersWithRole', { role: selectedRole.name }) : t('users.title')}>
           {!selectedRole ? (
-            <div className="py-12 text-center text-sm text-slate-500">{t('roles.selectRoleMembers')}</div>
+            <div className="py-12 text-center text-sm text-muted-foreground">{t('roles.selectRoleMembers')}</div>
           ) : usersQuery.isLoading ? (
-            <div className="py-8 text-center text-sm text-slate-500">{t('roles.loadingUsers')}</div>
+            <div className="py-8 text-center text-sm text-muted-foreground">{t('roles.loadingUsers')}</div>
           ) : roleUsers.length === 0 ? (
-            <div className="py-12 text-center text-sm text-slate-500">{t('roles.noUsersWithRole')}</div>
+            <div className="py-12 text-center text-sm text-muted-foreground">{t('roles.noUsersWithRole')}</div>
           ) : (
-            <div className="flex flex-col divide-y divide-slate-100">
+            <div className="flex flex-col divide-y divide-border">
               {roleUsers.map((user) => (
                 <div key={user.id} className="flex items-center gap-3 py-3">
                   <Avatar label={`${user.firstName[0]}${user.lastName[0]}`} shape="circle" className="bg-primary/10 text-primary" />
                   <div>
-                    <p className="m-0 text-sm font-semibold text-slate-950 dark:text-slate-50">{user.firstName} {user.lastName}</p>
-                    <p className="m-0 mt-1 text-xs text-slate-500">{user.email}</p>
+                    <p className="m-0 text-sm font-semibold text-foreground">{user.firstName} {user.lastName}</p>
+                    <p className="m-0 mt-1 text-xs text-muted-foreground">{user.email}</p>
                   </div>
                 </div>
               ))}

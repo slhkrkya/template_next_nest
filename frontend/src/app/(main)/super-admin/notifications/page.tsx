@@ -82,7 +82,7 @@ function CreateNotifForm({
         text={t('systemWideHint')}
       />
       <div>
-        <label htmlFor="notif-title" className="mb-2 block text-sm font-semibold text-slate-700">
+        <label htmlFor="notif-title" className="mb-2 block text-sm font-semibold text-foreground">
           {t('titleField')} <span className="text-rose-600">*</span>
         </label>
         <InputText
@@ -95,7 +95,7 @@ function CreateNotifForm({
         />
       </div>
       <div>
-        <label htmlFor="notif-message" className="mb-2 block text-sm font-semibold text-slate-700">
+        <label htmlFor="notif-message" className="mb-2 block text-sm font-semibold text-foreground">
           {t('messageField')} <span className="text-rose-600">*</span>
         </label>
         <InputTextarea
@@ -111,7 +111,7 @@ function CreateNotifForm({
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="notif-type" className="mb-2 block text-sm font-semibold text-slate-700">
+          <label htmlFor="notif-type" className="mb-2 block text-sm font-semibold text-foreground">
             {t('type')}
           </label>
           <Dropdown
@@ -123,7 +123,7 @@ function CreateNotifForm({
           />
         </div>
         <div>
-          <label htmlFor="notif-user" className="mb-2 block text-sm font-semibold text-slate-700">
+          <label htmlFor="notif-user" className="mb-2 block text-sm font-semibold text-foreground">
             {t('userId')}
           </label>
           <InputText
@@ -136,7 +136,7 @@ function CreateNotifForm({
         </div>
       </div>
       <div>
-        <label htmlFor="notif-link" className="mb-2 block text-sm font-semibold text-slate-700">
+        <label htmlFor="notif-link" className="mb-2 block text-sm font-semibold text-foreground">
           {t('link')}
         </label>
         <InputText
@@ -225,7 +225,7 @@ export default function NotificationsAdminPage() {
           <span className={row.isRead ? 'text-sm font-medium' : 'text-sm font-semibold'}>
             {row.title}
           </span>
-          <p className="m-0 mt-1 line-clamp-1 text-xs text-slate-500">{row.message}</p>
+          <p className="m-0 mt-1 line-clamp-1 text-xs text-muted-foreground">{row.message}</p>
         </div>
       ),
     },
@@ -242,7 +242,7 @@ export default function NotificationsAdminPage() {
       key: 'createdAt',
       className: 'w-40',
       render: (_, row) => (
-        <span className="text-xs tabular-nums text-slate-500">
+        <span className="text-xs tabular-nums text-muted-foreground">
           {format(new Date(row.createdAt), 'dd MMM yyyy HH:mm')}
         </span>
       ),

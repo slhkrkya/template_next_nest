@@ -4,83 +4,83 @@
 
 @layer base {
   :root {
-    --background: 220 38% 97%;
-    --foreground: 225 36% 10%;
+    --background: 150 25% 97%;
+    --foreground: 160 45% 8%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 84% 5%;
+    --card-foreground: 160 45% 8%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 84% 5%;
+    --popover-foreground: 160 45% 8%;
 
-    --primary: 238 78% 58%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 152 70% 36%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 150 20% 93%;
+    --secondary-foreground: 160 40% 20%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 150 20% 93%;
+    --muted-foreground: 155 12% 48%;
 
-    --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 152 25% 90%;
+    --accent-foreground: 160 40% 20%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 221 83% 53%;
+    --border: 150 18% 88%;
+    --input: 150 18% 88%;
+    --ring: 152 70% 36%;
 
-    --sidebar-background: 232 44% 12%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 221 83% 53%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 217 33% 18%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 18%;
-    --sidebar-ring: 221 83% 53%;
+    --sidebar-background: 162 42% 8%;
+    --sidebar-foreground: 150 20% 90%;
+    --sidebar-primary: 152 75% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 158 35% 14%;
+    --sidebar-accent-foreground: 150 20% 90%;
+    --sidebar-border: 158 35% 14%;
+    --sidebar-ring: 152 75% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.625rem;
   }
 
   .dark {
-    --background: 229 40% 8%;
-    --foreground: 210 40% 98%;
+    --background: 162 40% 6%;
+    --foreground: 150 15% 95%;
 
-    --card: 222 84% 5%;
-    --card-foreground: 210 40% 98%;
+    --card: 160 42% 8%;
+    --card-foreground: 150 15% 95%;
 
-    --popover: 222 84% 5%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 160 42% 8%;
+    --popover-foreground: 150 15% 95%;
 
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 11%;
+    --primary: 152 75% 52%;
+    --primary-foreground: 160 45% 6%;
 
-    --secondary: 217 33% 18%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 158 35% 14%;
+    --secondary-foreground: 150 15% 90%;
 
-    --muted: 217 33% 18%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 158 35% 12%;
+    --muted-foreground: 155 12% 58%;
 
-    --accent: 217 33% 18%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 158 35% 14%;
+    --accent-foreground: 150 15% 90%;
 
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 63% 35%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217 33% 18%;
-    --input: 217 33% 18%;
-    --ring: 224 76% 48%;
+    --border: 158 30% 16%;
+    --input: 158 30% 16%;
+    --ring: 152 75% 52%;
 
-    --sidebar-background: 232 45% 11%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 217 91% 60%;
-    --sidebar-primary-foreground: 222 47% 11%;
-    --sidebar-accent: 217 33% 18%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 18%;
-    --sidebar-ring: 224 76% 48%;
+    --sidebar-background: 162 50% 4%;
+    --sidebar-foreground: 150 15% 88%;
+    --sidebar-primary: 152 80% 55%;
+    --sidebar-primary-foreground: 160 50% 5%;
+    --sidebar-accent: 160 42% 10%;
+    --sidebar-accent-foreground: 150 15% 88%;
+    --sidebar-border: 160 42% 10%;
+    --sidebar-ring: 152 80% 55%;
   }
 
   * {
@@ -128,7 +128,7 @@
   position: absolute;
   inset: 0 0 auto;
   height: 3px;
-  background: hsl(var(--primary));
+  background: linear-gradient(90deg, hsl(var(--primary)), hsl(152 80% 65%));
 }
 
 .arca-topbar {
@@ -140,16 +140,26 @@
   background: hsl(var(--card) / 0.82);
 }
 
+/* PrimeReact & third-party color overrides — map hard-coded Tailwind slate
+   classes to the active CSS-variable theme so components render correctly in
+   both light and dark modes without needing per-component dark: variants. */
+
 .text-slate-950,
 .text-slate-900,
-.text-slate-800,
+.text-slate-800 {
+  color: hsl(var(--foreground)) !important;
+}
+
 .dark .dark\:text-slate-50,
 .dark .dark\:text-slate-100 {
   color: hsl(var(--foreground)) !important;
 }
 
 .text-slate-700,
-.text-slate-600,
+.text-slate-600 {
+  color: hsl(var(--foreground) / 0.78) !important;
+}
+
 .dark .dark\:text-slate-200,
 .dark .dark\:text-slate-300 {
   color: hsl(var(--foreground) / 0.78) !important;
@@ -157,7 +167,10 @@
 
 .text-slate-500,
 .text-slate-400,
-.text-slate-300,
+.text-slate-300 {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
 .dark .dark\:text-slate-400,
 .dark .dark\:text-slate-500,
 .dark .dark\:text-slate-600,
@@ -165,14 +178,20 @@
   color: hsl(var(--muted-foreground)) !important;
 }
 
-.bg-white,
+.bg-white {
+  background-color: hsl(var(--card)) !important;
+}
+
 .dark .dark\:bg-slate-950,
 .dark .dark\:bg-slate-900 {
   background-color: hsl(var(--card)) !important;
 }
 
 .bg-slate-50,
-.bg-slate-100,
+.bg-slate-100 {
+  background-color: hsl(var(--muted)) !important;
+}
+
 .dark .dark\:bg-slate-800,
 .dark .dark\:bg-slate-800\/50,
 .dark .dark\:bg-slate-800\/60 {
@@ -181,7 +200,10 @@
 
 .border-slate-100,
 .border-slate-200,
-.border-slate-300,
+.border-slate-300 {
+  border-color: hsl(var(--border)) !important;
+}
+
 .dark .dark\:border-slate-700,
 .dark .dark\:border-slate-800 {
   border-color: hsl(var(--border)) !important;
@@ -191,12 +213,18 @@
   border-color: hsl(var(--border)) !important;
 }
 
-.hover\:bg-slate-50:hover,
+.hover\:bg-slate-50:hover {
+  background-color: hsl(var(--accent)) !important;
+}
+
 .dark .dark\:hover\:bg-slate-700\/50:hover {
   background-color: hsl(var(--accent)) !important;
 }
 
-.hover\:border-slate-300:hover,
+.hover\:border-slate-300:hover {
+  border-color: hsl(var(--primary) / 0.4) !important;
+}
+
 .dark .dark\:hover\:border-slate-700:hover {
   border-color: hsl(var(--primary) / 0.4) !important;
 }

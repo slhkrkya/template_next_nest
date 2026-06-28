@@ -86,13 +86,13 @@ function EmptyState({ filter }: { filter: FilterType }) {
 
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400 dark:bg-slate-900">
+      <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-muted text-muted-foreground">
         <i className="pi pi-bell text-xl" />
       </span>
-      <p className="m-0 font-semibold text-slate-800 dark:text-slate-100">
+      <p className="m-0 font-semibold text-foreground">
         {filter === 'unread' ? t('allCaughtUp') : t('noNotifications')}
       </p>
-      <p className="m-0 mt-1 text-sm text-slate-500">
+      <p className="m-0 mt-1 text-sm text-muted-foreground">
         {filter === 'unread'
           ? t('emptyUnread')
           : t('emptyAll')}
@@ -132,7 +132,7 @@ function NotificationItem({
 
   return (
     <div
-      className={`flex gap-4 border-b border-slate-100 px-5 py-4 last:border-b-0 dark:border-slate-800 ${
+      className={`flex gap-4 border-b border-border px-5 py-4 last:border-b-0 ${
         isUnread ? 'bg-primary/10' : ''
       }`}
     >
@@ -141,16 +141,16 @@ function NotificationItem({
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="m-0 truncate text-sm font-semibold text-slate-950 dark:text-slate-50">
+              <p className="m-0 truncate text-sm font-semibold text-foreground">
                 {notification.title}
               </p>
               {isUnread && <Tag value={t('unread')} severity="info" />}
             </div>
-            <p className="m-0 mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
+            <p className="m-0 mt-1 text-sm leading-6 text-muted-foreground">
               {notification.message}
             </p>
           </div>
-          <span className="shrink-0 text-xs tabular-nums text-slate-400">{timeAgo}</span>
+          <span className="shrink-0 text-xs tabular-nums text-muted-foreground">{timeAgo}</span>
         </div>
       </div>
       <div className="flex shrink-0 items-start gap-1">
@@ -284,7 +284,7 @@ export default function NotificationsPage() {
         ) : notifications.length === 0 ? (
           <EmptyState filter={filter} />
         ) : (
-          <div className="overflow-hidden rounded-lg border border-slate-100 dark:border-slate-800">
+          <div className="overflow-hidden rounded-lg border border-border">
             {notifications.map((notification) => (
               <NotificationItem
                 key={notification.id}

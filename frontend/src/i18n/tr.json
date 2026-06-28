@@ -30,7 +30,7 @@
     "required": "Zorunlu"
   },
   "auth": {
-    "brand": "AdminPanel",
+    "brand": "Salih",
     "authentication": "Kimlik doğrulama",
     "brandSubtitle": "Çok kiracılı operasyon paketi",
     "multiTenantOperations": "Çok kiracılı operasyonlar",

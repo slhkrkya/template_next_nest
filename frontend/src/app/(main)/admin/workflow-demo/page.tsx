@@ -83,7 +83,7 @@ function WorkflowNode({ data, type }: NodeProps) {
 
   return (
     <div
-      className="min-w-36 rounded-lg border-2 bg-white px-5 py-3 text-center shadow-xl dark:bg-slate-950"
+      className="min-w-36 rounded-lg border-2 bg-card px-5 py-3 text-center shadow-xl"
       style={{
         borderColor: color,
         boxShadow: `0 0 0 1px ${color}26, 0 14px 30px rgb(15 23 42 / 0.18)`,
@@ -94,11 +94,11 @@ function WorkflowNode({ data, type }: NodeProps) {
         <div className="text-lg" style={{ color }}>
           <NodeIcon icon={nodeData.icon} />
         </div>
-        <div className="mt-1 text-sm font-bold text-slate-950 dark:text-slate-50">
+        <div className="mt-1 text-sm font-bold text-foreground">
           {nodeData.label}
         </div>
         {nodeData.description && (
-          <div className="mt-1 max-w-36 break-words text-xs text-slate-500 dark:text-slate-400">
+          <div className="mt-1 max-w-36 break-words text-xs text-muted-foreground">
             {nodeData.description}
           </div>
         )}
@@ -312,7 +312,7 @@ export default function WorkflowDemoPage() {
         <div className="flex min-h-0 flex-col gap-4">
           <Card>
             <div className="flex flex-col gap-3">
-              <div className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
                 Node Types
               </div>
               {NODE_TYPES_CONFIG.map((config) => (
@@ -333,10 +333,10 @@ export default function WorkflowDemoPage() {
                     <NodeIcon icon={config.icon} />
                   </span>
                   <span className="min-w-0">
-                    <span className="block text-sm font-semibold text-slate-950 dark:text-slate-50">
+                    <span className="block text-sm font-semibold text-foreground">
                       {config.label}
                     </span>
-                    <span className="block truncate text-xs text-slate-500 dark:text-slate-400">
+                    <span className="block truncate text-xs text-muted-foreground">
                       {config.desc}
                     </span>
                   </span>
@@ -348,7 +348,7 @@ export default function WorkflowDemoPage() {
 
           <Card>
             <div className="flex flex-col gap-3">
-              <div className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
                 Canvas
               </div>
               <Button
@@ -371,8 +371,8 @@ export default function WorkflowDemoPage() {
           </Card>
 
           <Card>
-            <div className="flex flex-col gap-3 text-sm text-slate-600 dark:text-slate-300">
-              <div className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <div className="flex flex-col gap-3 text-sm text-muted-foreground">
+              <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
                 Tips
               </div>
               {[
@@ -392,7 +392,7 @@ export default function WorkflowDemoPage() {
         </div>
 
         <Card className="min-h-0 overflow-hidden">
-          <div className="h-full min-h-[34rem] overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950">
+          <div className="h-full min-h-[34rem] overflow-hidden rounded-lg border border-border bg-muted">
             <ReactFlow
               nodes={nodes}
               edges={edges}
@@ -415,7 +415,7 @@ export default function WorkflowDemoPage() {
                 maskColor="rgba(15, 23, 42, 0.18)"
               />
               <Panel position="top-right">
-                <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+                <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 shadow-sm">
                   <Tag value={`${nodes.length} nodes`} severity="info" />
                   <Tag value={`${edges.length} edges`} severity="success" />
                 </div>
@@ -438,7 +438,7 @@ export default function WorkflowDemoPage() {
           </div>
         }
       >
-        <p className="m-0 text-sm text-slate-600 dark:text-slate-300">
+        <p className="m-0 text-sm text-muted-foreground">
           This will remove every node and edge from the canvas.
         </p>
       </Dialog>

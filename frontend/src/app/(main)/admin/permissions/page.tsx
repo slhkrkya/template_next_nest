@@ -233,11 +233,11 @@ export default function PermissionsPage() {
 
   const subjectTemplate = (subject: SubjectOption) => (
     <div className="flex flex-col gap-1">
-      <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+      <span className="text-sm font-semibold text-foreground">
         {subject.label}
       </span>
       {subject.sublabel && (
-        <span className="truncate text-xs text-slate-500 dark:text-slate-400">
+        <span className="truncate text-xs text-muted-foreground">
           {subject.sublabel}
         </span>
       )}
@@ -271,7 +271,7 @@ export default function PermissionsPage() {
           onClick={() => toggleAllScope(scope, true)}
           disabled={!selectedId}
         />
-        <span className="text-slate-300 dark:text-slate-700">/</span>
+        <span className="text-border">/</span>
         <Button
           type="button"
           label={commonT("none")}
@@ -371,14 +371,14 @@ export default function PermissionsPage() {
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex flex-col gap-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="m-0 text-lg font-semibold text-slate-950 dark:text-slate-50">
+                <h2 className="m-0 text-lg font-semibold text-foreground">
                   {selectedSubject ? `${selectedSubject.label} ${t("matrix")}` : t("matrix")}
                 </h2>
                 {isDirty && (
                   <Tag value={t("unsaved")} icon="pi pi-circle-fill" severity="warning" />
                 )}
               </div>
-              <p className="m-0 text-sm text-slate-500 dark:text-slate-400">
+              <p className="m-0 text-sm text-muted-foreground">
                 {selectedSubject?.sublabel ??
                   t("selectSubject")}
               </p>
@@ -414,7 +414,7 @@ export default function PermissionsPage() {
                 body={(permission: PermissionEntry) => (
                   <div className="flex items-center gap-2">
                     <i className="pi pi-database text-primary" />
-                    <span className="font-mono text-sm text-slate-800 dark:text-slate-100">
+                    <span className="font-mono text-sm text-foreground">
                       {permission.entityName}
                     </span>
                   </div>

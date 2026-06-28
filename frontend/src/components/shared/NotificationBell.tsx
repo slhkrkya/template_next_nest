@@ -37,11 +37,11 @@ function NotifRow({ notif, locale }: { notif: Notification; locale: string }) {
         style={{ backgroundColor: dotColor }}
       />
       <div className="min-w-0 flex-1">
-        <p className="m-0 truncate text-sm font-semibold text-slate-900">{notif.title}</p>
-        <p className="m-0 mt-1 line-clamp-2 text-xs leading-5 text-slate-500">
+        <p className="m-0 truncate text-sm font-semibold text-foreground">{notif.title}</p>
+        <p className="m-0 mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
           {notif.message}
         </p>
-        <p className="m-0 mt-1 text-[11px] text-slate-400">
+        <p className="m-0 mt-1 text-[11px] text-muted-foreground">
           {formatDistanceToNow(new Date(notif.createdAt), {
             addSuffix: true,
             locale: dateLocale,
@@ -119,8 +119,8 @@ export function NotificationBell() {
         )}
       </Button>
       <OverlayPanel ref={panelRef} className="w-80">
-        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-          <span className="font-semibold text-slate-950">{t('title')}</span>
+        <div className="flex items-center justify-between border-b border-border pb-3">
+          <span className="font-semibold text-foreground">{t('title')}</span>
           {unreadCount > 0 && (
             <Button
               type="button"
@@ -135,7 +135,7 @@ export function NotificationBell() {
         </div>
         <div className="max-h-80 overflow-y-auto py-2">
           {notifications.length === 0 ? (
-            <div className="py-10 text-center text-sm text-slate-500">
+            <div className="py-10 text-center text-sm text-muted-foreground">
               {t('noNotifications')}
             </div>
           ) : (

@@ -151,10 +151,10 @@ export default function CompanyProfilePage() {
                 shape="square"
                 className="bg-primary/10 text-primary"
               />
-              <span className="text-sm font-semibold text-slate-700">
+              <span className="text-sm font-semibold text-foreground">
                 {logoFile ? logoFile.name : 'Click or drag to upload logo'}
               </span>
-              <span className="text-xs text-slate-400">PNG, JPG, SVG or WebP. Max 2 MB.</span>
+              <span className="text-xs text-muted-foreground">PNG, JPG, SVG or WebP. Max 2 MB.</span>
             </button>
             <input
               ref={fileRef}
@@ -165,10 +165,10 @@ export default function CompanyProfilePage() {
             />
 
             {profileQuery.isLoading ? (
-              <div className="text-sm text-slate-500">Loading profile...</div>
+              <div className="text-sm text-muted-foreground">Loading profile...</div>
             ) : (
               <div>
-                <label htmlFor="company-name" className="mb-2 block text-sm font-semibold text-slate-700">
+                <label htmlFor="company-name" className="mb-2 block text-sm font-semibold text-foreground">
                   Company Name
                 </label>
                 <InputText
@@ -197,37 +197,37 @@ export default function CompanyProfilePage() {
 
         <Card title="Subscription">
           {profileQuery.isLoading ? (
-            <div className="py-8 text-center text-sm text-slate-500">Loading subscription...</div>
+            <div className="py-8 text-center text-sm text-muted-foreground">Loading subscription...</div>
           ) : profile ? (
             <div className="space-y-5">
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl bg-slate-50 p-4">
-                  <p className="m-0 text-xs font-semibold uppercase text-slate-500">Plan</p>
-                  <p className="m-0 mt-2 text-lg font-bold text-slate-950 dark:text-slate-50">{profile.subscriptionPlan}</p>
+                <div className="rounded-xl bg-muted p-4">
+                  <p className="m-0 text-xs font-semibold uppercase text-muted-foreground">Plan</p>
+                  <p className="m-0 mt-2 text-lg font-bold text-foreground">{profile.subscriptionPlan}</p>
                 </div>
-                <div className="rounded-xl bg-slate-50 p-4">
-                  <p className="m-0 text-xs font-semibold uppercase text-slate-500">Status</p>
+                <div className="rounded-xl bg-muted p-4">
+                  <p className="m-0 text-xs font-semibold uppercase text-muted-foreground">Status</p>
                   <div className="mt-2">
                     <Tag value={profile.subscriptionStatus} severity={statusSeverity(profile.subscriptionStatus)} />
                   </div>
                 </div>
               </div>
-              <div className="rounded-xl bg-slate-50 p-4">
-                <p className="m-0 text-xs font-semibold uppercase text-slate-500">Expires</p>
-                <p className="m-0 mt-2 text-sm font-semibold text-slate-950 dark:text-slate-50">
+              <div className="rounded-xl bg-muted p-4">
+                <p className="m-0 text-xs font-semibold uppercase text-muted-foreground">Expires</p>
+                <p className="m-0 mt-2 text-sm font-semibold text-foreground">
                   {profile.subscriptionExpiresAt
                     ? format(new Date(profile.subscriptionExpiresAt), 'MMMM d, yyyy')
                     : 'No expiry date'}
                 </p>
               </div>
               <div>
-                <div className="mb-2 flex justify-between text-sm text-slate-500">
+                <div className="mb-2 flex justify-between text-sm text-muted-foreground">
                   <span>User seats</span>
                   <span>{profile.currentUsers} / {profile.maxUsers}</span>
                 </div>
                 <ProgressBar value={usagePct} />
               </div>
-              <p className="m-0 text-sm text-slate-500">
+              <p className="m-0 text-sm text-muted-foreground">
                 Member since {format(new Date(profile.createdAt), 'MMMM yyyy')}.
               </p>
             </div>

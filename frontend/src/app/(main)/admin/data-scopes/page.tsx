@@ -177,7 +177,7 @@ export default function DataScopesPage() {
       <Card className="mb-5">
         <div className="flex flex-wrap items-center gap-4">
           <div className="min-w-72 flex-1">
-            <label htmlFor="user-select" className="mb-2 block text-sm font-semibold text-slate-700">Select User</label>
+            <label htmlFor="user-select" className="mb-2 block text-sm font-semibold text-foreground">Select User</label>
             <Dropdown
               inputId="user-select"
               value={selectedUserId}
@@ -193,8 +193,8 @@ export default function DataScopesPage() {
             <div className="flex items-center gap-3 rounded-xl bg-primary/10 px-4 py-3">
               <Avatar label={`${selectedUser.firstName[0]}${selectedUser.lastName[0]}`} shape="circle" className="bg-primary text-primary-foreground" />
               <div>
-                <p className="m-0 text-sm font-semibold text-slate-950 dark:text-slate-50">{selectedUser.firstName} {selectedUser.lastName}</p>
-                <p className="m-0 mt-1 text-xs text-slate-500">{selectedUser.email}</p>
+                <p className="m-0 text-sm font-semibold text-foreground">{selectedUser.firstName} {selectedUser.lastName}</p>
+                <p className="m-0 mt-1 text-xs text-muted-foreground">{selectedUser.email}</p>
               </div>
             </div>
           )}
@@ -205,7 +205,7 @@ export default function DataScopesPage() {
         <Card>
           <div className="mb-4 flex flex-wrap items-end gap-3">
             <div className="min-w-64">
-              <label htmlFor="entity-select" className="mb-2 block text-sm font-semibold text-slate-700">Add Entity</label>
+              <label htmlFor="entity-select" className="mb-2 block text-sm font-semibold text-foreground">Add Entity</label>
               <Dropdown
                 inputId="entity-select"
                 value={addEntityName}
@@ -217,7 +217,7 @@ export default function DataScopesPage() {
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">Scope</label>
+              <label className="mb-2 block text-sm font-semibold text-foreground">Scope</label>
               <SelectButton value={addScopeType} options={scopeOptions} onChange={(event) => event.value && setAddScopeType(event.value)} allowEmpty={false} />
             </div>
             <Button
@@ -239,7 +239,7 @@ export default function DataScopesPage() {
         </Card>
       ) : (
         <Card>
-          <div className="py-12 text-center text-sm text-slate-500">
+          <div className="py-12 text-center text-sm text-muted-foreground">
             Select a user above to configure their data scopes.
           </div>
         </Card>

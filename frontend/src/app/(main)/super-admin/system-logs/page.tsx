@@ -91,9 +91,9 @@ function FilterBar({
   }
 
   return (
-    <div className="mb-5 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+    <div className="mb-5 flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4">
       <div className="min-w-40">
-        <label htmlFor="log-level" className="mb-2 block text-xs font-semibold uppercase text-slate-500">
+        <label htmlFor="log-level" className="mb-2 block text-xs font-semibold uppercase text-muted-foreground">
           Level
         </label>
         <Dropdown
@@ -105,7 +105,7 @@ function FilterBar({
         />
       </div>
       <div className="min-w-48">
-        <label htmlFor="log-source" className="mb-2 block text-xs font-semibold uppercase text-slate-500">
+        <label htmlFor="log-source" className="mb-2 block text-xs font-semibold uppercase text-muted-foreground">
           Source
         </label>
         <InputText
@@ -117,7 +117,7 @@ function FilterBar({
         />
       </div>
       <div>
-        <label htmlFor="log-from" className="mb-2 block text-xs font-semibold uppercase text-slate-500">
+        <label htmlFor="log-from" className="mb-2 block text-xs font-semibold uppercase text-muted-foreground">
           From
         </label>
         <Calendar
@@ -129,7 +129,7 @@ function FilterBar({
         />
       </div>
       <div>
-        <label htmlFor="log-to" className="mb-2 block text-xs font-semibold uppercase text-slate-500">
+        <label htmlFor="log-to" className="mb-2 block text-xs font-semibold uppercase text-muted-foreground">
           To
         </label>
         <Calendar
@@ -161,7 +161,7 @@ function LogDetail({ log, onClose }: { log: SystemLog | null; onClose: () => voi
         log ? (
           <span className="flex items-center gap-2">
             <LevelBadge level={log.level} />
-            <span className="font-mono text-sm text-slate-500">{log.source}</span>
+            <span className="font-mono text-sm text-muted-foreground">{log.source}</span>
           </span>
         ) : (
           'Log detail'
@@ -173,19 +173,19 @@ function LogDetail({ log, onClose }: { log: SystemLog | null; onClose: () => voi
       {log && (
         <div className="space-y-5">
           <div>
-            <p className="m-0 text-xs font-semibold uppercase tracking-wide text-slate-500">Timestamp</p>
+            <p className="m-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Timestamp</p>
             <p className="m-0 mt-1 font-mono text-sm tabular-nums">
               {format(new Date(log.createdAt), "yyyy-MM-dd HH:mm:ss 'UTC'")}
             </p>
           </div>
           <div>
-            <p className="m-0 text-xs font-semibold uppercase tracking-wide text-slate-500">Message</p>
+            <p className="m-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Message</p>
             <p className="m-0 mt-1 text-sm leading-6">{log.message}</p>
           </div>
           {log.meta && Object.keys(log.meta).length > 0 && (
             <div>
-              <p className="m-0 text-xs font-semibold uppercase tracking-wide text-slate-500">Metadata</p>
-              <pre className="mt-2 max-h-80 overflow-auto rounded-lg bg-slate-950 p-4 text-xs leading-6 text-slate-100">
+              <p className="m-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Metadata</p>
+              <pre className="mt-2 max-h-80 overflow-auto rounded-lg bg-muted p-4 text-xs leading-6 text-foreground font-mono">
                 {JSON.stringify(log.meta, null, 2)}
               </pre>
             </div>
@@ -238,13 +238,13 @@ export default function SystemLogsPage() {
   const columns: Column<SystemLog>[] = [
     { header: 'Level', key: 'level', className: 'w-28', render: (_, row) => <LevelBadge level={row.level} /> },
     { header: 'Message', key: 'message', render: (_, row) => <span className="line-clamp-2 text-sm">{row.message}</span> },
-    { header: 'Source', key: 'source', className: 'w-44', render: (_, row) => <span className="font-mono text-xs text-slate-500">{row.source}</span> },
+    { header: 'Source', key: 'source', className: 'w-44', render: (_, row) => <span className="font-mono text-xs text-muted-foreground">{row.source}</span> },
     {
       header: 'Time',
       key: 'createdAt',
       className: 'w-44',
       render: (_, row) => (
-        <span className="text-xs tabular-nums text-slate-500">
+        <span className="text-xs tabular-nums text-muted-foreground">
           {format(new Date(row.createdAt), 'dd MMM HH:mm:ss')}
         </span>
       ),

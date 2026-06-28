@@ -128,7 +128,7 @@ export default function RateLimitViolationsPage() {
       header: 'Time',
       key: 'windowStart',
       render: (_, row) => (
-        <span className="text-xs tabular-nums text-slate-500">
+        <span className="text-xs tabular-nums text-muted-foreground">
           {format(new Date(row.windowStart), 'MMM d, HH:mm:ss')}
         </span>
       ),
@@ -166,13 +166,13 @@ export default function RateLimitViolationsPage() {
         subtitle="IPs that exceeded request thresholds. Dismiss resolved incidents."
       />
 
-      <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+      <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4">
         <Checkbox
           inputId="select-all-violations"
           checked={violations.length > 0 && selected.size === violations.length}
           onChange={toggleAll}
         />
-        <label htmlFor="select-all-violations" className="text-sm font-semibold text-slate-600">
+        <label htmlFor="select-all-violations" className="text-sm font-semibold text-muted-foreground">
           Select all
         </label>
         <SelectButton
@@ -187,7 +187,7 @@ export default function RateLimitViolationsPage() {
           allowEmpty={false}
         />
         <div className="flex-1" />
-        <span className="text-sm text-slate-500">{selected.size} selected</span>
+        <span className="text-sm text-muted-foreground">{selected.size} selected</span>
         <Button
           type="button"
           label="Dismiss Selected"

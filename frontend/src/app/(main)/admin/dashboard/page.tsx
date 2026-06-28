@@ -117,12 +117,12 @@ export default function AdminDashboardPage() {
       })
     : Array(30).fill(0);
 
-  const gridColor = isDark ? 'rgba(51,65,85,0.5)' : 'rgba(148,163,184,0.18)';
-  const tickColor = isDark ? '#64748b' : '#94a3b8';
+  const gridColor = isDark ? 'rgba(22,55,34,0.7)' : 'rgba(100,160,120,0.15)';
+  const tickColor = isDark ? '#4a7a5a' : '#6b9e7a';
   const lineColor = `hsl(${primaryChartColor})`;
-  const fillColor = `hsl(${primaryChartColor} / ${isDark ? '0.18' : '0.10'})`;
-  const tooltipBg = isDark ? '#1e293b' : '#ffffff';
-  const tooltipText = isDark ? '#e2e8f0' : '#0f172a';
+  const fillColor = `hsl(${primaryChartColor} / ${isDark ? '0.20' : '0.12'})`;
+  const tooltipBg = isDark ? '#0e1f12' : '#ffffff';
+  const tooltipText = isDark ? '#d4f0dc' : '#0a1a0d';
 
   const chartData = {
     labels: last30Days,
@@ -150,7 +150,7 @@ export default function AdminDashboardPage() {
         backgroundColor: tooltipBg,
         titleColor: tooltipText,
         bodyColor: tickColor,
-        borderColor: isDark ? '#334155' : '#e2e8f0',
+        borderColor: isDark ? '#1a3d22' : '#d0edd8',
         borderWidth: 1,
       },
     },
@@ -175,8 +175,8 @@ export default function AdminDashboardPage() {
       key: 'userName',
       render: (_, row) => (
         <div>
-          <p className="m-0 text-sm font-semibold text-slate-900 dark:text-slate-100">{row.userName}</p>
-          <p className="m-0 mt-1 text-xs text-slate-500 dark:text-slate-400">{row.ipAddress}</p>
+          <p className="m-0 text-sm font-semibold text-foreground">{row.userName}</p>
+          <p className="m-0 mt-1 text-xs text-muted-foreground">{row.ipAddress}</p>
         </div>
       ),
     },
@@ -185,14 +185,14 @@ export default function AdminDashboardPage() {
       header: t('permissions.entity'),
       key: 'entityName',
       render: (_, row) => (
-        <span className="text-sm text-slate-500 dark:text-slate-400">{row.entityName}</span>
+        <span className="text-sm text-muted-foreground">{row.entityName}</span>
       ),
     },
     {
       header: t('dashboard.time'),
       key: 'createdAt',
       render: (_, row) => (
-        <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
+        <span className="text-xs tabular-nums text-muted-foreground">
           {format(new Date(row.createdAt), 'MMM d, HH:mm')}
         </span>
       ),

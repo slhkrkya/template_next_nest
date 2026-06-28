@@ -23,7 +23,7 @@ const SIZE_CLASSES: Record<NonNullable<UserAvatarProps['size']>, string> = {
 
 const STATUS_CLASSES: Record<StatusIndicator, string> = {
   online: 'bg-green-500',
-  offline: 'bg-slate-400',
+  offline: 'bg-muted-foreground',
   away: 'bg-yellow-400',
   busy: 'bg-red-500',
 };

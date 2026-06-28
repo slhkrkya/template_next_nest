@@ -17,14 +17,16 @@ export class UpsertUserPermissionDto {
   @IsUUID()
   userId: string;
 
+  @IsOptional()
   @IsUUID()
-  tenantId: string;
+  tenantId?: string;
 
   @IsString()
   entityName: string;
 
+  @IsOptional()
   @IsEnum(AccessLevel)
-  accessLevel: AccessLevel;
+  accessLevel?: AccessLevel;
 
   @IsBoolean()
   @IsOptional()

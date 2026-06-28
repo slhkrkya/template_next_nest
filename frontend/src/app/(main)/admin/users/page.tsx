@@ -133,10 +133,10 @@ export default function UsersPage() {
       key: 'firstName',
       render: (_, user) => (
         <div>
-          <p className="m-0 text-sm font-semibold text-slate-950 dark:text-slate-50">
+          <p className="m-0 text-sm font-semibold text-foreground">
             {user.firstName} {user.lastName}
           </p>
-          <p className="m-0 mt-1 text-xs text-slate-500">{user.email}</p>
+          <p className="m-0 mt-1 text-xs text-muted-foreground">{user.email}</p>
         </div>
       ),
     },
@@ -146,7 +146,7 @@ export default function UsersPage() {
       header: t('users.created'),
       key: 'createdAt',
       render: (_, user) => (
-        <span className="text-xs tabular-nums text-slate-500">
+        <span className="text-xs tabular-nums text-muted-foreground">
           {format(new Date(user.createdAt), 'MMM d, yyyy')}
         </span>
       ),
@@ -200,7 +200,7 @@ export default function UsersPage() {
         }
       />
 
-      <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+      <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4">
         <span className="p-input-icon-left min-w-64 flex-1">
           <i className="pi pi-search" />
           <InputText

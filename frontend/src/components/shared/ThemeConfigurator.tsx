@@ -62,9 +62,9 @@ export function ThemeConfigurator({ visible, onHide }: ThemeConfiguratorProps) {
       }
     >
       <div className="space-y-6 pb-4">
-        <section className="border-b border-slate-200 pb-5 dark:border-slate-700">
+        <section className="border-b border-border pb-5">
           <div className="mb-3 flex items-center justify-between gap-4">
-            <span className="font-semibold text-slate-900 dark:text-slate-100">Scale</span>
+            <span className="font-semibold text-foreground">Scale</span>
             <div className="flex items-center gap-1">
               <Button
                 type="button"
@@ -82,7 +82,7 @@ export function ThemeConfigurator({ visible, onHide }: ThemeConfiguratorProps) {
                     key={scale}
                     type="button"
                     className={`h-3 w-3 rounded-full transition-colors ${
-                      preference.scale === scale ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'
+                      preference.scale === scale ? 'bg-primary' : 'bg-muted'
                     }`}
                     onClick={() => persistPreference({ scale })}
                     aria-label={`Set scale ${scale}`}
@@ -103,9 +103,9 @@ export function ThemeConfigurator({ visible, onHide }: ThemeConfiguratorProps) {
           </div>
         </section>
 
-        <section className="border-b border-slate-200 pb-5 dark:border-slate-700">
+        <section className="border-b border-border pb-5">
           <div className="mb-4 flex items-center justify-between gap-4">
-            <span className="font-semibold text-slate-900 dark:text-slate-100">Input Style</span>
+            <span className="font-semibold text-foreground">Input Style</span>
             <SelectButton
               value={preference.inputStyle}
               options={INPUT_STYLE_OPTIONS}
@@ -114,7 +114,7 @@ export function ThemeConfigurator({ visible, onHide }: ThemeConfiguratorProps) {
             />
           </div>
           <div className="flex items-center justify-between gap-4">
-            <span className="font-semibold text-slate-900 dark:text-slate-100">Ripple Effect</span>
+            <span className="font-semibold text-foreground">Ripple Effect</span>
             <InputSwitch
               checked={preference.ripple}
               onChange={(event) => persistPreference({ ripple: !!event.value })}
@@ -122,9 +122,9 @@ export function ThemeConfigurator({ visible, onHide }: ThemeConfiguratorProps) {
           </div>
         </section>
 
-        <section className="border-b border-slate-200 pb-5 dark:border-slate-700">
+        <section className="border-b border-border pb-5">
           <div className="flex items-center justify-between gap-4">
-            <span className="font-semibold text-slate-900 dark:text-slate-100">Dark Mode</span>
+            <span className="font-semibold text-foreground">Dark Mode</span>
             <SelectButton
               value={preference.colorScheme}
               options={COLOR_SCHEME_OPTIONS}
@@ -136,14 +136,14 @@ export function ThemeConfigurator({ visible, onHide }: ThemeConfiguratorProps) {
 
         <section>
           <div className="mb-4 flex items-center justify-between">
-            <span className="font-semibold text-slate-900 dark:text-slate-100">Themes</span>
-            {isSaving && <i className="pi pi-spin pi-spinner text-sm text-slate-500 dark:text-slate-400" />}
+            <span className="font-semibold text-foreground">Themes</span>
+            {isSaving && <i className="pi pi-spin pi-spinner text-sm text-muted-foreground" />}
           </div>
 
           <div className="space-y-5">
             {Object.entries(themeGroups).map(([label, options]) => (
-              <div key={label} className="border-b border-slate-200 pb-5 last:border-b-0 dark:border-slate-700">
-                <div className="mb-3 flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
+              <div key={label} className="border-b border-border pb-5 last:border-b-0">
+                <div className="mb-3 flex items-center gap-2 font-semibold text-foreground">
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
                     {label.charAt(0)}
                   </span>
@@ -159,8 +159,8 @@ export function ThemeConfigurator({ visible, onHide }: ThemeConfiguratorProps) {
                       <button
                         key={`${option.family}-${option.name}`}
                         type="button"
-                        className={`flex h-8 items-center justify-center rounded-full border bg-white transition-colors dark:bg-slate-900 ${
-                          selected ? 'border-primary ring-2 ring-primary/30' : 'border-slate-200 dark:border-slate-700'
+                        className={`flex h-8 items-center justify-center rounded-full border bg-card transition-colors ${
+                          selected ? 'border-primary ring-2 ring-primary/30' : 'border-border'
                         }`}
                         onClick={() => persistPreference({
                           themeFamily: option.family,

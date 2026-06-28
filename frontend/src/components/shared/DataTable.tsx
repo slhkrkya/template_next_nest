@@ -73,7 +73,7 @@ export function DataTable<T extends object>({
   return (
     <div className={classNames('flex flex-col gap-3', className)}>
       {onSearch && (
-        <div className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-3 shadow-sm">
           <span className="p-input-icon-left w-full max-w-sm">
             <i className="pi pi-search" />
             <InputText
@@ -116,8 +116,8 @@ export function DataTable<T extends object>({
       </PrimeDataTable>
 
       {pagination && (
-        <div className="flex flex-col gap-2 rounded-b-lg border border-t-0 border-slate-200 bg-white px-3 py-2 dark:border-slate-800 dark:bg-slate-950 sm:flex-row sm:items-center sm:justify-between">
-          <p className="m-0 text-sm text-slate-500 dark:text-slate-400">
+        <div className="flex flex-col gap-2 rounded-b-lg border border-t-0 border-border bg-card px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="m-0 text-sm text-muted-foreground">
             {pagination.totalCount === 0
               ? t('noResults')
               : t('showing', { start, end, total: pagination.totalCount })}

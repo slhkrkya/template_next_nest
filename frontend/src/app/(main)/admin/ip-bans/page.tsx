@@ -109,12 +109,12 @@ export default function IpBansPage() {
 
   const columns: Column<IpBan>[] = [
     { header: 'IP Address', key: 'ipAddress', render: (_, ban) => <span className="font-mono font-semibold">{ban.ipAddress}</span> },
-    { header: 'Reason', key: 'reason', render: (_, ban) => <span className="line-clamp-2 text-sm text-slate-500">{ban.reason}</span> },
+    { header: 'Reason', key: 'reason', render: (_, ban) => <span className="line-clamp-2 text-sm text-muted-foreground">{ban.reason}</span> },
     {
       header: 'Banned At',
       key: 'bannedAt',
       render: (_, ban) => (
-        <span className="text-xs tabular-nums text-slate-500">
+        <span className="text-xs tabular-nums text-muted-foreground">
           {format(new Date(ban.bannedAt), 'MMM d, yyyy HH:mm')}
         </span>
       ),
@@ -131,7 +131,7 @@ export default function IpBansPage() {
           <Tag value={format(new Date(ban.expiresAt), 'MMM d, yyyy')} severity="warning" />
         ),
     },
-    { header: 'Banned By', key: 'bannedBy', render: (_, ban) => <span className="text-sm text-slate-500">{ban.bannedBy}</span> },
+    { header: 'Banned By', key: 'bannedBy', render: (_, ban) => <span className="text-sm text-muted-foreground">{ban.bannedBy}</span> },
     {
       header: 'Action',
       key: 'id',
@@ -173,18 +173,18 @@ export default function IpBansPage() {
       >
         <form className="flex flex-col gap-4" onSubmit={handleSubmit((data) => addMutation.mutate(data))}>
           <div>
-            <label htmlFor="ipAddress" className="mb-2 block text-sm font-semibold text-slate-700">IP Address</label>
+            <label htmlFor="ipAddress" className="mb-2 block text-sm font-semibold text-foreground">IP Address</label>
             <InputText id="ipAddress" {...register('ipAddress')} invalid={!!errors.ipAddress} className="w-full" placeholder="192.168.1.100 or 10.0.0.0/8" />
-            <small className="mt-1 block text-slate-500">IPv4 or IPv6. CIDR notation supported for ranges.</small>
+            <small className="mt-1 block text-muted-foreground">IPv4 or IPv6. CIDR notation supported for ranges.</small>
             <FieldError message={errors.ipAddress?.message} />
           </div>
           <div>
-            <label htmlFor="reason" className="mb-2 block text-sm font-semibold text-slate-700">Reason</label>
+            <label htmlFor="reason" className="mb-2 block text-sm font-semibold text-foreground">Reason</label>
             <InputText id="reason" {...register('reason')} invalid={!!errors.reason} className="w-full" placeholder="Describe why this IP is being banned" />
             <FieldError message={errors.reason?.message} />
           </div>
           <div>
-            <label htmlFor="expiresAt" className="mb-2 block text-sm font-semibold text-slate-700">Expires At</label>
+            <label htmlFor="expiresAt" className="mb-2 block text-sm font-semibold text-foreground">Expires At</label>
             <Calendar
               inputId="expiresAt"
               value={expiresAt ? new Date(expiresAt) : null}
@@ -197,7 +197,7 @@ export default function IpBansPage() {
               showIcon
               className="w-full"
             />
-            <small className="mt-1 block text-slate-500">Leave blank for a permanent ban.</small>
+            <small className="mt-1 block text-muted-foreground">Leave blank for a permanent ban.</small>
           </div>
           {addMutation.isError && <Message severity="error" text={(addMutation.error as Error).message} />}
           <div className="flex justify-end gap-2">
