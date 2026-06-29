@@ -67,7 +67,7 @@ const adminNavItems: NavItem[] = [
   { labelKey: 'ipBans', href: '/admin/ip-bans', icon: Ban, permission: { entity: 'IpBans', action: 'read' } },
   { labelKey: 'rateLimits', href: '/admin/rate-limit-violations', icon: Gauge, permission: { entity: 'RateLimits', action: 'read' } },
   { labelKey: 'dataScopes', href: '/admin/data-scopes', icon: Database, permission: { entity: 'DataScopes', action: 'read' } },
-  { labelKey: 'companyProfile', href: '/admin/company-profile', icon: Building2, permission: { entity: 'Tenants', action: 'read' } },
+  { labelKey: 'companyProfile', href: '/admin/company-profile', icon: Building2 },
   { labelKey: 'notifications', href: '/admin/notifications', icon: Bell, permission: { entity: 'Notifications', action: 'read' } },
   { labelKey: 'workflowDemo', href: '/admin/workflow-demo', icon: Workflow, permission: { entity: 'EntityWorkflows', action: 'read' } },
 ];

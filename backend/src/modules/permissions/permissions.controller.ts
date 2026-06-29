@@ -7,13 +7,12 @@ import {
   Body,
   Request,
   ParseUUIDPipe,
-  UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { RequirePermission } from '../../common/decorators';
 import { AuthenticatedUser } from '../../common/types';
-import { SuperAdminGuard } from '../../common/guards/superadmin.guard';
 import { UpsertUserPermissionDto } from './dto/upsert-user-permission.dto';
 import { UpsertRolePermissionDto } from './dto/upsert-role-permission.dto';
 import { BulkDeleteDto } from './dto/bulk-delete.dto';
@@ -49,11 +48,13 @@ export class PermissionsController {
   }
 
   @Get('entities')
+  @RequirePermission('Permissions', 'read')
   getAllEntities(@CurrentUser() user: AuthenticatedUser) {
     return this.queryBus.execute(new GetAllEntitiesQuery(user));
   }
 
   @Get('user/:userId')
+  @RequirePermission('Permissions', 'read')
   getUserPermissions(
     @CurrentUser() user: AuthenticatedUser,
     @Request() req: any,
@@ -64,6 +65,7 @@ export class PermissionsController {
   }
 
   @Get('role/:roleId')
+  @RequirePermission('Permissions', 'read')
   getRolePermissions(
     @CurrentUser() user: AuthenticatedUser,
     @Param('roleId', ParseUUIDPipe) roleId: string,
@@ -72,7 +74,7 @@ export class PermissionsController {
   }
 
   @Post('user')
-  @UseGuards(SuperAdminGuard)
+  @RequirePermission('Permissions', 'update')
   upsertUserPermission(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: UpsertUserPermissionDto,
@@ -84,7 +86,7 @@ export class PermissionsController {
   }
 
   @Post('role')
-  @UseGuards(SuperAdminGuard)
+  @RequirePermission('Permissions', 'update')
   upsertRolePermission(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: UpsertRolePermissionDto,
@@ -93,7 +95,7 @@ export class PermissionsController {
   }
 
   @Delete('user/bulk')
-  @UseGuards(SuperAdminGuard)
+  @RequirePermission('Permissions', 'delete')
   bulkDeleteUserPermissions(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: BulkDeleteDto,
@@ -102,7 +104,7 @@ export class PermissionsController {
   }
 
   @Delete('role/bulk')
-  @UseGuards(SuperAdminGuard)
+  @RequirePermission('Permissions', 'delete')
   bulkDeleteRolePermissions(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: BulkDeleteDto,

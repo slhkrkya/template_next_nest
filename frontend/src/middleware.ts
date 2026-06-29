@@ -166,7 +166,7 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/super-admin/tenant-select', request.url));
     }
 
-    // Regular admin without admin role
+    // Non-SuperAdmin users need a non-User role for admin pages
     if (!payload.isSuperAdmin && !hasAdminAccess(payload.role)) {
       return NextResponse.redirect(new URL(getDefaultDashboard(payload), request.url));
     }

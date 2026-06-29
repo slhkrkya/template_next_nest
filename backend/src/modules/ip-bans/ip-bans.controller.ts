@@ -8,19 +8,17 @@ import {
   Query,
   HttpCode,
   HttpStatus,
-  UseGuards,
 } from '@nestjs/common'
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam } from '@nestjs/swagger'
 import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { BanIpDto } from './dto/ban-ip.dto'
 import { PaginationDto } from '../../common/dto/pagination.dto'
 import { CurrentUser } from '../../common/decorators/current-user.decorator'
+import { RequirePermission } from '../../common/decorators'
 import { AuthenticatedUser } from '../../common/types'
-import { SuperAdminGuard } from '../../common/guards/superadmin.guard'
 import { GetIpBansQuery } from './queries'
 import { BanIpCommand, UnbanIpCommand } from './commands'
 
-@UseGuards(SuperAdminGuard)
 @ApiTags('ip-bans')
 @ApiBearerAuth()
 @Controller('ip-bans')
@@ -31,6 +29,7 @@ export class IpBansController {
   ) {}
 
   @Get()
+  @RequirePermission('IpBans', 'read')
   @ApiOperation({ summary: 'List all banned IPs (paginated)' })
   findAll(
     @CurrentUser() user: AuthenticatedUser,
@@ -40,6 +39,7 @@ export class IpBansController {
   }
 
   @Post('ban')
+  @RequirePermission('IpBans', 'create')
   @ApiOperation({ summary: 'Ban an IP address' })
   ban(
     @CurrentUser() user: AuthenticatedUser,
@@ -49,6 +49,7 @@ export class IpBansController {
   }
 
   @Delete('unban/:ip')
+  @RequirePermission('IpBans', 'delete')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Unban an IP address' })
   @ApiParam({ name: 'ip', type: String, description: 'IP address to unban' })
