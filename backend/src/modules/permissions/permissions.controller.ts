@@ -15,10 +15,14 @@ import { RequirePermission } from '../../common/decorators';
 import { AuthenticatedUser } from '../../common/types';
 import { UpsertUserPermissionDto } from './dto/upsert-user-permission.dto';
 import { UpsertRolePermissionDto } from './dto/upsert-role-permission.dto';
+import { BulkUpsertUserPermissionsDto } from './dto/bulk-upsert-user-permissions.dto';
+import { BulkUpsertRolePermissionsDto } from './dto/bulk-upsert-role-permissions.dto';
 import { BulkDeleteDto } from './dto/bulk-delete.dto';
 import {
   UpsertUserPermissionCommand,
   UpsertRolePermissionCommand,
+  BulkUpsertUserPermissionsCommand,
+  BulkUpsertRolePermissionsCommand,
   BulkDeleteUserPermissionsCommand,
   BulkDeleteRolePermissionsCommand,
 } from './commands';
@@ -92,6 +96,27 @@ export class PermissionsController {
     @Body() dto: UpsertRolePermissionDto,
   ) {
     return this.commandBus.execute(new UpsertRolePermissionCommand(user, dto));
+  }
+
+  @Post('user/bulk-upsert')
+  @RequirePermission('Permissions', 'update')
+  bulkUpsertUserPermissions(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: BulkUpsertUserPermissionsDto,
+    @Request() req: any,
+  ) {
+    return this.commandBus.execute(
+      new BulkUpsertUserPermissionsCommand(user, { ...dto, tenantId: req.tenantId }),
+    );
+  }
+
+  @Post('role/bulk-upsert')
+  @RequirePermission('Permissions', 'update')
+  bulkUpsertRolePermissions(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: BulkUpsertRolePermissionsDto,
+  ) {
+    return this.commandBus.execute(new BulkUpsertRolePermissionsCommand(user, dto));
   }
 
   @Delete('user/bulk')

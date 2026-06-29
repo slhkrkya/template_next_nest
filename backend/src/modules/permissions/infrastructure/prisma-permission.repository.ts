@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../../../prisma/prisma.service'
 import { getTransactionClient } from '../../../common/unit-of-work/prisma-transaction.context'
-import { IPermissionRepository } from '../domain/permission.repository.interface'
+import { IPermissionRepository, PermissionFlags } from '../domain/permission.repository.interface'
 import { UserEntityPermissionEntity, RoleEntityPermissionEntity } from '../domain/permission.entity'
 
 @Injectable()
@@ -46,6 +46,27 @@ export class PrismaPermissionRepository implements IPermissionRepository {
     return this.toUserEntity(raw)
   }
 
+  async upsertManyUserPermissions(userId: string, tenantId: string | null, permissions: PermissionFlags[]): Promise<void> {
+    if (permissions.length === 0) return
+    const entityNames = permissions.map(p => p.entityName)
+    await this.prisma.userEntityPermission.deleteMany({
+      where: { userId, tenantId: tenantId ?? null, entityName: { in: entityNames } },
+    })
+    await this.prisma.userEntityPermission.createMany({
+      data: permissions.map(p => ({
+        id: crypto.randomUUID(),
+        userId,
+        tenantId: tenantId ?? null,
+        entityName: p.entityName,
+        canCreate: p.canCreate,
+        canRead: p.canRead,
+        canUpdate: p.canUpdate,
+        canDelete: p.canDelete,
+      })),
+      skipDuplicates: true,
+    })
+  }
+
   async deleteUserPermissions(ids: string[]): Promise<{ count: number }> {
     const result = await this.prisma.userEntityPermission.deleteMany({
       where: { id: { in: ids } },
@@ -65,6 +86,26 @@ export class PrismaPermissionRepository implements IPermissionRepository {
       update: { canCreate: data.canCreate, canRead: data.canRead, canUpdate: data.canUpdate, canDelete: data.canDelete },
     })
     return this.toRoleEntity(raw)
+  }
+
+  async upsertManyRolePermissions(operationClaimId: string, permissions: PermissionFlags[]): Promise<void> {
+    if (permissions.length === 0) return
+    const entityNames = permissions.map(p => p.entityName)
+    await this.prisma.roleEntityPermission.deleteMany({
+      where: { operationClaimId, entityName: { in: entityNames } },
+    })
+    await this.prisma.roleEntityPermission.createMany({
+      data: permissions.map(p => ({
+        id: crypto.randomUUID(),
+        operationClaimId,
+        entityName: p.entityName,
+        canCreate: p.canCreate,
+        canRead: p.canRead,
+        canUpdate: p.canUpdate,
+        canDelete: p.canDelete,
+      })),
+      skipDuplicates: true,
+    })
   }
 
   async deleteRolePermissions(ids: string[]): Promise<{ count: number }> {

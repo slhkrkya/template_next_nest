@@ -176,8 +176,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     return hasPermission(item.permission.entity, item.permission.action);
   };
 
-  // Global mode shows SuperAdmin; tenant mode shows Admin for the selected tenant.
-  const showAdminSection = inTenantMode || hasAdminAccessRole;
+  // Global mode shows SuperAdmin only; tenant mode shows Admin for the selected tenant.
+  const showAdminSection = inTenantMode || (!isSuperAdmin && hasAdminAccessRole);
   const showSuperAdminSection = inGlobalMode;
 
   const filteredAdminItems = showAdminSection ? adminNavItems.filter(canAccessItem) : [];

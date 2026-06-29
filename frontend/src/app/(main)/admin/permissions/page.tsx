@@ -8,8 +8,8 @@ import {
   getAllEntities as fetchAllEntities,
   getRolePermissions as fetchRolePermissions,
   getUserPermissions as fetchUserPermissions,
-  upsertRolePermission,
-  upsertUserPermission,
+  bulkUpsertUserPermissions,
+  bulkUpsertRolePermissions,
 } from "@/lib/api/permissions.api";
 import { getUsers as fetchUsers } from "@/lib/api/users.api";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -93,21 +93,19 @@ async function savePermissions(
   id: string,
   permissions: PermissionEntry[],
 ) {
-  await Promise.all(
-    permissions.map((permission) => {
-      const payload = {
-        entityName: permission.entityName,
-        canCreate: permission.CREATE,
-        canRead: permission.READ,
-        canUpdate: permission.UPDATE,
-        canDelete: permission.DELETE,
-      };
+  const items = permissions.map((permission) => ({
+    entityName: permission.entityName,
+    canCreate: permission.CREATE,
+    canRead: permission.READ,
+    canUpdate: permission.UPDATE,
+    canDelete: permission.DELETE,
+  }));
 
-      return type === "user"
-        ? upsertUserPermission({ userId: id, ...payload })
-        : upsertRolePermission({ roleId: id, ...payload });
-    }),
-  );
+  if (type === "user") {
+    await bulkUpsertUserPermissions({ userId: id, permissions: items });
+  } else {
+    await bulkUpsertRolePermissions({ roleId: id, permissions: items });
+  }
 }
 
 function toPermissionEntry(

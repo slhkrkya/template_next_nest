@@ -7,6 +7,14 @@ import type {
   UserEntityPermission,
 } from '@/types'
 
+export interface BulkUpsertPermissionItem {
+  entityName: string
+  canCreate: boolean
+  canRead: boolean
+  canUpdate: boolean
+  canDelete: boolean
+}
+
 /**
  * Fetch the entity permissions that apply to the currently authenticated user.
  * Used on app boot to populate the permission store.
@@ -71,6 +79,34 @@ export async function upsertRolePermission(
 ): Promise<RoleEntityPermission> {
   const response = await axiosInstance.post<RoleEntityPermission>(
     '/permissions/role',
+    data,
+  )
+  return response.data
+}
+
+/**
+ * Create or update multiple user entity permissions in a single transaction.
+ */
+export async function bulkUpsertUserPermissions(data: {
+  userId: string
+  permissions: BulkUpsertPermissionItem[]
+}): Promise<{ count: number }> {
+  const response = await axiosInstance.post<{ count: number }>(
+    '/permissions/user/bulk-upsert',
+    data,
+  )
+  return response.data
+}
+
+/**
+ * Create or update multiple role entity permissions in a single transaction.
+ */
+export async function bulkUpsertRolePermissions(data: {
+  roleId: string
+  permissions: BulkUpsertPermissionItem[]
+}): Promise<{ count: number }> {
+  const response = await axiosInstance.post<{ count: number }>(
+    '/permissions/role/bulk-upsert',
     data,
   )
   return response.data
