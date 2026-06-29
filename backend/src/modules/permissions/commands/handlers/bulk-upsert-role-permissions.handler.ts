@@ -4,6 +4,7 @@ import { IPermissionRepository, PERMISSION_REPOSITORY } from '../../domain/permi
 import { BulkUpsertRolePermissionsCommand } from '../bulk-upsert-role-permissions.command';
 import { PermissionCheckerService } from '../../../../common/services/permission-checker.service';
 import { IUnitOfWork, UNIT_OF_WORK } from '../../../../common/unit-of-work';
+import { PermissionsGateway } from '../../../websockets/permissions.gateway';
 
 @Injectable()
 @CommandHandler(BulkUpsertRolePermissionsCommand)
@@ -14,6 +15,7 @@ export class BulkUpsertRolePermissionsHandler
     @Inject(PERMISSION_REPOSITORY) private readonly permissions: IPermissionRepository,
     @Inject(UNIT_OF_WORK) private readonly uow: IUnitOfWork,
     private readonly permChecker: PermissionCheckerService,
+    private readonly permissionsGateway: PermissionsGateway,
   ) {}
 
   async execute(command: BulkUpsertRolePermissionsCommand): Promise<{ count: number }> {
@@ -34,6 +36,8 @@ export class BulkUpsertRolePermissionsHandler
       );
     });
 
+    // Role change affects all users with this role — broadcast to all connected clients
+    this.permissionsGateway.broadcastPermissionsUpdated();
     return { count: permissions.length };
   }
 }

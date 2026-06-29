@@ -5,23 +5,23 @@ import {
   ParseIntPipe,
   DefaultValuePipe,
 } from '@nestjs/common'
+import { QueryBus } from '@nestjs/cqrs'
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger'
 import { AuthenticatedUser } from '../../common/types'
 import { GetUser, RequirePermission } from '../../common/decorators'
-import { AdminService, AuditLogFilters, SystemLogFilters } from './admin.service'
+import { AuditLogFilters, SystemLogFilters } from './admin.service'
+import { GetAuditLogsQuery, GetSystemLogsQuery } from './queries'
 
 @ApiTags('tenant-logs')
 @ApiBearerAuth()
 @Controller('tenant-logs')
 export class TenantLogsController {
-  constructor(
-    private readonly adminService: AdminService,
-  ) {}
+  constructor(private readonly queryBus: QueryBus) {}
 
   @Get('audit-logs')
   @RequirePermission('AuditLogs', 'read')
   @ApiOperation({ summary: 'Get audit logs for current tenant' })
-  async getAuditLogs(
+  getAuditLogs(
     @GetUser() user: AuthenticatedUser,
     @Query('entityName') entityName?: string,
     @Query('action') action?: string,
@@ -39,13 +39,13 @@ export class TenantLogsController {
       page,
       limit,
     }
-    return this.adminService.getAuditLogs(filters)
+    return this.queryBus.execute(new GetAuditLogsQuery(user, filters))
   }
 
   @Get('system-logs')
   @RequirePermission('SystemLogs', 'read')
   @ApiOperation({ summary: 'Get system logs for current tenant' })
-  async getSystemLogs(
+  getSystemLogs(
     @GetUser() user: AuthenticatedUser,
     @Query('level') level?: string,
     @Query('source') source?: string,
@@ -63,6 +63,6 @@ export class TenantLogsController {
       page,
       limit,
     }
-    return this.adminService.getSystemLogs(filters)
+    return this.queryBus.execute(new GetSystemLogsQuery(user, filters))
   }
 }

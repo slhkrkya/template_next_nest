@@ -5,6 +5,7 @@ import { EntityNotFoundException } from '../../../../core/exceptions/domain.exce
 import { UpsertRolePermissionCommand } from '../upsert-role-permission.command';
 import { PermissionCheckerService } from '../../../../common/services/permission-checker.service';
 import { IUnitOfWork, UNIT_OF_WORK } from '../../../../common/unit-of-work';
+import { PermissionsGateway } from '../../../websockets/permissions.gateway';
 
 @Injectable()
 @CommandHandler(UpsertRolePermissionCommand)
@@ -15,6 +16,7 @@ export class UpsertRolePermissionHandler
     @Inject(PERMISSION_REPOSITORY) private readonly permissions: IPermissionRepository,
     @Inject(UNIT_OF_WORK) private readonly uow: IUnitOfWork,
     private readonly permChecker: PermissionCheckerService,
+    private readonly permissionsGateway: PermissionsGateway,
   ) {}
 
   async execute(command: UpsertRolePermissionCommand) {
@@ -23,7 +25,7 @@ export class UpsertRolePermissionHandler
     const { roleId, entityName, canCreate, canRead, canUpdate, canDelete } =
       command.dto;
 
-    return this.uow.runInTransaction(async () => {
+    const result = await this.uow.runInTransaction(async () => {
       const entity = await this.permissions.findEntityByName(entityName);
       if (!entity) {
         throw new EntityNotFoundException('PermissionEntity', entityName);
@@ -38,5 +40,9 @@ export class UpsertRolePermissionHandler
         canDelete: canDelete ?? false,
       });
     });
+
+    // Role change affects all users with this role — broadcast to all connected clients
+    this.permissionsGateway.broadcastPermissionsUpdated();
+    return result;
   }
 }

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { PrismaModule } from '../../prisma/prisma.module';
+import { WebsocketsModule } from '../websockets/websockets.module';
 import { PermissionsController } from './permissions.controller';
 import { PermissionsService } from './permissions.service';
 import { PERMISSION_REPOSITORY } from './domain/permission.repository.interface';
@@ -9,7 +10,7 @@ import { CommandHandlers } from './commands';
 import { QueryHandlers } from './queries';
 
 @Module({
-  imports: [CqrsModule, PrismaModule],
+  imports: [CqrsModule, PrismaModule, WebsocketsModule],
   controllers: [PermissionsController],
   providers: [
     PermissionsService,

@@ -5,6 +5,7 @@ import { EntityNotFoundException } from '../../../../core/exceptions/domain.exce
 import { UpsertUserPermissionCommand } from '../upsert-user-permission.command';
 import { PermissionCheckerService } from '../../../../common/services/permission-checker.service';
 import { IUnitOfWork, UNIT_OF_WORK } from '../../../../common/unit-of-work';
+import { PermissionsGateway } from '../../../websockets/permissions.gateway';
 
 @Injectable()
 @CommandHandler(UpsertUserPermissionCommand)
@@ -15,6 +16,7 @@ export class UpsertUserPermissionHandler
     @Inject(PERMISSION_REPOSITORY) private readonly permissions: IPermissionRepository,
     @Inject(UNIT_OF_WORK) private readonly uow: IUnitOfWork,
     private readonly permChecker: PermissionCheckerService,
+    private readonly permissionsGateway: PermissionsGateway,
   ) {}
 
   async execute(command: UpsertUserPermissionCommand) {
@@ -23,7 +25,7 @@ export class UpsertUserPermissionHandler
     const { userId, tenantId, entityName, canCreate, canRead, canUpdate, canDelete } =
       command.dto;
 
-    return this.uow.runInTransaction(async () => {
+    const result = await this.uow.runInTransaction(async () => {
       const entity = await this.permissions.findEntityByName(entityName);
       if (!entity) {
         throw new EntityNotFoundException('PermissionEntity', entityName);
@@ -39,5 +41,8 @@ export class UpsertUserPermissionHandler
         canDelete: canDelete ?? false,
       });
     });
+
+    this.permissionsGateway.notifyPermissionsUpdated(userId);
+    return result;
   }
 }

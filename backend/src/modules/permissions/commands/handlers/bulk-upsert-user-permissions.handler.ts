@@ -4,6 +4,7 @@ import { IPermissionRepository, PERMISSION_REPOSITORY } from '../../domain/permi
 import { BulkUpsertUserPermissionsCommand } from '../bulk-upsert-user-permissions.command';
 import { PermissionCheckerService } from '../../../../common/services/permission-checker.service';
 import { IUnitOfWork, UNIT_OF_WORK } from '../../../../common/unit-of-work';
+import { PermissionsGateway } from '../../../websockets/permissions.gateway';
 
 @Injectable()
 @CommandHandler(BulkUpsertUserPermissionsCommand)
@@ -14,6 +15,7 @@ export class BulkUpsertUserPermissionsHandler
     @Inject(PERMISSION_REPOSITORY) private readonly permissions: IPermissionRepository,
     @Inject(UNIT_OF_WORK) private readonly uow: IUnitOfWork,
     private readonly permChecker: PermissionCheckerService,
+    private readonly permissionsGateway: PermissionsGateway,
   ) {}
 
   async execute(command: BulkUpsertUserPermissionsCommand): Promise<{ count: number }> {
@@ -35,6 +37,7 @@ export class BulkUpsertUserPermissionsHandler
       );
     });
 
+    this.permissionsGateway.notifyPermissionsUpdated(userId);
     return { count: permissions.length };
   }
 }

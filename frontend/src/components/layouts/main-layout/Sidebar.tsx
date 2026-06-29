@@ -73,12 +73,12 @@ const adminNavItems: NavItem[] = [
 ];
 
 const superAdminNavItems: NavItem[] = [
-  { labelKey: 'tenants', href: '/super-admin/tenants', icon: Globe, permission: { entity: 'Tenants', action: 'read' } },
-  { labelKey: 'subscriptionPlans', href: '/super-admin/subscription-plans', icon: CreditCard, permission: { entity: 'SubscriptionPlans', action: 'read' } },
-  { labelKey: 'systemLogs', href: '/super-admin/system-logs', icon: ScrollText, permission: { entity: 'AuditLogs', action: 'read' } },
-  { labelKey: 'rateLimits', href: '/super-admin/rate-limit-violations', icon: Gauge, permission: { entity: 'RateLimits', action: 'read' } },
-  { labelKey: 'notifications', href: '/super-admin/notifications', icon: Bell, permission: { entity: 'Notifications', action: 'read' } },
-  { labelKey: 'switchTenant', href: '/super-admin/tenant-select', icon: ArrowLeftRight, permission: { entity: 'Tenants', action: 'read' } },
+  { labelKey: 'tenants', href: '/super-admin/tenants', icon: Globe },
+  { labelKey: 'subscriptionPlans', href: '/super-admin/subscription-plans', icon: CreditCard },
+  { labelKey: 'systemLogs', href: '/super-admin/system-logs', icon: ScrollText },
+  { labelKey: 'rateLimits', href: '/super-admin/rate-limit-violations', icon: Gauge },
+  { labelKey: 'notifications', href: '/super-admin/notifications', icon: Bell },
+  { labelKey: 'switchTenant', href: '/super-admin/tenant-select', icon: ArrowLeftRight },
 ];
 
 function hasAdminAccess(role?: string): boolean {

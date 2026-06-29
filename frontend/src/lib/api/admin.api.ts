@@ -30,24 +30,6 @@ export async function getAuditLogs(
 }
 
 /**
- * Fetch application-level system logs (structured log lines from the backend).
- * Level filter accepts 'error' | 'warn' | 'info' | 'debug'.
- */
-export async function getSystemLogs(
-  params?: PaginationQuery & {
-    level?: string
-    from?: string
-    to?: string
-  },
-): Promise<PagedResult<Record<string, unknown>>> {
-  const response = await axiosInstance.get<PagedResult<Record<string, unknown>>>(
-    '/admin/system-logs',
-    { params },
-  )
-  return response.data
-}
-
-/**
  * Fetch system logs for admin users with enhanced filtering.
  * Supports level, source, date range, and search filtering.
  */

@@ -3,6 +3,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { IPermissionRepository, PERMISSION_REPOSITORY } from '../../domain/permission.repository.interface';
 import { SyncRolePermissionsToUserCommand } from '../sync-role-permissions-to-user.command';
 import { IUnitOfWork, UNIT_OF_WORK } from '../../../../common/unit-of-work';
+import { PermissionsGateway } from '../../../websockets/permissions.gateway';
 
 @Injectable()
 @CommandHandler(SyncRolePermissionsToUserCommand)
@@ -12,6 +13,7 @@ export class SyncRolePermissionsToUserHandler
   constructor(
     @Inject(PERMISSION_REPOSITORY) private readonly permissions: IPermissionRepository,
     @Inject(UNIT_OF_WORK) private readonly uow: IUnitOfWork,
+    private readonly permissionsGateway: PermissionsGateway,
   ) {}
 
   async execute(command: SyncRolePermissionsToUserCommand): Promise<void> {
@@ -19,5 +21,7 @@ export class SyncRolePermissionsToUserHandler
     await this.uow.runInTransaction(async () => {
       await this.permissions.syncRolePermissionsToUser(roleId, userId, tenantId);
     });
+
+    this.permissionsGateway.notifyPermissionsUpdated(userId);
   }
 }

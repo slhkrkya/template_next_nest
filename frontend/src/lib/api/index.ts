@@ -38,7 +38,6 @@ export {
 export {
   getDashboardStats,
   getAuditLogs,
-  getSystemLogs,
   getDailyLoginStats,
 } from './admin.api'
 
