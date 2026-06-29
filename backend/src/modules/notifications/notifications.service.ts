@@ -10,8 +10,13 @@ import {
 } from './commands'
 import { GetMyNotificationsQuery } from './queries'
 import { PaginationDto } from '../../common/dto/pagination.dto'
+import { IsBoolean, IsOptional } from 'class-validator'
+import { Transform } from 'class-transformer'
 
 export class NotificationsQueryDto extends PaginationDto {
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
   isRead?: boolean
 }
 

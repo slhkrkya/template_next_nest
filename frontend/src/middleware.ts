@@ -158,6 +158,14 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // User-only route protection: non-User roles must not access /user/* paths
+  if (pathname.startsWith('/user')) {
+    if (payload.isSuperAdmin || hasAdminAccess(payload.role)) {
+      return NextResponse.redirect(new URL(getDefaultDashboard(payload), request.url));
+    }
+    return NextResponse.next();
+  }
+
   // Admin route protection with tenant context guard for super-admins
   if (pathname.startsWith('/admin')) {
     // Super-admin in global mode (no tenant selected) trying to access admin pages

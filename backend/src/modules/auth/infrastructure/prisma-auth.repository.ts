@@ -3,6 +3,24 @@ import { PrismaService } from '../../../prisma/prisma.service'
 import { getTransactionClient } from '../../../common/unit-of-work/prisma-transaction.context'
 import { IAuthRepository } from '../domain/auth.repository.interface'
 
+/**
+ * Picks the most privileged claim name from a user's operation claims.
+ * Higher priority wins; when tied, any non-'User' claim is preferred over 'User'
+ * so that a newly assigned custom role is reflected in the JWT immediately.
+ */
+function pickEffectiveRole(claims: Array<{ name: string; priority?: number | null }>): string | undefined {
+  if (!claims.length) return undefined;
+  const sorted = [...claims].sort((a, b) => {
+    const pa = a.priority ?? 0;
+    const pb = b.priority ?? 0;
+    if (pb !== pa) return pb - pa;
+    const aIsUser = a.name.toLowerCase() === 'user' ? 1 : 0;
+    const bIsUser = b.name.toLowerCase() === 'user' ? 1 : 0;
+    return aIsUser - bIsUser;
+  });
+  return sorted[0].name;
+}
+
 @Injectable()
 export class PrismaAuthRepository implements IAuthRepository {
   constructor(private readonly prismaService: PrismaService) {}
@@ -18,7 +36,7 @@ export class PrismaAuthRepository implements IAuthRepository {
         id: true, email: true, passwordHash: true, firstName: true, lastName: true,
         isActive: true, isSuperAdmin: true, tenantId: true,
         lockedUntil: true, failedLoginAttempts: true,
-        operationClaims: { select: { operationClaim: { select: { name: true } } } },
+        operationClaims: { select: { operationClaim: { select: { name: true, priority: true } } } },
       },
     })
     if (!raw) return null
@@ -26,7 +44,7 @@ export class PrismaAuthRepository implements IAuthRepository {
       id: raw.id, email: raw.email, passwordHash: raw.passwordHash,
       firstName: raw.firstName, lastName: raw.lastName, isActive: raw.isActive,
       isSuperAdmin: raw.isSuperAdmin, tenantId: raw.tenantId ?? null,
-      role: raw.operationClaims[0]?.operationClaim?.name,
+      role: pickEffectiveRole(raw.operationClaims.map(c => c.operationClaim)),
       lockedUntil: raw.lockedUntil, failedLoginAttempts: raw.failedLoginAttempts,
     }
   }
@@ -49,7 +67,7 @@ export class PrismaAuthRepository implements IAuthRepository {
       isActive: raw.isActive,
       isSuperAdmin: raw.isSuperAdmin,
       tenantId: raw.tenantId ?? null,
-      role: (raw as any).operationClaims?.[0]?.operationClaim?.name as string | undefined,
+      role: pickEffectiveRole(((raw as any).operationClaims ?? []).map((c: any) => c.operationClaim)),
       profilePicturePath: (raw as any).profilePicturePath ?? null,
       settings: (raw as any).settings ?? null,
       themePreference: (raw as any).themePreference ?? null,
@@ -180,7 +198,7 @@ export class PrismaAuthRepository implements IAuthRepository {
         isActive: raw.user.isActive,
         isSuperAdmin: raw.user.isSuperAdmin,
         tenantId: raw.user.tenantId ?? null,
-        role: (raw.user as any).operationClaims?.[0]?.operationClaim?.name as string | undefined,
+        role: pickEffectiveRole(((raw.user as any).operationClaims ?? []).map((c: any) => c.operationClaim)),
       },
     }
   }

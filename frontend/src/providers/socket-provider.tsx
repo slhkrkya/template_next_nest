@@ -48,13 +48,14 @@ export function SocketProvider({ children }: SocketProviderProps) {
     };
 
     // Permissions namespace
-    permissionsSocketRef.current = io(`${SOCKET_URL}/permissions`, socketOptions);
+    const permissionsSocket = io(`${SOCKET_URL}/permissions`, socketOptions);
+    permissionsSocketRef.current = permissionsSocket;
 
-    permissionsSocketRef.current.on('connect', () => {
+    permissionsSocket.on('connect', () => {
       console.debug('[SocketProvider] Connected to /permissions namespace');
     });
 
-    permissionsSocketRef.current.on('permissions-updated', async () => {
+    permissionsSocket.on('permissions-updated', async () => {
       try {
         const permissions = await getMyPermissions();
         setPermissions(permissions);
@@ -63,28 +64,31 @@ export function SocketProvider({ children }: SocketProviderProps) {
       }
     });
 
-    permissionsSocketRef.current.on('disconnect', (reason: string) => {
+    permissionsSocket.on('disconnect', (reason: string) => {
       console.debug('[SocketProvider] Disconnected from /permissions:', reason);
     });
 
     // Notifications namespace
-    notificationsSocketRef.current = io(`${SOCKET_URL}/notifications`, socketOptions);
+    const notificationsSocket = io(`${SOCKET_URL}/notifications`, socketOptions);
+    notificationsSocketRef.current = notificationsSocket;
 
-    notificationsSocketRef.current.on('connect', () => {
+    notificationsSocket.on('connect', () => {
       console.debug('[SocketProvider] Connected to /notifications namespace');
     });
 
-    notificationsSocketRef.current.on('new-notification', (notification: Notification) => {
+    notificationsSocket.on('new-notification', (notification: Notification) => {
       addNotification(notification);
     });
 
-    notificationsSocketRef.current.on('disconnect', (reason: string) => {
+    notificationsSocket.on('disconnect', (reason: string) => {
       console.debug('[SocketProvider] Disconnected from /notifications:', reason);
     });
 
     return () => {
-      permissionsSocketRef.current?.disconnect();
-      notificationsSocketRef.current?.disconnect();
+      permissionsSocket.disconnect();
+      permissionsSocketRef.current = null;
+      notificationsSocket.disconnect();
+      notificationsSocketRef.current = null;
     };
   }, [isAuthenticated, accessToken, setPermissions, addNotification]);
 

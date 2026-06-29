@@ -55,8 +55,12 @@ export class PermissionsGuard implements CanActivate {
       where: {
         userId: user.id,
         entityName: entity,
-        tenantId: effectiveTenantId,
+        OR: [
+          { tenantId: effectiveTenantId },
+          { tenantId: null },
+        ],
       },
+      orderBy: { tenantId: 'desc' },
     });
 
     if (userPermission) {
@@ -77,7 +81,10 @@ export class PermissionsGuard implements CanActivate {
           userClaims: {
             some: {
               userId: user.id,
-              tenantId: effectiveTenantId,
+              OR: [
+                { tenantId: effectiveTenantId },
+                { tenantId: null },
+              ],
             },
           },
         },

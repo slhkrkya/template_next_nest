@@ -12,6 +12,19 @@ import {
 } from '../domain/user.repository.interface'
 import { UserEntity, UserProps } from '../domain/user.entity'
 
+function pickEffectiveRole(claims: Array<{ name: string; priority?: number | null }>): string | undefined {
+  if (!claims.length) return undefined;
+  const sorted = [...claims].sort((a, b) => {
+    const pa = a.priority ?? 0;
+    const pb = b.priority ?? 0;
+    if (pb !== pa) return pb - pa;
+    const aIsUser = a.name.toLowerCase() === 'user' ? 1 : 0;
+    const bIsUser = b.name.toLowerCase() === 'user' ? 1 : 0;
+    return aIsUser - bIsUser;
+  });
+  return sorted[0].name;
+}
+
 @Injectable()
 export class PrismaUserRepository implements IUserRepository {
   constructor(private readonly prismaService: PrismaService) {}
@@ -39,7 +52,7 @@ export class PrismaUserRepository implements IUserRepository {
       isActive: raw.isActive,
       isSuperAdmin: raw.isSuperAdmin ?? false,
       tenantId: raw.tenantId ?? null,
-      role: raw.operationClaims?.[0]?.operationClaim?.name,
+      role: pickEffectiveRole((raw.operationClaims ?? []).map((c: any) => c.operationClaim)),
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
     })
@@ -58,7 +71,7 @@ export class PrismaUserRepository implements IUserRepository {
     updatedAt: true,
     operationClaims: {
       select: {
-        operationClaim: { select: { id: true, name: true } },
+        operationClaim: { select: { id: true, name: true, priority: true } },
       },
     },
   } as const

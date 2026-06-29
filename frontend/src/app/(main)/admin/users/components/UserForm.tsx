@@ -4,7 +4,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/lib/axios';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
@@ -20,7 +20,7 @@ const createCreateSchema = (t: (key: any, params?: any) => string) => z.object({
   lastName: z.string().min(1, t('validation.lastNameRequired')),
   email: z.string().email(t('validation.email')),
   password: z.string().min(8, t('validation.passwordMin')),
-  role: z.enum(['Admin', 'User'], { required_error: t('validation.fieldRequired', { field: t('roles.title') }) }),
+  role: z.string().min(1, t('validation.fieldRequired', { field: t('roles.title') })),
   isActive: z.boolean(),
 });
 
@@ -28,7 +28,7 @@ const createEditSchema = (t: (key: any, params?: any) => string) => z.object({
   firstName: z.string().min(1, t('validation.firstNameRequired')),
   lastName: z.string().min(1, t('validation.lastNameRequired')),
   email: z.string().email(t('validation.email')),
-  role: z.enum(['Admin', 'User'], { required_error: t('validation.fieldRequired', { field: t('roles.title') }) }),
+  role: z.string().min(1, t('validation.fieldRequired', { field: t('roles.title') })),
   isActive: z.boolean(),
 });
 
@@ -62,10 +62,15 @@ export default function UserForm({ mode, user, onSuccess, onCancel }: UserFormPr
   const isCreate = mode === 'create';
   const createSchema = createCreateSchema(t);
   const editSchema = createEditSchema(t);
-  const roleOptions = [
-    { label: t('nav.user'), value: 'User' },
-    { label: t('nav.admin'), value: 'Admin' },
-  ];
+
+  const rolesQuery = useQuery({
+    queryKey: ['admin', 'roles'],
+    queryFn: async () => {
+      const res = await axiosInstance.get<{ id: string; name: string }[]>('/roles');
+      return res.data;
+    },
+  });
+  const roleOptions = (rolesQuery.data ?? []).map((r) => ({ label: r.name, value: r.name }));
 
   const {
     control,
@@ -150,6 +155,8 @@ export default function UserForm({ mode, user, onSuccess, onCancel }: UserFormPr
               onChange={(event) => field.onChange(event.value)}
               className="w-full"
               invalid={!!errors.role}
+              disabled={rolesQuery.isLoading}
+              placeholder={rolesQuery.isLoading ? t('common.loading') : undefined}
               appendTo={getPrimeOverlayAppendTo()}
             />
           )}

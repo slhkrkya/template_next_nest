@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { PrismaModule } from '../../prisma/prisma.module';
+import { RolesModule } from '../roles/roles.module';
+import { PermissionsModule } from '../permissions/permissions.module';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { USER_REPOSITORY } from './domain/user.repository.interface';
@@ -9,7 +11,7 @@ import { CommandHandlers } from './commands';
 import { QueryHandlers } from './queries';
 
 @Module({
-  imports: [CqrsModule, PrismaModule],
+  imports: [CqrsModule, PrismaModule, RolesModule, PermissionsModule],
   controllers: [UsersController],
   providers: [
     UsersService,

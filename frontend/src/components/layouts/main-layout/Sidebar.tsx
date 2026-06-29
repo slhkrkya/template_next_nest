@@ -160,6 +160,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { hasPermission } = usePermissionStore();
   const isSuperAdmin = user?.isSuperAdmin ?? false;
   const hasAdminAccessRole = hasAdminAccess(user?.role);
+  const hasEffectiveAdminAccess = hasAdminAccessRole;
 
   async function logout() {
     try { await logoutApi(); } catch { /* ignore */ }
@@ -177,7 +178,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   };
 
   // Global mode shows SuperAdmin only; tenant mode shows Admin for the selected tenant.
-  const showAdminSection = inTenantMode || (!isSuperAdmin && hasAdminAccessRole);
+  const showAdminSection = inTenantMode || (!isSuperAdmin && hasEffectiveAdminAccess);
   const showSuperAdminSection = inGlobalMode;
 
   const filteredAdminItems = showAdminSection ? adminNavItems.filter(canAccessItem) : [];
@@ -185,7 +186,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
   const groups: NavGroup[] = [
     // User section is visible for regular users and SuperAdmin tenant mode.
-    ...(!hasAdminAccessRole && !inGlobalMode ? [{ titleKey: 'user', items: userNavItems }] : []),
+    ...(!hasEffectiveAdminAccess && !inGlobalMode ? [{ titleKey: 'user', items: userNavItems }] : []),
     ...(filteredAdminItems.length > 0 ? [{ titleKey: 'admin', items: filteredAdminItems }] : []),
     ...(filteredSuperAdminItems.length > 0 ? [{ titleKey: 'superAdmin', items: filteredSuperAdminItems }] : []),
   ];
