@@ -87,16 +87,16 @@ export function DataTable<T extends object>({
     <div className={classNames('flex flex-col gap-3', className)}>
       {onSearch && (
         <div className="rounded-lg border border-border bg-card p-3 shadow-sm">
-          <span className="p-input-icon-left block w-full max-w-md">
-            <i className="pi pi-search" />
+          <div className="relative w-full max-w-md">
+            <i className="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground" />
             <InputText
               value={searchValue}
               onChange={handleSearch}
               placeholder={searchPlaceholder ?? t('searchPlaceholder')}
-              className="w-full"
+              className="w-full pl-9"
               aria-label={t('search')}
             />
-          </span>
+          </div>
         </div>
       )}
 

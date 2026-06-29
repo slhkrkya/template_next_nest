@@ -196,15 +196,15 @@ export default function UsersPage() {
 
       <FilterBar>
         <FilterField label={t('common.search')}>
-          <span className="p-input-icon-left block w-full">
-            <i className="pi pi-search" />
+          <div className="relative w-full">
+            <i className="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground" />
             <InputText
               value={search}
               onChange={(event) => handleSearch(event.target.value)}
               placeholder={t('users.searchByNameOrEmail')}
-              className="w-full"
+              className="w-full pl-9"
             />
-          </span>
+          </div>
         </FilterField>
         <FilterField label={t('roles.title')} htmlFor="users-role-filter">
           <Dropdown

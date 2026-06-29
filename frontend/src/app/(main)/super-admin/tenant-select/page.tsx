@@ -108,15 +108,15 @@ export default function TenantSelectPage() {
         {switching === '__global__' && <i className="pi pi-spin pi-spinner text-primary" />}
       </button>
 
-      <span className="p-input-icon-left mb-4 block max-w-md">
-        <i className="pi pi-search" />
+      <div className="relative mb-4 max-w-md">
+        <i className="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground" />
         <InputText
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder={t('search')}
-          className="w-full"
+          className="w-full pl-9"
         />
-      </span>
+      </div>
 
       {isLoading ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
