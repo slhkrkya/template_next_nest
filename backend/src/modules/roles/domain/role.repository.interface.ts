@@ -6,9 +6,10 @@ export interface IRoleRepository {
   findById(id: string): Promise<RoleEntity | null>
   findByName(name: string): Promise<RoleEntity | null>
   findAll(): Promise<RoleEntity[]>
-  create(data: Omit<RoleProps, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }): Promise<RoleEntity>
-  update(id: string, data: Partial<Pick<RoleProps, 'name' | 'description'>>): Promise<RoleEntity>
+  create(data: Omit<RoleProps, 'id' | 'createdAt' | 'updatedAt' | 'userCount'> & { id?: string }): Promise<RoleEntity>
+  update(id: string, data: Partial<Pick<RoleProps, 'name' | 'description' | 'priority'>>): Promise<RoleEntity>
   delete(id: string): Promise<void>
   assignToUser(userId: string, roleId: string, tenantId?: string): Promise<void>
   removeFromUser(userId: string, roleId: string, tenantId?: string): Promise<void>
+  getUsersByRole(roleId: string, tenantId?: string, page?: number, limit?: number): Promise<{ id: string; firstName: string; lastName: string; email: string }[]>
 }

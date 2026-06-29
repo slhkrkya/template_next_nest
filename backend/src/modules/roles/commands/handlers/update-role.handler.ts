@@ -29,6 +29,7 @@ export class UpdateRoleHandler implements ICommandHandler<UpdateRoleCommand> {
     return this.roles.update(id, {
       ...(dto.name !== undefined ? { name: dto.name } : {}),
       ...(dto.description !== undefined ? { description: dto.description } : {}),
+      ...(dto.priority !== undefined ? { priority: dto.priority } : {}),
     });
   }
 }

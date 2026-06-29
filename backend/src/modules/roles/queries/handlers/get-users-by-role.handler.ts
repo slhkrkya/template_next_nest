@@ -13,17 +13,14 @@ export class GetUsersByRoleHandler
   ) {}
 
   async execute(query: GetUsersByRoleQuery) {
-    const { roleId } = query;
+    const { roleId, tenantId, page, limit } = query;
 
     const role = await this.roles.findById(roleId);
     if (!role) {
       throw new NotFoundException(`Role with id ${roleId} not found`);
     }
 
-    // Delegation to repository - user listing by role is handled via repository
-    // The IRoleRepository does not expose getUsersByRole directly; return role for now
-    // If the repository is extended, update this handler accordingly
-    return role;
+    return this.roles.getUsersByRole(roleId, tenantId, page, limit);
   }
 }
 

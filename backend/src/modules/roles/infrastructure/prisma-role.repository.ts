@@ -17,6 +17,8 @@ export class PrismaRoleRepository implements IRoleRepository {
       id: raw.id,
       name: raw.name,
       description: raw.description ?? null,
+      priority: raw.priority ?? 0,
+      userCount: raw._count?.userClaims ?? 0,
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
     })
@@ -33,22 +35,45 @@ export class PrismaRoleRepository implements IRoleRepository {
   }
 
   async findAll(): Promise<RoleEntity[]> {
-    const raw = await this.prisma.operationClaim.findMany({ orderBy: { name: 'asc' } })
+    const raw = await this.prisma.operationClaim.findMany({
+      where: { name: { not: 'SuperAdmin' } },
+      orderBy: { name: 'asc' },
+      include: { _count: { select: { userClaims: true } } },
+    })
     return raw.map(r => this.toEntity(r))
   }
 
-  async create(data: Omit<RoleProps, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }): Promise<RoleEntity> {
+  async getUsersByRole(roleId: string, tenantId?: string, page = 1, limit = 50): Promise<{ id: string; firstName: string; lastName: string; email: string }[]> {
+    const claims = await this.prisma.userOperationClaim.findMany({
+      where: {
+        operationClaimId: roleId,
+        ...(tenantId ? { tenantId } : {}),
+      },
+      include: { user: true },
+      skip: (page - 1) * limit,
+      take: limit,
+    })
+    return claims.map(c => ({
+      id: c.user.id,
+      firstName: c.user.firstName,
+      lastName: c.user.lastName,
+      email: c.user.email,
+    }))
+  }
+
+  async create(data: Omit<RoleProps, 'id' | 'createdAt' | 'updatedAt' | 'userCount'> & { id?: string }): Promise<RoleEntity> {
     const raw = await this.prisma.operationClaim.create({
       data: {
         id: data.id ?? crypto.randomUUID(),
         name: data.name,
         description: data.description,
+        priority: data.priority ?? 0,
       },
     })
     return this.toEntity(raw)
   }
 
-  async update(id: string, data: Partial<Pick<RoleProps, 'name' | 'description'>>): Promise<RoleEntity> {
+  async update(id: string, data: Partial<Pick<RoleProps, 'name' | 'description' | 'priority'>>): Promise<RoleEntity> {
     const raw = await this.prisma.operationClaim.update({ where: { id }, data })
     return this.toEntity(raw)
   }

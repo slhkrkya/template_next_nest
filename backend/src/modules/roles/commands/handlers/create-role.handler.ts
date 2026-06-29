@@ -23,6 +23,7 @@ export class CreateRoleHandler implements ICommandHandler<CreateRoleCommand> {
     return this.roles.create({
       name: dto.name,
       description: dto.description ?? null,
+      priority: dto.priority ?? 0,
     });
   }
 }
