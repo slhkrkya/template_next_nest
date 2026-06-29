@@ -62,7 +62,7 @@ function PasswordStrength({ password }: { password: string }) {
         {checks.map((check) => (
           <span
             key={check.label}
-            className={check.ok ? 'text-xs font-semibold text-emerald-600' : 'text-xs text-slate-400'}
+            className={check.ok ? 'text-xs font-semibold text-emerald-600' : 'text-xs text-muted-foreground'}
           >
             <i className={check.ok ? 'pi pi-check mr-1' : 'pi pi-circle mr-1'} />
             {check.label}
@@ -123,10 +123,10 @@ export default function RegisterPage() {
         <span className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
           <i className="pi pi-check text-2xl" />
         </span>
-        <h2 className="m-0 text-2xl font-bold text-slate-950 dark:text-slate-50">
+        <h2 className="m-0 text-2xl font-bold text-foreground">
           {t('auth.emailSentTitle')}
         </h2>
-        <p className="mx-auto my-5 max-w-sm text-sm leading-6 text-slate-500 dark:text-slate-400">
+        <p className="mx-auto my-5 max-w-sm text-sm leading-6 text-muted-foreground">
           {t('auth.confirmationSent')}
         </p>
         <Link href="/login" className="font-semibold text-primary hover:text-primary/80">
@@ -139,10 +139,10 @@ export default function RegisterPage() {
   return (
     <>
       <div className="mb-8">
-        <h1 className="m-0 text-3xl font-bold text-slate-950 dark:text-slate-50">
+        <h1 className="m-0 text-3xl font-bold text-foreground">
           {t('auth.registerHeading')}
         </h1>
-        <p className="m-0 mt-2 text-sm text-slate-500 dark:text-slate-400">
+        <p className="m-0 mt-2 text-sm text-muted-foreground">
           {t('auth.registerShortSubtitle')}
         </p>
       </div>
@@ -154,7 +154,7 @@ export default function RegisterPage() {
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="firstName" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+            <label htmlFor="firstName" className="mb-2 block text-sm font-semibold text-foreground/80">
               {t('auth.firstName')} <span className="text-rose-600">*</span>
             </label>
             <InputText
@@ -169,7 +169,7 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="lastName" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+            <label htmlFor="lastName" className="mb-2 block text-sm font-semibold text-foreground/80">
               {t('auth.lastName')} <span className="text-rose-600">*</span>
             </label>
             <InputText
@@ -185,7 +185,7 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label htmlFor="email" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <label htmlFor="email" className="mb-2 block text-sm font-semibold text-foreground/80">
             {t('auth.emailAddress')} <span className="text-rose-600">*</span>
           </label>
           <InputText
@@ -201,7 +201,7 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label htmlFor="companyName" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <label htmlFor="companyName" className="mb-2 block text-sm font-semibold text-foreground/80">
             {t('auth.companyName')} <span className="text-rose-600">*</span>
           </label>
           <InputText
@@ -216,7 +216,7 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label htmlFor="password" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <label htmlFor="password" className="mb-2 block text-sm font-semibold text-foreground/80">
             {t('auth.password')} <span className="text-rose-600">*</span>
           </label>
           <Controller
@@ -243,7 +243,7 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label htmlFor="confirmPassword" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <label htmlFor="confirmPassword" className="mb-2 block text-sm font-semibold text-foreground/80">
             {t('auth.confirmPassword')} <span className="text-rose-600">*</span>
           </label>
           <Controller
@@ -268,7 +268,7 @@ export default function RegisterPage() {
           <FieldError message={errors.confirmPassword?.message} />
         </div>
 
-        <p className="m-0 text-xs leading-5 text-slate-400 dark:text-slate-500">
+        <p className="m-0 text-xs leading-5 text-muted-foreground">
           {t('auth.termsPrefix')}{' '}
           <Link href="/terms" className="text-primary hover:text-primary/80">{t('auth.terms')}</Link>{' '}
           {t('auth.and')}{' '}
@@ -284,7 +284,7 @@ export default function RegisterPage() {
         />
       </form>
 
-      <p className="mt-7 text-center text-sm text-slate-500 dark:text-slate-400">
+      <p className="mt-7 text-center text-sm text-muted-foreground">
         {t('auth.haveAccount')}{' '}
         <Link href="/login" className="font-semibold text-primary hover:text-primary/80">
           {t('auth.signIn')}

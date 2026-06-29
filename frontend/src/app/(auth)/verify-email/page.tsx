@@ -64,10 +64,10 @@ export default function VerifyEmailPage() {
         )}
       </span>
 
-      <h2 className="m-0 text-2xl font-bold text-slate-950 dark:text-slate-50">
+      <h2 className="m-0 text-2xl font-bold text-foreground">
         {isPending ? t('verifyEmailTitle') : isSuccess ? t('verifySuccessTitle') : t('verifyFailedTitle')}
       </h2>
-      <p className="mx-auto my-5 max-w-sm text-sm leading-6 text-slate-500 dark:text-slate-400">{message}</p>
+      <p className="mx-auto my-5 max-w-sm text-sm leading-6 text-muted-foreground">{message}</p>
 
       {!isPending && (
         <Link href="/login">

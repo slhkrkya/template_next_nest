@@ -114,120 +114,10 @@
   }
 }
 
-.p-component {
-  font-family: var(--font-inter), Inter, system-ui, sans-serif;
-}
-
-.arca-stat-card {
-  overflow: hidden;
-  position: relative;
-}
-
-.arca-stat-card::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 3px;
-  background: linear-gradient(90deg, hsl(var(--primary)), hsl(152 80% 65%));
-}
-
-.arca-topbar {
-  backdrop-filter: blur(14px);
-  background: hsl(var(--card) / 0.92);
-}
-
-.arca-page-surface {
-  background: hsl(var(--card) / 0.82);
-}
-
-/* PrimeReact & third-party color overrides — map hard-coded Tailwind slate
-   classes to the active CSS-variable theme so components render correctly in
-   both light and dark modes without needing per-component dark: variants. */
-
-.text-slate-950,
-.text-slate-900,
-.text-slate-800 {
-  color: hsl(var(--foreground)) !important;
-}
-
-.dark .dark\:text-slate-50,
-.dark .dark\:text-slate-100 {
-  color: hsl(var(--foreground)) !important;
-}
-
-.text-slate-700,
-.text-slate-600 {
-  color: hsl(var(--foreground) / 0.78) !important;
-}
-
-.dark .dark\:text-slate-200,
-.dark .dark\:text-slate-300 {
-  color: hsl(var(--foreground) / 0.78) !important;
-}
-
-.text-slate-500,
-.text-slate-400,
-.text-slate-300 {
-  color: hsl(var(--muted-foreground)) !important;
-}
-
-.dark .dark\:text-slate-400,
-.dark .dark\:text-slate-500,
-.dark .dark\:text-slate-600,
-.dark .dark\:text-slate-700 {
-  color: hsl(var(--muted-foreground)) !important;
-}
-
-.bg-white {
-  background-color: hsl(var(--card)) !important;
-}
-
-.dark .dark\:bg-slate-950,
-.dark .dark\:bg-slate-900 {
-  background-color: hsl(var(--card)) !important;
-}
-
-.bg-slate-50,
-.bg-slate-100 {
-  background-color: hsl(var(--muted)) !important;
-}
-
-.dark .dark\:bg-slate-800,
-.dark .dark\:bg-slate-800\/50,
-.dark .dark\:bg-slate-800\/60 {
-  background-color: hsl(var(--muted)) !important;
-}
-
-.border-slate-100,
-.border-slate-200,
-.border-slate-300 {
-  border-color: hsl(var(--border)) !important;
-}
-
-.dark .dark\:border-slate-700,
-.dark .dark\:border-slate-800 {
-  border-color: hsl(var(--border)) !important;
-}
-
-.divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
-  border-color: hsl(var(--border)) !important;
-}
-
-.hover\:bg-slate-50:hover {
-  background-color: hsl(var(--accent)) !important;
-}
-
-.dark .dark\:hover\:bg-slate-700\/50:hover {
-  background-color: hsl(var(--accent)) !important;
-}
-
-.hover\:border-slate-300:hover {
-  border-color: hsl(var(--primary) / 0.4) !important;
-}
-
-.dark .dark\:hover\:border-slate-700:hover {
-  border-color: hsl(var(--primary) / 0.4) !important;
-}
+/* ── PrimeReact form component overrides ─────────────────────────────────────
+   Map PrimeReact's Lara theme surface tokens to our CSS variable theme so
+   inputs/dropdowns render correctly in both light and dark modes.
+   These cannot be removed without switching to a CSS-in-JS preset (PrimeReact v11+). */
 
 .p-inputtext,
 .p-password .p-inputtext,
@@ -327,4 +217,20 @@
 .p-disabled,
 .p-component:disabled {
   opacity: 0.65;
+}
+
+/* ── Stat card top accent bar ──────────────────────────────────────────────── */
+/* Top gradient accent bar for stat cards — CSS ::before is required here
+   since Tailwind cannot set pseudo-element content on a PrimeReact Card. */
+.arca-stat-card {
+  overflow: hidden;
+  position: relative;
+}
+
+.arca-stat-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, hsl(var(--primary)), hsl(152 80% 65%));
 }

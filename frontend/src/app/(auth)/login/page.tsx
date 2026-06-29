@@ -93,10 +93,10 @@ export default function LoginPage() {
   return (
     <>
       <div className="mb-8">
-        <h1 className="m-0 text-3xl font-bold text-slate-950 dark:text-slate-50">
+        <h1 className="m-0 text-3xl font-bold text-foreground">
           {t('auth.loginTitle')}
         </h1>
-        <p className="m-0 mt-2 text-sm text-slate-500 dark:text-slate-400">
+        <p className="m-0 mt-2 text-sm text-muted-foreground">
           {t('auth.loginWorkspaceSubtitle')}
         </p>
       </div>
@@ -109,7 +109,7 @@ export default function LoginPage() {
         <div>
           <label
             htmlFor="email"
-            className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300"
+            className="mb-2 block text-sm font-semibold text-foreground/80"
           >
             {t('auth.emailAddress')} <span className="text-rose-600">*</span>
           </label>
@@ -129,7 +129,7 @@ export default function LoginPage() {
           <div className="mb-2 flex items-center justify-between">
             <label
               htmlFor="password"
-              className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
+              className="block text-sm font-semibold text-foreground/80"
             >
               {t('auth.password')} <span className="text-rose-600">*</span>
             </label>
@@ -174,7 +174,7 @@ export default function LoginPage() {
               />
               <label
                 htmlFor="rememberMe"
-                className="cursor-pointer text-sm text-slate-600 dark:text-slate-400"
+                className="cursor-pointer text-sm text-muted-foreground"
               >
                 {t('auth.rememberMe30Days')}
               </label>
@@ -191,7 +191,7 @@ export default function LoginPage() {
         />
       </form>
 
-      <p className="mt-7 text-center text-sm text-slate-500 dark:text-slate-400">
+      <p className="mt-7 text-center text-sm text-muted-foreground">
         {t('auth.noAccount')}{' '}
         <Link
           href="/register"

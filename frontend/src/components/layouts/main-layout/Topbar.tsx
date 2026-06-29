@@ -285,7 +285,7 @@ export function Topbar({ onSidebarToggle, onMobileToggle }: TopbarProps) {
 
   return (
     <>
-      <header className="arca-topbar sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border px-4 shadow-sm">
+      <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border px-4 shadow-sm backdrop-blur-[14px] bg-card/[0.92]">
         <div className="flex items-center gap-3">
           <Button
             type="button"

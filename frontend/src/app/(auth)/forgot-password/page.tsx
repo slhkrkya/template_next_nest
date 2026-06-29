@@ -50,16 +50,16 @@ export default function ForgotPasswordPage() {
         <span className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
           <i className="pi pi-envelope text-2xl" />
         </span>
-        <h2 className="m-0 text-2xl font-bold text-slate-950 dark:text-slate-50">
+        <h2 className="m-0 text-2xl font-bold text-foreground">
           {t('auth.checkInbox')}
         </h2>
-        <p className="mx-auto mb-1 mt-3 max-w-sm text-sm leading-6 text-slate-500 dark:text-slate-400">
+        <p className="mx-auto mb-1 mt-3 max-w-sm text-sm leading-6 text-muted-foreground">
           {t('auth.resetLinkSentTo')}
         </p>
-        <p className="mb-6 text-sm font-semibold text-slate-700 dark:text-slate-300">{submittedEmail}</p>
+        <p className="mb-6 text-sm font-semibold text-foreground/80">{submittedEmail}</p>
         <Button type="button" label={t('auth.tryAnotherEmail')} text onClick={() => setSent(false)} />
         <div className="mt-5">
-          <Link href="/login" className="text-sm font-semibold text-slate-600 dark:text-slate-400">
+          <Link href="/login" className="text-sm font-semibold text-muted-foreground">
             {t('auth.backToSignIn')}
           </Link>
         </div>
@@ -70,10 +70,10 @@ export default function ForgotPasswordPage() {
   return (
     <>
       <div className="mb-8">
-        <h1 className="m-0 text-3xl font-bold text-slate-950 dark:text-slate-50">
+        <h1 className="m-0 text-3xl font-bold text-foreground">
           {t('auth.resetPasswordHeading')}
         </h1>
-        <p className="m-0 mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
+        <p className="m-0 mt-2 text-sm leading-6 text-muted-foreground">
           {t('auth.resetPasswordHelp')}
         </p>
       </div>
@@ -84,7 +84,7 @@ export default function ForgotPasswordPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
         <div>
-          <label htmlFor="email" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <label htmlFor="email" className="mb-2 block text-sm font-semibold text-foreground/80">
             {t('auth.emailAddress')} <span className="text-rose-600">*</span>
           </label>
           <InputText
@@ -111,7 +111,7 @@ export default function ForgotPasswordPage() {
       </form>
 
       <div className="mt-6 text-center">
-        <Link href="/login" className="text-sm font-semibold text-slate-600 dark:text-slate-400">
+        <Link href="/login" className="text-sm font-semibold text-muted-foreground">
           {t('auth.backToSignIn')}
         </Link>
       </div>

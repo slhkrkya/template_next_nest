@@ -39,8 +39,8 @@ export default async function NotFound() {
           </svg>
         </div>
 
-        <h1 className="text-3xl font-bold text-slate-800 mb-3">{t('notFoundTitle')}</h1>
-        <p className="text-slate-500 mb-8 leading-relaxed">
+        <h1 className="text-3xl font-bold text-foreground mb-3">{t('notFoundTitle')}</h1>
+        <p className="text-muted-foreground mb-8 leading-relaxed">
           {t('notFoundHomeDescription')}
         </p>
 

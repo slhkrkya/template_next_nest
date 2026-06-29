@@ -35,7 +35,7 @@ export default async function RootLayout({
         <link
           id="primereact-theme"
           rel="stylesheet"
-          href="/primereact-themes/lara-light-indigo/theme.css"
+          href="/primereact-themes/lara-light-green/theme.css"
         />
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>

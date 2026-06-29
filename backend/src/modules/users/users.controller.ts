@@ -9,6 +9,7 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { GetUser, RequirePermission } from '../../common/decorators';
 import type { AuthenticatedUser } from '../../common/types';
 import {
@@ -87,11 +88,13 @@ export class UsersController {
     return this.usersService.updateSettings(userId, dto);
   }
 
+  @SkipThrottle()
   @Get('theme-preference')
   getThemePreference(@GetUser('id') userId: string) {
     return this.usersService.getThemePreference(userId);
   }
 
+  @SkipThrottle()
   @Patch('theme-preference')
   updateThemePreference(
     @GetUser('id') userId: string,

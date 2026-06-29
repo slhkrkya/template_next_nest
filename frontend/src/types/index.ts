@@ -31,8 +31,6 @@ export interface UserSettings {
 }
 
 export interface UserThemePreference {
-  themeFamily: string
-  themeName: string
   colorScheme: ColorScheme
   inputStyle: PrimeInputStyle
   ripple: boolean

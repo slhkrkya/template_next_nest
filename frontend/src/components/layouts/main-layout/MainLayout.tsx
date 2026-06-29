@@ -52,7 +52,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-30 flex flex-col bg-sidebar-background sidebar-transition shadow-2xl shadow-slate-950/20 lg:static lg:z-auto lg:shadow-none',
+          'fixed inset-y-0 left-0 z-30 flex flex-col bg-sidebar sidebar-transition shadow-2xl shadow-black/20 lg:static lg:z-auto lg:shadow-none',
           sidebarCollapsed ? 'w-16' : 'w-64',
           mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
@@ -68,7 +68,7 @@ export function MainLayout({ children }: MainLayoutProps) {
           onMobileToggle={toggleMobile}
         />
 
-        <main className="arca-page-surface flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto bg-card/[0.82]">
           <div className="mx-auto w-full max-w-[1600px] p-4 md:p-6">
             {children}
           </div>

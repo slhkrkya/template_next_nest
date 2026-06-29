@@ -59,10 +59,10 @@ export default function ResetPasswordPage() {
         <span className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-rose-100 text-rose-600">
           <i className="pi pi-exclamation-triangle text-2xl" />
         </span>
-        <h2 className="m-0 text-2xl font-bold text-slate-950 dark:text-slate-50">
+        <h2 className="m-0 text-2xl font-bold text-foreground">
           {t('auth.invalidResetLinkTitle')}
         </h2>
-        <p className="mx-auto my-5 max-w-sm text-sm leading-6 text-slate-500 dark:text-slate-400">
+        <p className="mx-auto my-5 max-w-sm text-sm leading-6 text-muted-foreground">
           {t('auth.invalidResetLinkMessage')}
         </p>
         <Link href="/forgot-password">
@@ -87,10 +87,10 @@ export default function ResetPasswordPage() {
   return (
     <>
       <div className="mb-8">
-        <h1 className="m-0 text-3xl font-bold text-slate-950 dark:text-slate-50">
+        <h1 className="m-0 text-3xl font-bold text-foreground">
           {t('auth.chooseNewPassword')}
         </h1>
-        <p className="m-0 mt-2 text-sm text-slate-500 dark:text-slate-400">
+        <p className="m-0 mt-2 text-sm text-muted-foreground">
           {t('auth.newPasswordHelp')}
         </p>
       </div>
@@ -101,7 +101,7 @@ export default function ResetPasswordPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
         <div>
-          <label htmlFor="password" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <label htmlFor="password" className="mb-2 block text-sm font-semibold text-foreground/80">
             {t('auth.newPassword')} <span className="text-rose-600">*</span>
           </label>
           <Controller
@@ -127,7 +127,7 @@ export default function ResetPasswordPage() {
         </div>
 
         <div>
-          <label htmlFor="confirmPassword" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <label htmlFor="confirmPassword" className="mb-2 block text-sm font-semibold text-foreground/80">
             {t('auth.confirmNewPassword')} <span className="text-rose-600">*</span>
           </label>
           <Controller
@@ -162,7 +162,7 @@ export default function ResetPasswordPage() {
       </form>
 
       <div className="mt-6 text-center">
-        <Link href="/login" className="text-sm font-semibold text-slate-600 dark:text-slate-400">
+        <Link href="/login" className="text-sm font-semibold text-muted-foreground">
           {t('auth.backToSignIn')}
         </Link>
       </div>
