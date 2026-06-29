@@ -47,10 +47,13 @@ export function useAuth() {
   // ---------------------------------------------------------------------------
 
   async function logout(): Promise<void> {
+    // Set flag immediately so auth-provider skips refresh on hard reload,
+    // even if the server request fails due to a network error.
+    sessionStorage.setItem('auth:logged_out', '1')
     try {
       await apiLogout()
     } catch {
-      // Swallow network errors; we clear local state regardless.
+      // Swallow network errors; local state is cleared regardless.
     } finally {
       clearAuth()
       router.push('/login')
@@ -59,12 +62,13 @@ export function useAuth() {
 
   // ---------------------------------------------------------------------------
 
-  function hasAdminRole(): boolean {
-    return (user?.role ?? '').trim().toLowerCase() === 'admin'
+  function hasAdminAccess(): boolean {
+    const normalizedRole = (user?.role ?? '').trim().toLowerCase()
+    return normalizedRole.length > 0 && normalizedRole !== 'user'
   }
 
   function isAdmin(): boolean {
-    return (user?.isSuperAdmin ?? false) || hasAdminRole()
+    return (user?.isSuperAdmin ?? false) || hasAdminAccess()
   }
 
   function isSuperAdmin(): boolean {

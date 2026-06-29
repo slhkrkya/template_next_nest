@@ -47,6 +47,23 @@ function getCurrentLocale(): string {
   return match?.[1] ? decodeURIComponent(match[1]) : 'en'
 }
 
+function getServerErrorMessage(error: AxiosError): string | null {
+  const payload = error.response?.data
+  if (!payload || typeof payload !== 'object') return null
+
+  const data = payload as { message?: unknown; errors?: unknown }
+  if (typeof data.message === 'string' && data.message.trim()) {
+    return data.message
+  }
+
+  if (Array.isArray(data.errors)) {
+    const messages = data.errors.filter((item): item is string => typeof item === 'string')
+    if (messages.length > 0) return messages.join('\n')
+  }
+
+  return null
+}
+
 // ... Axios instance ...
 
 const axiosInstance: AxiosInstance = axios.create({
@@ -84,15 +101,21 @@ axiosInstance.interceptors.response.use(
     return response
   },
   async (error: AxiosError) => {
+    const serverMessage = getServerErrorMessage(error)
+    if (serverMessage) {
+      error.message = serverMessage
+    }
+
     const originalRequest = error.config as AxiosRequestConfig & {
       _retry?: boolean
     }
 
-    // Only intercept 401s that are not the refresh endpoint itself
+    // Only intercept 401s that are not auth endpoints themselves
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      !originalRequest.url?.includes('/auth/refresh')
+      !originalRequest.url?.includes('/auth/refresh') &&
+      !originalRequest.url?.includes('/auth/login')
     ) {
       if (isRefreshing) {
         // Queue this request until the in-flight refresh completes

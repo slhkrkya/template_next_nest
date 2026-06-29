@@ -57,11 +57,12 @@ const userNavItems: NavItem[] = [
 ];
 
 const adminNavItems: NavItem[] = [
-  { labelKey: 'dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+  { labelKey: 'dashboard', href: '/admin/dashboard', icon: LayoutDashboard, permission: { entity: 'AuditLogs', action: 'read' } },
   { labelKey: 'users', href: '/admin/users', icon: Users, permission: { entity: 'Users', action: 'read' } },
   { labelKey: 'roles', href: '/admin/roles', icon: Shield, permission: { entity: 'Roles', action: 'read' } },
   { labelKey: 'permissions', href: '/admin/permissions', icon: Key, permission: { entity: 'Permissions', action: 'read' } },
   { labelKey: 'auditLogs', href: '/admin/audit-logs', icon: ClipboardList, permission: { entity: 'AuditLogs', action: 'read' } },
+  { labelKey: 'systemLogs', href: '/admin/system-logs', icon: ScrollText, permission: { entity: 'SystemLogs', action: 'read' } },
   { labelKey: 'emailParameters', href: '/admin/email-parameters', icon: Mail, permission: { entity: 'EmailParameters', action: 'read' } },
   { labelKey: 'ipBans', href: '/admin/ip-bans', icon: Ban, permission: { entity: 'IpBans', action: 'read' } },
   { labelKey: 'rateLimits', href: '/admin/rate-limit-violations', icon: Gauge, permission: { entity: 'RateLimits', action: 'read' } },
@@ -75,12 +76,14 @@ const superAdminNavItems: NavItem[] = [
   { labelKey: 'tenants', href: '/super-admin/tenants', icon: Globe, permission: { entity: 'Tenants', action: 'read' } },
   { labelKey: 'subscriptionPlans', href: '/super-admin/subscription-plans', icon: CreditCard, permission: { entity: 'SubscriptionPlans', action: 'read' } },
   { labelKey: 'systemLogs', href: '/super-admin/system-logs', icon: ScrollText, permission: { entity: 'AuditLogs', action: 'read' } },
+  { labelKey: 'rateLimits', href: '/super-admin/rate-limit-violations', icon: Gauge, permission: { entity: 'RateLimits', action: 'read' } },
   { labelKey: 'notifications', href: '/super-admin/notifications', icon: Bell, permission: { entity: 'Notifications', action: 'read' } },
   { labelKey: 'switchTenant', href: '/super-admin/tenant-select', icon: ArrowLeftRight, permission: { entity: 'Tenants', action: 'read' } },
 ];
 
-function isAdminRole(role?: string): boolean {
-  return (role ?? '').trim().toLowerCase() === 'admin';
+function hasAdminAccess(role?: string): boolean {
+  const normalizedRole = (role ?? '').trim().toLowerCase();
+  return normalizedRole.length > 0 && normalizedRole !== 'user';
 }
 
 function NavLink({
@@ -156,7 +159,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { user, clearAuth } = useAuthStore();
   const { hasPermission } = usePermissionStore();
   const isSuperAdmin = user?.isSuperAdmin ?? false;
-  const isAdmin = isAdminRole(user?.role);
+  const hasAdminAccessRole = hasAdminAccess(user?.role);
 
   async function logout() {
     try { await logoutApi(); } catch { /* ignore */ }
@@ -174,7 +177,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   };
 
   // Global mode shows SuperAdmin; tenant mode shows Admin for the selected tenant.
-  const showAdminSection = inTenantMode || isAdmin;
+  const showAdminSection = inTenantMode || hasAdminAccessRole;
   const showSuperAdminSection = inGlobalMode;
 
   const filteredAdminItems = showAdminSection ? adminNavItems.filter(canAccessItem) : [];
@@ -182,7 +185,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
   const groups: NavGroup[] = [
     // User section is visible for regular users and SuperAdmin tenant mode.
-    ...(!isAdmin && !inGlobalMode ? [{ titleKey: 'user', items: userNavItems }] : []),
+    ...(!hasAdminAccessRole && !inGlobalMode ? [{ titleKey: 'user', items: userNavItems }] : []),
     ...(filteredAdminItems.length > 0 ? [{ titleKey: 'admin', items: filteredAdminItems }] : []),
     ...(filteredSuperAdminItems.length > 0 ? [{ titleKey: 'superAdmin', items: filteredSuperAdminItems }] : []),
   ];

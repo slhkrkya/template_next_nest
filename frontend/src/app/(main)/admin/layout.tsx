@@ -5,8 +5,9 @@ interface AdminRouteLayoutProps {
   children: React.ReactNode;
 }
 
-function isAdminRole(role?: string): boolean {
-  return (role ?? '').trim().toLowerCase() === 'admin';
+function hasAdminAccess(role?: string): boolean {
+  const normalizedRole = (role ?? '').trim().toLowerCase();
+  return normalizedRole.length > 0 && normalizedRole !== 'user';
 }
 
 export default async function AdminRouteLayout({
@@ -18,7 +19,7 @@ export default async function AdminRouteLayout({
     redirect('/login');
   }
 
-  if (!user.isSuperAdmin && !isAdminRole(user.role)) {
+  if (!user.isSuperAdmin && !hasAdminAccess(user.role)) {
     redirect('/user/profile');
   }
 

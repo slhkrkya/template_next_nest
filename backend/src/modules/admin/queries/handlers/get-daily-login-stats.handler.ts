@@ -12,6 +12,7 @@ export class GetDailyLoginStatsHandler implements IQueryHandler<GetDailyLoginSta
 
   async execute(query: GetDailyLoginStatsQuery): Promise<DailyLoginStat[]> {
     await this.permissionChecker.check(query.user, 'AuditLogs', 'Read')
-    return this.adminService.getDailyLoginStats()
+    const tenantId = query.user.tenantId ?? (query.user.isSuperAdmin ? undefined : null)
+    return this.adminService.getDailyLoginStats({ tenantId })
   }
 }

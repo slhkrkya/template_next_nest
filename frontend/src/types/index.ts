@@ -53,6 +53,15 @@ export interface AuthUser {
   themePreference?: UserThemePreference
 }
 
+export interface CreateUserRequest {
+  email: string
+  firstName: string
+  lastName: string
+  password: string
+  role?: string
+  tenantId?: string
+}
+
 export interface RegisterRequest {
   firstName: string
   lastName: string

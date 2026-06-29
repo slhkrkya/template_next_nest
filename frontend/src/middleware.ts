@@ -22,6 +22,19 @@ const PUBLIC_PATH_PREFIXES = [
   '/favicon.ico',
 ];
 
+/**
+ * Super-admin paths that don't require tenant context (global mode).
+ * These paths are accessible in global mode without selecting a tenant.
+ */
+const SUPER_ADMIN_GLOBAL_PATHS = [
+  '/super-admin/tenants',
+  '/super-admin/tenant-select',
+  '/super-admin/subscription-plans',
+  '/super-admin/system-logs',
+  '/super-admin/rate-limit-violations',
+  '/super-admin/notifications',
+];
+
 function isPublicPath(pathname: string): boolean {
   return AUTH_PATHS.has(pathname) ||
     PUBLIC_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
@@ -29,6 +42,10 @@ function isPublicPath(pathname: string): boolean {
 
 function isAuthPath(pathname: string): boolean {
   return AUTH_PATHS.has(pathname);
+}
+
+function isSuperAdminGlobalPath(pathname: string): boolean {
+  return SUPER_ADMIN_GLOBAL_PATHS.some((p) => pathname.startsWith(p));
 }
 
 interface JWTPayload {
@@ -70,13 +87,19 @@ function normalizeRole(role?: string): string {
   return (role ?? '').trim().toLowerCase();
 }
 
-function isAdminRole(role?: string): boolean {
-  return normalizeRole(role) === 'admin';
+function hasAdminAccess(role?: string): boolean {
+  const normalizedRole = normalizeRole(role);
+  return normalizedRole.length > 0 && normalizedRole !== 'user';
 }
 
-function getDefaultDashboard(payload: Pick<JWTPayload, 'role' | 'isSuperAdmin'>): string {
-  if (payload.isSuperAdmin) return '/super-admin/tenants';
-  if (isAdminRole(payload.role)) return '/admin/dashboard';
+function getDefaultDashboard(payload: Pick<JWTPayload, 'role' | 'isSuperAdmin' | 'tenantId'>): string {
+  if (payload.isSuperAdmin) {
+    // If super-admin has a tenant context, go to admin dashboard for that tenant
+    if (payload.tenantId) return '/admin/dashboard';
+    // Otherwise, go to global super-admin view
+    return '/super-admin/tenants';
+  }
+  if (hasAdminAccess(payload.role)) return '/admin/dashboard';
   return '/user/profile';
 }
 
@@ -126,16 +149,29 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(getDefaultDashboard(payload), request.url));
   }
 
-  if (pathname.startsWith('/super-admin') && !payload.isSuperAdmin) {
-    return NextResponse.redirect(new URL(getDefaultDashboard(payload), request.url));
+  // Super-admin route protection
+  if (pathname.startsWith('/super-admin')) {
+    if (!payload.isSuperAdmin) {
+      return NextResponse.redirect(new URL(getDefaultDashboard(payload), request.url));
+    }
+    // Super-admin can access super-admin routes (global mode paths)
+    return NextResponse.next();
   }
 
-  if (
-    pathname.startsWith('/admin') &&
-    !payload.isSuperAdmin &&
-    !isAdminRole(payload.role)
-  ) {
-    return NextResponse.redirect(new URL(getDefaultDashboard(payload), request.url));
+  // Admin route protection with tenant context guard for super-admins
+  if (pathname.startsWith('/admin')) {
+    // Super-admin in global mode (no tenant selected) trying to access admin pages
+    // Must select a tenant first to manage admin functionality
+    if (payload.isSuperAdmin && !payload.tenantId) {
+      return NextResponse.redirect(new URL('/super-admin/tenant-select', request.url));
+    }
+
+    // Regular admin without admin role
+    if (!payload.isSuperAdmin && !hasAdminAccess(payload.role)) {
+      return NextResponse.redirect(new URL(getDefaultDashboard(payload), request.url));
+    }
+
+    return NextResponse.next();
   }
 
   return NextResponse.next();

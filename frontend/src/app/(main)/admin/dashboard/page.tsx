@@ -96,11 +96,13 @@ export default function AdminDashboardPage() {
     queryKey: ['admin', 'dashboard-stats'],
     queryFn: getDashboardStats,
     refetchInterval: 30_000,
+    retry: false,
   });
 
   const logsQuery = useQuery({
     queryKey: ['admin', 'audit-logs', { limit: 10 }],
     queryFn: getAuditLogs,
+    retry: false,
   });
 
   const stats = statsQuery.data;

@@ -13,11 +13,11 @@ import {
 } from '@nestjs/common'
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam } from '@nestjs/swagger'
 import { CommandBus, QueryBus } from '@nestjs/cqrs'
-import { PaginationDto } from '../../common/dto/pagination.dto'
 import { GetUser, RequirePermission } from '../../common/decorators'
 import { AuthenticatedUser } from '../../common/types'
 import { BulkDismissDto } from './dto/bulk-dismiss.dto'
 import { ClearOldDto } from './dto/clear-old.dto'
+import { GetViolationsQueryDto } from './dto/get-violations-query.dto'
 import { GetRateLimitViolationsQuery } from './queries'
 import { DismissViolationCommand, BulkDismissViolationsCommand, ClearOldViolationsCommand } from './commands'
 
@@ -35,10 +35,9 @@ export class RateLimitViolationsController {
   @ApiOperation({ summary: 'List rate limit violations (paginated)' })
   findAll(
     @GetUser() user: AuthenticatedUser,
-    @Query() query: PaginationDto,
-    @Query('dismissed') dismissed?: string,
+    @Query() query: GetViolationsQueryDto,
   ) {
-    const dismissedFilter = dismissed === 'true' ? true : dismissed === 'false' ? false : undefined
+    const dismissedFilter = query.dismissed === 'true' ? true : query.dismissed === 'false' ? false : undefined
     return this.queryBus.execute(new GetRateLimitViolationsQuery(user, query, dismissedFilter))
   }
 

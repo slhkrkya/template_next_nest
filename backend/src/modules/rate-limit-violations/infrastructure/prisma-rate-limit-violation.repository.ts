@@ -26,4 +26,38 @@ export class PrismaRateLimitViolationRepository implements IRateLimitViolationRe
     return this.toEntity(r)
   }
   async deleteMany(ids: string[]): Promise<void> { await this.prisma.rateLimitViolation.deleteMany({ where: { id: { in: ids } } }) }
+
+  async findRecentViolation(
+    ipAddress: string,
+    endpoint: string,
+    tenantId: string | null,
+    windowMinutes: number,
+  ): Promise<RateLimitViolationEntity | null> {
+    const cutoffTime = new Date()
+    cutoffTime.setMinutes(cutoffTime.getMinutes() - windowMinutes)
+
+    const record = await this.prisma.rateLimitViolation.findFirst({
+      where: {
+        ipAddress,
+        endpoint,
+        tenantId: tenantId ?? null,
+        isDismissed: false,
+        createdAt: { gte: cutoffTime },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    return record ? this.toEntity(record) : null
+  }
+
+  async incrementViolationCount(id: string): Promise<RateLimitViolationEntity> {
+    const r = await this.prisma.rateLimitViolation.update({
+      where: { id },
+      data: {
+        requestCount: { increment: 1 },
+        windowStart: new Date(), // Update last violation time
+      },
+    })
+    return this.toEntity(r)
+  }
 }

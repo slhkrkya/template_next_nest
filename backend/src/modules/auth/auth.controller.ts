@@ -73,7 +73,7 @@ export class AuthController {
   // POST /auth/login
   // ---------------------------------------------------------------------------
   @Public()
-  @Throttle({ default: { ttl: 900000, limit: 5 } })
+  @Throttle({ login: {} })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @AuditLog('Auth', 'LOGIN')
@@ -94,7 +94,7 @@ export class AuthController {
   // POST /auth/register
   // ---------------------------------------------------------------------------
   @Public()
-  @Throttle({ default: { ttl: 3600000, limit: 5 } })
+  @Throttle({ register: {} })
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @AuditLog('Auth', 'REGISTER')
@@ -167,7 +167,7 @@ export class AuthController {
   // POST /auth/forgot-password
   // ---------------------------------------------------------------------------
   @Public()
-  @Throttle({ default: { ttl: 3600000, limit: 3 } })
+  @Throttle({ forgotPassword: {} })
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   @AuditLog('Auth', 'PASSWORD_RESET_REQUEST')

@@ -34,6 +34,10 @@ import { I18nMiddleware } from './common/i18n';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: [
+        `.env.${process.env.NODE_ENV ?? 'development'}`,
+        '.env', // fallback for backward compatibility
+      ],
       validationSchema: configValidationSchema,
       load: [appConfig, jwtConfig, throttleConfig, mailConfig],
     }),
@@ -42,8 +46,24 @@ import { I18nMiddleware } from './common/i18n';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => [
         {
+          name: 'default',
           ttl: config.get('throttle.ttl', 60000),
           limit: config.get('throttle.limit', 100),
+        },
+        {
+          name: 'login',
+          ttl: config.get('throttle.login.ttl', 900000),
+          limit: config.get('throttle.login.limit', 5),
+        },
+        {
+          name: 'register',
+          ttl: config.get('throttle.register.ttl', 3600000),
+          limit: config.get('throttle.register.limit', 5),
+        },
+        {
+          name: 'forgotPassword',
+          ttl: config.get('throttle.forgotPassword.ttl', 3600000),
+          limit: config.get('throttle.forgotPassword.limit', 3),
         },
       ],
     }),

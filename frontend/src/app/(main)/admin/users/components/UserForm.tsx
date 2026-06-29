@@ -20,7 +20,7 @@ const createCreateSchema = (t: (key: any, params?: any) => string) => z.object({
   lastName: z.string().min(1, t('validation.lastNameRequired')),
   email: z.string().email(t('validation.email')),
   password: z.string().min(8, t('validation.passwordMin')),
-  role: z.enum(['ADMIN', 'MODERATOR', 'USER'], { required_error: t('validation.fieldRequired', { field: t('roles.title') }) }),
+  role: z.enum(['Admin', 'User'], { required_error: t('validation.fieldRequired', { field: t('roles.title') }) }),
   isActive: z.boolean(),
 });
 
@@ -28,7 +28,7 @@ const createEditSchema = (t: (key: any, params?: any) => string) => z.object({
   firstName: z.string().min(1, t('validation.firstNameRequired')),
   lastName: z.string().min(1, t('validation.lastNameRequired')),
   email: z.string().email(t('validation.email')),
-  role: z.enum(['ADMIN', 'MODERATOR', 'USER'], { required_error: t('validation.fieldRequired', { field: t('roles.title') }) }),
+  role: z.enum(['Admin', 'User'], { required_error: t('validation.fieldRequired', { field: t('roles.title') }) }),
   isActive: z.boolean(),
 });
 
@@ -63,9 +63,8 @@ export default function UserForm({ mode, user, onSuccess, onCancel }: UserFormPr
   const createSchema = createCreateSchema(t);
   const editSchema = createEditSchema(t);
   const roleOptions = [
-    { label: t('nav.user'), value: 'USER' },
-    { label: t('users.moderator'), value: 'MODERATOR' },
-    { label: t('nav.admin'), value: 'ADMIN' },
+    { label: t('nav.user'), value: 'User' },
+    { label: t('nav.admin'), value: 'Admin' },
   ];
 
   const {
@@ -80,7 +79,7 @@ export default function UserForm({ mode, user, onSuccess, onCancel }: UserFormPr
       firstName: user?.firstName ?? '',
       lastName: user?.lastName ?? '',
       email: user?.email ?? '',
-      role: (user?.role as 'ADMIN' | 'MODERATOR' | 'USER') ?? 'USER',
+      role: (user?.role as 'Admin' | 'User') ?? 'User',
       isActive: user?.isActive ?? true,
       ...(isCreate ? { password: '' } : {}),
     },

@@ -1,6 +1,7 @@
 import axiosInstance from '@/lib/axios'
 import type {
   ChangePasswordRequest,
+  CreateUserRequest,
   PagedResult,
   PaginationQuery,
   TableColumnPreference,
@@ -56,9 +57,7 @@ export async function getUser(id: string): Promise<User> {
  * Create a new user. Payload mirrors the RegisterRequest shape but is
  * submitted by an admin rather than self-registration.
  */
-export async function createUser(
-  data: Partial<User> & { password: string },
-): Promise<User> {
+export async function createUser(data: CreateUserRequest): Promise<User> {
   const response = await axiosInstance.post<User>('/users', data)
   return response.data
 }

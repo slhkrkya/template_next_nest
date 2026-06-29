@@ -5,12 +5,13 @@ interface SuperAdminRouteLayoutProps {
   children: React.ReactNode;
 }
 
-function isAdminRole(role?: string): boolean {
-  return (role ?? '').trim().toLowerCase() === 'admin';
+function hasAdminAccess(role?: string): boolean {
+  const normalizedRole = (role ?? '').trim().toLowerCase();
+  return normalizedRole.length > 0 && normalizedRole !== 'user';
 }
 
 function getDefaultDashboard(role?: string): string {
-  if (isAdminRole(role)) return '/admin/dashboard';
+  if (hasAdminAccess(role)) return '/admin/dashboard';
   return '/user/profile';
 }
 

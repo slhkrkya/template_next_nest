@@ -1,11 +1,12 @@
 import {
+  IsBoolean,
   IsEmail,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
-  MinLength,
 } from 'class-validator';
+import { IsStrongPassword } from '../../../common/validators/password.validator';
 
 export class CreateUserDto {
   @IsEmail()
@@ -22,7 +23,10 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(6)
+  @IsStrongPassword({
+    message:
+      'Password must be 8-128 characters with uppercase, lowercase, number, and special character. No common patterns or repeated characters.',
+  })
   password: string;
 
   @IsOptional()
@@ -32,4 +36,8 @@ export class CreateUserDto {
   @IsOptional()
   @IsUUID()
   tenantId?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 }

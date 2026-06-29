@@ -77,14 +77,19 @@ export class PrismaUserRepository implements IUserRepository {
     const { page = 1, pageSize = 20, search, tenantId, isActive } = options
     const skip = (page - 1) * pageSize
 
-    const where: any = {}
+    // SuperAdmin users are excluded from listings (ghost users)
+    const where: any = { isSuperAdmin: false }
     if (tenantId) where.tenantId = tenantId
     if (isActive !== undefined) where.isActive = isActive
     if (search) {
-      where.OR = [
-        { email: { contains: search, mode: 'insensitive' } },
-        { firstName: { contains: search, mode: 'insensitive' } },
-        { lastName: { contains: search, mode: 'insensitive' } },
+      where.AND = [
+        {
+          OR: [
+            { email: { contains: search, mode: 'insensitive' } },
+            { firstName: { contains: search, mode: 'insensitive' } },
+            { lastName: { contains: search, mode: 'insensitive' } },
+          ],
+        },
       ]
     }
 

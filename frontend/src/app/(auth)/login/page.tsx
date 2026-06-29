@@ -22,20 +22,21 @@ const createLoginSchema = (t: (key: any, params?: any) => string) => z.object({
 
 type LoginFormData = z.infer<ReturnType<typeof createLoginSchema>>;
 
-function isAdminRole(role?: string): boolean {
-  return (role ?? '').trim().toLowerCase() === 'admin';
+function hasAdminAccess(role?: string): boolean {
+  const normalizedRole = (role ?? '').trim().toLowerCase();
+  return normalizedRole.length > 0 && normalizedRole !== 'user';
 }
 
 function getDefaultDashboard(user: AuthUser): string {
   if (user.isSuperAdmin) return '/super-admin/tenants';
-  if (isAdminRole(user.role)) return '/admin/dashboard';
+  if (hasAdminAccess(user.role)) return '/admin/dashboard';
   return '/user/profile';
 }
 
 function canAccessPath(path: string, user: AuthUser): boolean {
   if (user.isSuperAdmin) return true;
   if (path.startsWith('/super-admin')) return false;
-  if (path.startsWith('/admin')) return isAdminRole(user.role);
+  if (path.startsWith('/admin')) return hasAdminAccess(user.role);
   return true;
 }
 

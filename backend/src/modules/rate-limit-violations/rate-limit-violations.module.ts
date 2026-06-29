@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { CqrsModule } from '@nestjs/cqrs'
 import { RateLimitViolationsService } from './rate-limit-violations.service'
 import { RateLimitViolationsController } from './rate-limit-violations.controller'
+import { SuperAdminRateLimitViolationsController } from './super-admin-rate-limit-violations.controller'
 import { PrismaModule } from '../../prisma/prisma.module'
 import { RATE_LIMIT_VIOLATION_REPOSITORY } from './domain/rate-limit-violation.repository.interface'
 import { PrismaRateLimitViolationRepository } from './infrastructure/prisma-rate-limit-violation.repository'
@@ -14,7 +15,7 @@ const CommandHandlers = [DismissViolationHandler, BulkDismissViolationsHandler, 
 
 @Module({
   imports: [PrismaModule, CqrsModule],
-  controllers: [RateLimitViolationsController],
+  controllers: [RateLimitViolationsController, SuperAdminRateLimitViolationsController],
   providers: [
     RateLimitViolationsService,
     { provide: RATE_LIMIT_VIOLATION_REPOSITORY, useClass: PrismaRateLimitViolationRepository },

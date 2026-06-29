@@ -187,7 +187,7 @@ function LogDetail({ log, onClose }: { log: SystemLog | null; onClose: () => voi
   );
 }
 
-export default function SystemLogsPage() {
+export default function AdminSystemLogsPage() {
   const t = useTranslations('systemLogs');
   const { toast } = useAppToast();
   const [logs, setLogs] = useState<SystemLog[]>([]);

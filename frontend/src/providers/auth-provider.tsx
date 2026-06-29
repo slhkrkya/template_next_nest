@@ -20,6 +20,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     async function initialize() {
+      // Respect an explicit logout — skip refresh even if the httpOnly cookie
+      // still lingers (e.g. server was unreachable during logout).
+      if (sessionStorage.getItem('auth:logged_out') === '1') {
+        sessionStorage.removeItem('auth:logged_out');
+        clearAuth();
+        clearPermissions();
+        setIsInitializing(false);
+        return;
+      }
+
       try {
         const { accessToken } = await refreshToken();
         setAxiosAccessToken(accessToken);

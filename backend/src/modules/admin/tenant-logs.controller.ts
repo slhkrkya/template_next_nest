@@ -43,7 +43,7 @@ export class TenantLogsController {
   }
 
   @Get('system-logs')
-  @RequirePermission('AuditLogs', 'read')
+  @RequirePermission('SystemLogs', 'read')
   @ApiOperation({ summary: 'Get system logs for current tenant' })
   async getSystemLogs(
     @GetUser() user: AuthenticatedUser,

@@ -16,11 +16,20 @@ import { useTranslations } from 'next-intl';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { FilterBar, FilterField, getPrimeOverlayAppendTo } from '@/components/shared/FilterBar';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { translateAuditAction, translateAuditEntity, translateAuditField } from '@/lib/i18n/log-translations';
+
+interface AuditLogUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+}
 
 interface AuditLog {
   id: string;
   userId: string;
-  userName: string;
+  userName?: string;
+  user?: AuditLogUser;
   entityName: string;
   action: string;
   entityId: string;
@@ -32,7 +41,12 @@ interface AuditLog {
 
 interface AuditLogsResponse {
   data: AuditLog[];
-  total: number;
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 const pageSize = 15;
@@ -58,7 +72,13 @@ async function getAuditLogs(params: {
       ...(params.userId && { userId: params.userId }),
     },
   });
-  return res.data;
+  return {
+    ...res.data,
+    data: res.data.data.map((log) => ({
+      ...log,
+      userName: log.userName ?? ([log.user?.firstName, log.user?.lastName].filter(Boolean).join(' ') || log.user?.email || log.userId),
+    })),
+  };
 }
 
 async function getEntities(): Promise<string[]> {
@@ -79,7 +99,8 @@ function actionSeverity(action: string) {
 }
 
 function ActionBadge({ action }: { action: string }) {
-  return <Tag value={action} severity={actionSeverity(action)} />;
+  const t = useTranslations('auditLogs');
+  return <Tag value={translateAuditAction(action, t)} severity={actionSeverity(action)} />;
 }
 
 function JsonDiff({
@@ -116,7 +137,7 @@ function JsonDiff({
       <PrimeColumn
         field="key"
         header={t('field')}
-        body={(row) => <span className="font-mono text-sm text-primary">{row.key}</span>}
+        body={(row) => <span className="text-sm font-semibold text-primary">{translateAuditField(row.key, t)}</span>}
       />
       <PrimeColumn
         field="before"
@@ -180,17 +201,17 @@ export default function AuditLogsPage() {
 
   const entitiesQuery = useQuery({ queryKey: ['entity-names'], queryFn: getEntities });
   const logs = logsQuery.data?.data ?? [];
-  const total = logsQuery.data?.total ?? 0;
+  const total = logsQuery.data?.meta.total ?? 0;
   const actionOptions = [
     { label: t('allActions'), value: '' },
     ...auditActions.map((action) => ({
-      label: action,
+      label: translateAuditAction(action, t),
       value: action,
     })),
   ];
   const entityOptions = [
     { label: t('allEntities'), value: '' },
-    ...(entitiesQuery.data ?? []).map((entity) => ({ label: entity, value: entity })),
+    ...(entitiesQuery.data ?? []).map((entity) => ({ label: translateAuditEntity(entity, t), value: entity })),
   ];
 
   const columns: Column<AuditLog>[] = [
@@ -204,7 +225,7 @@ export default function AuditLogsPage() {
         </div>
       ),
     },
-    { header: t('entity'), key: 'entityName', render: (_, log) => <span className="font-mono text-sm text-muted-foreground">{log.entityName}</span> },
+    { header: t('entity'), key: 'entityName', render: (_, log) => <span className="text-sm font-semibold text-muted-foreground">{translateAuditEntity(log.entityName, t)}</span> },
     { header: t('action'), key: 'action', render: (_, log) => <ActionBadge action={log.action} /> },
     { header: t('entityId'), key: 'entityId', render: (_, log) => <span className="font-mono text-xs text-muted-foreground">{log.entityId}</span> },
     { header: t('ipAddress'), key: 'ipAddress', render: (_, log) => <span className="font-mono text-xs text-muted-foreground">{log.ipAddress}</span> },
@@ -366,7 +387,7 @@ export default function AuditLogsPage() {
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               {[
                 [t('user'), detailLog.userName],
-                [t('entity'), detailLog.entityName],
+                [t('entity'), translateAuditEntity(detailLog.entityName, t)],
                 [t('entityId'), detailLog.entityId],
                 [t('ipAddress'), detailLog.ipAddress],
                 [t('time'), format(new Date(detailLog.createdAt), 'PPpp')],

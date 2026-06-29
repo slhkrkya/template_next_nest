@@ -16,6 +16,18 @@ export const jwtConfig = registerAs('jwt', () => ({
 export const throttleConfig = registerAs('throttle', () => ({
   ttl: parseInt(process.env.THROTTLE_TTL ?? '60000', 10),
   limit: parseInt(process.env.THROTTLE_LIMIT ?? '100', 10),
+  login: {
+    ttl: parseInt(process.env.THROTTLE_LOGIN_TTL ?? '900000', 10),
+    limit: parseInt(process.env.THROTTLE_LOGIN_LIMIT ?? '5', 10),
+  },
+  register: {
+    ttl: parseInt(process.env.THROTTLE_REGISTER_TTL ?? '3600000', 10),
+    limit: parseInt(process.env.THROTTLE_REGISTER_LIMIT ?? '5', 10),
+  },
+  forgotPassword: {
+    ttl: parseInt(process.env.THROTTLE_FORGOT_PASSWORD_TTL ?? '3600000', 10),
+    limit: parseInt(process.env.THROTTLE_FORGOT_PASSWORD_LIMIT ?? '3', 10),
+  },
 }))
 
 export const mailConfig = registerAs('mail', () => ({

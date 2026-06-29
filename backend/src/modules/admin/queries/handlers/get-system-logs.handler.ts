@@ -11,7 +11,7 @@ export class GetSystemLogsHandler implements IQueryHandler<GetSystemLogsQuery> {
   ) {}
 
   async execute(query: GetSystemLogsQuery) {
-    await this.permissionChecker.check(query.user, 'AuditLogs', 'Read')
+    await this.permissionChecker.check(query.user, 'SystemLogs', 'Read')
     return this.adminService.getSystemLogs(query.filters)
   }
 }

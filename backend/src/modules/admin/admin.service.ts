@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 
 export interface DashboardStats {
@@ -10,7 +11,7 @@ export interface DashboardStats {
 
 export interface AuditLogFilters {
   userId?: string;
-  tenantId?: string;
+  tenantId?: string | null;
   entityName?: string;
   action?: string;
   dateFrom?: string;
@@ -22,9 +23,10 @@ export interface AuditLogFilters {
 export interface SystemLogFilters {
   level?: string;
   source?: string;
-  tenantId?: string;
+  tenantId?: string | null;
   dateFrom?: string;
   dateTo?: string;
+  search?: string;
   page?: number;
   limit?: number;
 }
@@ -39,24 +41,41 @@ export interface DailyLoginStat {
 export class AdminService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getDashboardStats(): Promise<DashboardStats> {
+  async getDashboardStats(
+    filters: { tenantId?: string | null } = {},
+  ): Promise<DashboardStats> {
+    const { tenantId } = filters;
+
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
+    // SuperAdmin users are excluded from all counts (ghost users)
+    const excludeSuperAdmin = { isSuperAdmin: false };
+    const tenantFilter = tenantId !== undefined ? { tenantId } : {};
+    const userWhere = { ...excludeSuperAdmin, ...tenantFilter };
+    const totalTenantsPromise =
+      tenantId === undefined
+        ? this.prisma.tenant.count()
+        : tenantId === null
+          ? Promise.resolve(0)
+          : this.prisma.tenant.count({ where: { id: tenantId } });
+
     const [totalUsers, activeUsers, totalTenants, recentSignups] =
       await Promise.all([
-        this.prisma.user.count(),
+        this.prisma.user.count({ where: userWhere }),
         this.prisma.user.count({
           where: {
+            ...userWhere,
             lastLoginAt: { gte: thirtyDaysAgo },
           },
         }),
-        this.prisma.tenant.count(),
+        totalTenantsPromise,
         this.prisma.user.count({
           where: {
+            ...userWhere,
             createdAt: { gte: sevenDaysAgo },
           },
         }),
@@ -131,6 +150,7 @@ export class AdminService {
       tenantId,
       dateFrom,
       dateTo,
+      search,
       page = 1,
       limit = 20,
     } = filters;
@@ -138,7 +158,7 @@ export class AdminService {
     const where: Record<string, unknown> = {};
 
     if (level) where.level = level;
-    if (source) where.source = source;
+    if (source) where.source = { contains: source, mode: 'insensitive' };
     if (tenantId !== undefined) where.tenantId = tenantId;
 
     if (dateFrom || dateTo) {
@@ -146,6 +166,11 @@ export class AdminService {
       if (dateFrom) createdAt.gte = new Date(dateFrom);
       if (dateTo) createdAt.lte = new Date(dateTo);
       where.createdAt = createdAt;
+    }
+
+    // Search in message field
+    if (search) {
+      where.message = { contains: search, mode: 'insensitive' };
     }
 
     const skip = (page - 1) * limit;
@@ -171,22 +196,38 @@ export class AdminService {
     };
   }
 
-  async getDailyLoginStats(): Promise<DailyLoginStat[]> {
+  async getDailyLoginStats(
+    filters: { tenantId?: string | null } = {},
+  ): Promise<DailyLoginStat[]> {
+    const { tenantId } = filters;
+
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     thirtyDaysAgo.setHours(0, 0, 0, 0);
 
+    const tenantFilter =
+      tenantId === undefined
+        ? Prisma.empty
+        : tenantId === null
+          ? Prisma.sql`AND al."tenantId" IS NULL`
+          : Prisma.sql`AND al."tenantId" = ${tenantId}`;
+
+    // Exclude SuperAdmin logins from daily stats (ghost users)
     const rawStats = await this.prisma.$queryRaw<
       { date: Date; count: bigint }[]
     >`
       SELECT
-        DATE("createdAt") AS date,
+        DATE(al."createdAt") AS date,
         COUNT(*)::int AS count
-      FROM "audit_logs"
+      FROM "audit_logs" al
       WHERE
-        action = 'LOGIN'
-        AND "createdAt" >= ${thirtyDaysAgo}
-      GROUP BY DATE("createdAt")
+        al.action = 'LOGIN'
+        AND al."createdAt" >= ${thirtyDaysAgo}
+        ${tenantFilter}
+        AND al."userId" NOT IN (
+          SELECT id FROM "users" WHERE "isSuperAdmin" = true
+        )
+      GROUP BY DATE(al."createdAt")
       ORDER BY date ASC
     `;
 

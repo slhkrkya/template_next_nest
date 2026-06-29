@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation';
 import { getUserFromCookie } from '@/lib/auth';
 
-function isAdminRole(role?: string): boolean {
-  return (role ?? '').trim().toLowerCase() === 'admin';
+function hasAdminAccess(role?: string): boolean {
+  const normalizedRole = (role ?? '').trim().toLowerCase();
+  return normalizedRole.length > 0 && normalizedRole !== 'user';
 }
 
 export default async function UserDashboardPage() {
@@ -12,7 +13,7 @@ export default async function UserDashboardPage() {
     redirect('/super-admin/tenants');
   }
 
-  if (isAdminRole(user?.role)) {
+  if (hasAdminAccess(user?.role)) {
     redirect('/admin/dashboard');
   }
 

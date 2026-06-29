@@ -12,6 +12,7 @@ export class GetDashboardStatsHandler implements IQueryHandler<GetDashboardStats
 
   async execute(query: GetDashboardStatsQuery): Promise<DashboardStats> {
     await this.permissionChecker.check(query.user, 'AuditLogs', 'Read')
-    return this.adminService.getDashboardStats()
+    const tenantId = query.user.tenantId ?? (query.user.isSuperAdmin ? undefined : null)
+    return this.adminService.getDashboardStats({ tenantId })
   }
 }
