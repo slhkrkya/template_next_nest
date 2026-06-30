@@ -2,6 +2,8 @@ import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs'
 import { Inject, Injectable, ForbiddenException } from '@nestjs/common'
 import * as bcrypt from 'bcryptjs'
 import { IUserRepository, USER_REPOSITORY } from '../../domain/user.repository.interface'
+import { IRoleRepository, ROLE_REPOSITORY } from '../../../roles/domain/role.repository.interface'
+import { IPermissionRepository, PERMISSION_REPOSITORY } from '../../../permissions/domain/permission.repository.interface'
 import { EntityAlreadyExistsException } from '../../../../core/exceptions/domain.exception'
 import { CreateUserCommand } from '../create-user.command'
 import { UserCreatedEvent } from '../../domain/events/user-created.event'
@@ -12,6 +14,8 @@ import { PrismaService } from '../../../../prisma/prisma.service'
 export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
   constructor(
     @Inject(USER_REPOSITORY) private readonly users: IUserRepository,
+    @Inject(ROLE_REPOSITORY) private readonly roles: IRoleRepository,
+    @Inject(PERMISSION_REPOSITORY) private readonly permissions: IPermissionRepository,
     private readonly eventBus: EventBus,
     private readonly prisma: PrismaService,
   ) {}
@@ -41,6 +45,14 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
       tenantId: effectiveTenantId,
       role: dto.role,
     })
+
+    if (dto.role) {
+      const role = await this.roles.findByName(dto.role)
+      if (role) {
+        await this.roles.assignToUser(user.id, role.id, effectiveTenantId ?? undefined)
+        await this.permissions.syncRolePermissionsToUser(role.id, user.id, effectiveTenantId ?? undefined)
+      }
+    }
 
     this.eventBus.publish(new UserCreatedEvent(user.id, user.email, user.tenantId))
 

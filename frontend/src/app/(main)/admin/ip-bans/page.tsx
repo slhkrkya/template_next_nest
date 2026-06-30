@@ -18,6 +18,7 @@ import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { getPrimeOverlayAppendTo } from '@/components/shared/FilterBar';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 
 interface IpBan {
   id: string;
@@ -138,15 +139,17 @@ export default function IpBansPage() {
       header: commonT('actions'),
       key: 'id',
       render: (_, ban) => (
-        <Button
-          type="button"
-          label={t('unban')}
-          icon="pi pi-unlock"
-          severity="danger"
-          outlined
-          size="small"
-          onClick={() => setUnbanTarget(ban)}
-        />
+        <PermissionGuard entity="IpBans" action="delete">
+          <Button
+            type="button"
+            label={t('unban')}
+            icon="pi pi-unlock"
+            severity="danger"
+            outlined
+            size="small"
+            onClick={() => setUnbanTarget(ban)}
+          />
+        </PermissionGuard>
       ),
     },
   ];
@@ -156,7 +159,11 @@ export default function IpBansPage() {
       <PageHeader
         title={t('title')}
         subtitle={t('subtitle')}
-        actions={<Button type="button" label={t('addBan')} icon="pi pi-plus" onClick={() => setAddOpen(true)} />}
+        actions={
+          <PermissionGuard entity="IpBans" action="create">
+            <Button type="button" label={t('addBan')} icon="pi pi-plus" onClick={() => setAddOpen(true)} />
+          </PermissionGuard>
+        }
       />
 
       <DataTable

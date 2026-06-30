@@ -14,6 +14,7 @@ import { Tag } from 'primereact/tag';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { FilterBar, FilterField, getPrimeOverlayAppendTo } from '@/components/shared/FilterBar';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 
 type ScopeType = 'SELF' | 'DEPARTMENT' | 'ALL';
 
@@ -149,14 +150,16 @@ export default function DataScopesPage() {
       key: 'save',
       className: 'w-28',
       render: (_, scope) => (
-        <Button
-          type="button"
-          label={commonT('save')}
-          size="small"
-          disabled={!pendingChanges[scope.entityName]}
-          loading={updateMutation.isPending}
-          onClick={() => updateMutation.mutate({ entityName: scope.entityName, scopeType: pendingChanges[scope.entityName] })}
-        />
+        <PermissionGuard entity="DataScopes" action="update">
+          <Button
+            type="button"
+            label={commonT('save')}
+            size="small"
+            disabled={!pendingChanges[scope.entityName]}
+            loading={updateMutation.isPending}
+            onClick={() => updateMutation.mutate({ entityName: scope.entityName, scopeType: pendingChanges[scope.entityName] })}
+          />
+        </PermissionGuard>
       ),
     },
   ];
@@ -202,14 +205,16 @@ export default function DataScopesPage() {
         <Card>
           <FilterBar
             actions={
-              <Button
-                type="button"
-                label={t('addScope')}
-                icon="pi pi-plus"
-                disabled={!addEntityName}
-                loading={addMutation.isPending}
-                onClick={() => addMutation.mutate()}
-              />
+              <PermissionGuard entity="DataScopes" action="create">
+                <Button
+                  type="button"
+                  label={t('addScope')}
+                  icon="pi pi-plus"
+                  disabled={!addEntityName}
+                  loading={addMutation.isPending}
+                  onClick={() => addMutation.mutate()}
+                />
+              </PermissionGuard>
             }
           >
             <FilterField label={t('addEntity')} htmlFor="entity-select">

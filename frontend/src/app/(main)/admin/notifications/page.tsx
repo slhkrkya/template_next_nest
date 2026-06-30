@@ -19,6 +19,7 @@ import { SelectButton } from 'primereact/selectbutton';
 import { Tag } from 'primereact/tag';
 import { FilterBar, FilterField, getPrimeOverlayAppendTo } from '@/components/shared/FilterBar';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 
 interface Notification {
   id: string;
@@ -174,15 +175,17 @@ export default function AdminNotificationsPage() {
         title={t('notifications.title')}
         subtitle={t('notifications.adminSubtitle')}
         actions={
-          <Button
-            type="button"
-            label={t('notifications.createNotification')}
-            icon="pi pi-plus"
-            onClick={() => {
-              setCreateOpen(true);
-              reset();
-            }}
-          />
+          <PermissionGuard entity="Notifications" action="create">
+            <Button
+              type="button"
+              label={t('notifications.createNotification')}
+              icon="pi pi-plus"
+              onClick={() => {
+                setCreateOpen(true);
+                reset();
+              }}
+            />
+          </PermissionGuard>
         }
       />
 
@@ -250,15 +253,17 @@ export default function AdminNotificationsPage() {
                       onClick={() => markReadMutation.mutate(notification.id)}
                     />
                   )}
-                  <Button
-                    type="button"
-                    icon="pi pi-trash"
-                    severity="danger"
-                    text
-                    rounded
-                    aria-label={t('common.delete')}
-                    onClick={() => deleteMutation.mutate(notification.id)}
-                  />
+                  <PermissionGuard entity="Notifications" action="delete">
+                    <Button
+                      type="button"
+                      icon="pi pi-trash"
+                      severity="danger"
+                      text
+                      rounded
+                      aria-label={t('common.delete')}
+                      onClick={() => deleteMutation.mutate(notification.id)}
+                    />
+                  </PermissionGuard>
                 </div>
               </div>
             </Card>

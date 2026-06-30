@@ -18,6 +18,7 @@ import { Tag } from 'primereact/tag';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 
 interface OperationClaim {
   id: string;
@@ -178,8 +179,12 @@ export default function RolesPage() {
       render: (_, role) => (
         <div className="flex gap-2">
           <Button type="button" icon="pi pi-users" severity="info" text rounded aria-label={t('roles.showUsers')} onClick={() => setSelectedRole(role)} />
-          <Button type="button" icon="pi pi-pencil" severity="secondary" text rounded aria-label={t('roles.editRoleAria')} onClick={() => setEditTarget(role)} />
-          <Button type="button" icon="pi pi-trash" severity="danger" text rounded aria-label={t('roles.deleteRoleAria')} onClick={() => setDeleteTarget(role)} />
+          <PermissionGuard entity="Roles" action="update">
+            <Button type="button" icon="pi pi-pencil" severity="secondary" text rounded aria-label={t('roles.editRoleAria')} onClick={() => setEditTarget(role)} />
+          </PermissionGuard>
+          <PermissionGuard entity="Roles" action="delete">
+            <Button type="button" icon="pi pi-trash" severity="danger" text rounded aria-label={t('roles.deleteRoleAria')} onClick={() => setDeleteTarget(role)} />
+          </PermissionGuard>
         </div>
       ),
     },
@@ -190,7 +195,11 @@ export default function RolesPage() {
       <PageHeader
         title={t('roles.title')}
         subtitle={t('roles.subtitle')}
-        actions={<Button type="button" label={t('roles.newRole')} icon="pi pi-plus" onClick={() => setCreateOpen(true)} />}
+        actions={
+          <PermissionGuard entity="Roles" action="create">
+            <Button type="button" label={t('roles.newRole')} icon="pi pi-plus" onClick={() => setCreateOpen(true)} />
+          </PermissionGuard>
+        }
       />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[3fr_2fr]">

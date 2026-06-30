@@ -13,6 +13,7 @@ import {
 } from "@/lib/api/permissions.api";
 import { getUsers as fetchUsers } from "@/lib/api/users.api";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { PermissionGuard } from "@/components/shared/PermissionGuard";
 import { useAppToast } from "@/providers/prime-provider";
 import type {
   OperationClaim,
@@ -313,13 +314,15 @@ export default function PermissionsPage() {
         subtitle={t("subtitle")}
         actions={
           selectedId ? (
-            <Button
-              label={saveMutation.isPending ? commonT("saving") : commonT("saveChanges")}
-              icon="pi pi-save"
-              onClick={() => saveMutation.mutate()}
-              disabled={!isDirty || saveMutation.isPending}
-              loading={saveMutation.isPending}
-            />
+            <PermissionGuard entity="Permissions" action="update">
+              <Button
+                label={saveMutation.isPending ? commonT("saving") : commonT("saveChanges")}
+                icon="pi pi-save"
+                onClick={() => saveMutation.mutate()}
+                disabled={!isDirty || saveMutation.isPending}
+                loading={saveMutation.isPending}
+              />
+            </PermissionGuard>
           ) : undefined
         }
       />

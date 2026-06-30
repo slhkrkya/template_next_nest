@@ -98,10 +98,13 @@ export class AdminService {
 
     const where: Record<string, unknown> = {};
 
+    // Frontend may send action as { label, value } object — extract the string value
+    const actionValue = action && typeof action === 'object' ? (action as any).value : action;
+
     if (userId) where.userId = userId;
     if (tenantId !== undefined) where.tenantId = tenantId;
     if (entityName) where.entityName = entityName;
-    if (action) where.action = action;
+    if (actionValue) where.action = actionValue;
 
     if (dateFrom || dateTo) {
       const createdAt: Record<string, Date> = {};

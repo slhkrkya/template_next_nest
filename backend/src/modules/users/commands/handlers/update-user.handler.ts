@@ -28,6 +28,7 @@ export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
       firstName: dto.firstName,
       lastName: dto.lastName,
       isActive: dto.isActive,
+      role: dto.role,
     })
 
     if (dto.role && dto.role !== existing.role) {

@@ -45,7 +45,7 @@ export interface IUserRepository {
   findByEmail(email: string): Promise<UserEntity | null>
   findMany(options: FindUsersOptions): Promise<PaginatedUsers>
   create(data: Omit<UserProps, 'createdAt' | 'updatedAt'>): Promise<UserEntity>
-  update(id: string, data: Partial<Pick<UserProps, 'firstName' | 'lastName' | 'isActive' | 'passwordHash'>>): Promise<UserEntity>
+  update(id: string, data: Partial<Pick<UserProps, 'firstName' | 'lastName' | 'isActive' | 'passwordHash' | 'role'>>): Promise<UserEntity>
   delete(id: string): Promise<void>
   existsByEmail(email: string): Promise<boolean>
   updateSettings(userId: string, data: UserSettingsData): Promise<UserSettingsData>

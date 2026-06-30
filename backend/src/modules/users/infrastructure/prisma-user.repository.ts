@@ -144,8 +144,10 @@ export class PrismaUserRepository implements IUserRepository {
     return this.toEntity(raw)
   }
 
-  async update(id: string, data: Partial<Pick<UserProps, 'firstName' | 'lastName' | 'isActive' | 'passwordHash'>>): Promise<UserEntity> {
-    const raw = await this.prisma.user.update({ where: { id }, data, select: this.select })
+  async update(id: string, data: Partial<Pick<UserProps, 'firstName' | 'lastName' | 'isActive' | 'passwordHash' | 'role'>>): Promise<UserEntity> {
+    // `role` is a computed field from operationClaims — not a DB column; exclude it
+    const { role: _role, ...dbData } = data
+    const raw = await this.prisma.user.update({ where: { id }, data: dbData, select: this.select })
     return this.toEntity(raw)
   }
 

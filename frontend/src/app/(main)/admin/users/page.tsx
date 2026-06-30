@@ -15,6 +15,7 @@ import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { FilterBar, FilterField, getPrimeOverlayAppendTo } from '@/components/shared/FilterBar';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 import UserForm from './components/UserForm';
 
 export interface User {
@@ -161,24 +162,28 @@ export default function UsersPage() {
       className: 'w-32',
       render: (_, user) => (
         <div className="flex gap-2">
-          <Button
-            type="button"
-            icon="pi pi-pencil"
-            severity="secondary"
-            text
-            rounded
-            aria-label={t('users.editUserAria')}
-            onClick={() => setEditUser(user)}
-          />
-          <Button
-            type="button"
-            icon="pi pi-trash"
-            severity="danger"
-            text
-            rounded
-            aria-label={t('users.deleteUserAria')}
-            onClick={() => setDeleteTarget(user)}
-          />
+          <PermissionGuard entity="Users" action="update">
+            <Button
+              type="button"
+              icon="pi pi-pencil"
+              severity="secondary"
+              text
+              rounded
+              aria-label={t('users.editUserAria')}
+              onClick={() => setEditUser(user)}
+            />
+          </PermissionGuard>
+          <PermissionGuard entity="Users" action="delete">
+            <Button
+              type="button"
+              icon="pi pi-trash"
+              severity="danger"
+              text
+              rounded
+              aria-label={t('users.deleteUserAria')}
+              onClick={() => setDeleteTarget(user)}
+            />
+          </PermissionGuard>
         </div>
       ),
     },
@@ -190,7 +195,9 @@ export default function UsersPage() {
         title={t('users.title')}
         subtitle={t('users.subtitle')}
         actions={
-          <Button type="button" label={t('users.newUser')} icon="pi pi-plus" onClick={() => setCreateOpen(true)} />
+          <PermissionGuard entity="Users" action="create">
+            <Button type="button" label={t('users.newUser')} icon="pi pi-plus" onClick={() => setCreateOpen(true)} />
+          </PermissionGuard>
         }
       />
 

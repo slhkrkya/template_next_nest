@@ -12,6 +12,7 @@ import { Tag } from 'primereact/tag';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { FilterBar, FilterField } from '@/components/shared/FilterBar';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 
 interface RateLimitViolation {
   id: string;
@@ -152,15 +153,17 @@ export default function RateLimitViolationsPage() {
       className: 'w-28',
       render: (_, row) =>
         row.dismissed ? null : (
-          <Button
-            type="button"
-            label={t('dismiss')}
-            size="small"
-            severity="warning"
-            outlined
-            loading={dismissMutation.isPending}
-            onClick={() => dismissMutation.mutate(row.id)}
-          />
+          <PermissionGuard entity="RateLimits" action="delete">
+            <Button
+              type="button"
+              label={t('dismiss')}
+              size="small"
+              severity="warning"
+              outlined
+              loading={dismissMutation.isPending}
+              onClick={() => dismissMutation.mutate(row.id)}
+            />
+          </PermissionGuard>
         ),
     },
   ];

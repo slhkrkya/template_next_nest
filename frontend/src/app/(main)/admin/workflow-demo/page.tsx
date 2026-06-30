@@ -19,6 +19,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { PermissionGuard } from "@/components/shared/PermissionGuard";
 import { useAppToast } from "@/providers/prime-provider";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
@@ -344,7 +345,9 @@ export default function WorkflowDemoPage() {
                   </span>
                 </button>
               ))}
-              <Button label={t("workflow.addNode")} icon="pi pi-plus" onClick={addNode} className="w-full" />
+              <PermissionGuard entity="EntityWorkflows" action="create">
+                <Button label={t("workflow.addNode")} icon="pi pi-plus" onClick={addNode} className="w-full" />
+              </PermissionGuard>
             </div>
           </Card>
 
@@ -362,13 +365,15 @@ export default function WorkflowDemoPage() {
                   setEdges(initialEdges);
                 }}
               />
-              <Button
-                label={t("workflow.clearAll")}
-                icon="pi pi-trash"
-                severity="danger"
-                outlined
-                onClick={() => setClearDialogVisible(true)}
-              />
+              <PermissionGuard entity="EntityWorkflows" action="delete">
+                <Button
+                  label={t("workflow.clearAll")}
+                  icon="pi pi-trash"
+                  severity="danger"
+                  outlined
+                  onClick={() => setClearDialogVisible(true)}
+                />
+              </PermissionGuard>
             </div>
           </Card>
 
