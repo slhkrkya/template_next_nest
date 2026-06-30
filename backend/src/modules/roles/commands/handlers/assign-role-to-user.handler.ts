@@ -4,6 +4,7 @@ import { IRoleRepository, ROLE_REPOSITORY } from '../../domain/role.repository.i
 import { IPermissionRepository, PERMISSION_REPOSITORY } from '../../../permissions/domain/permission.repository.interface';
 import { EntityNotFoundException } from '../../../../core/exceptions/domain.exception';
 import { AssignRoleToUserCommand } from '../assign-role-to-user.command';
+import { PermissionsGateway } from '../../../websockets/permissions.gateway';
 
 @Injectable()
 @CommandHandler(AssignRoleToUserCommand)
@@ -13,6 +14,7 @@ export class AssignRoleToUserHandler
   constructor(
     @Inject(ROLE_REPOSITORY) private readonly roles: IRoleRepository,
     @Inject(PERMISSION_REPOSITORY) private readonly permissions: IPermissionRepository,
+    private readonly permissionsGateway: PermissionsGateway,
   ) {}
 
   async execute(command: AssignRoleToUserCommand) {
@@ -25,6 +27,7 @@ export class AssignRoleToUserHandler
 
     await this.roles.assignToUser(userId, roleId, tenantId);
     await this.permissions.syncRolePermissionsToUser(roleId, userId, tenantId);
+    this.permissionsGateway.notifyPermissionsUpdated(userId);
 
     return { message: 'Role assigned successfully' };
   }

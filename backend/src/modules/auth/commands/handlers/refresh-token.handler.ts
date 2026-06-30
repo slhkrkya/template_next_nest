@@ -8,6 +8,7 @@ import {
 } from '../../domain/auth.repository.interface';
 import { RefreshTokenCommand } from '../refresh-token.command';
 import { IUnitOfWork, UNIT_OF_WORK } from '../../../../common/unit-of-work';
+import { parseDurationMs } from '../../../../common/utils/parse-duration.util';
 
 @Injectable()
 @CommandHandler(RefreshTokenCommand)
@@ -53,9 +54,9 @@ export class RefreshTokenHandler
     const user = storedToken.user;
     const roleName = user.role ?? 'User';
 
-    // SuperAdmin için refresh token JWT'sindeki tenantId'yi koru.
-    // DB'deki SuperAdmin tenantId her zaman null olduğundan switch edilmiş
-    // tenant context token refresh'te sıfırlanırdı.
+    // Preserve the tenant context carried by the SuperAdmin refresh token.
+    // SuperAdmin tenantId is stored as null in DB, so reading it from the user
+    // record would reset a switched tenant context during refresh.
     const resolvedTenantId = (user.isSuperAdmin ?? false)
       ? (payload.tenantId ?? null)
       : (user.tenantId ?? null);
@@ -74,7 +75,7 @@ export class RefreshTokenHandler
     );
     const expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000);
 
-    // Sign tokens before transaction (CPU-only, no DB)
+    // Sign tokens before transaction (CPU-only, no DB).
     const [accessToken, newRefreshToken] = await Promise.all([
       this.jwtService.signAsync(tokenPayload, {
         secret: this.configService.getOrThrow<string>('JWT_SECRET'),
@@ -86,17 +87,21 @@ export class RefreshTokenHandler
       }),
     ]);
 
-    // Atomic: revoke old + create new — if create fails, old token is not revoked
+    // Atomic: revoke old + create new. If create fails, old token is not revoked.
     await this.uow.runInTransaction(async () => {
       await this.authRepo.revokeRefreshToken(refreshTokenFromCookie);
       await this.authRepo.createRefreshToken(user.id, newRefreshToken, expiresAt);
     });
 
     const isProduction = this.configService.get('NODE_ENV') === 'production';
+    const accessTokenMaxAge = parseDurationMs(
+      this.configService.get<string>('JWT_EXPIRES_IN', '15m'),
+    );
     res.cookie('access_token', accessToken, {
       httpOnly: true,
       secure: isProduction,
       sameSite: 'strict',
+      maxAge: accessTokenMaxAge,
       path: '/',
     });
     res.cookie('refreshToken', newRefreshToken, {
@@ -104,7 +109,7 @@ export class RefreshTokenHandler
       secure: isProduction,
       sameSite: 'strict',
       maxAge: expiresInDays * 24 * 60 * 60 * 1000,
-      path: '/',
+      path: '/auth/refresh',
     });
 
     return { accessToken };

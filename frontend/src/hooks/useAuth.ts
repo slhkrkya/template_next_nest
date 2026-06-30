@@ -2,7 +2,9 @@
 
 import { useRouter } from 'next/navigation'
 import { login as apiLogin, logout as apiLogout, register as apiRegister } from '@/lib/api/auth.api'
+import { getMyPermissions } from '@/lib/api/permissions.api'
 import { useAuthStore } from '@/store/auth.store'
+import { usePermissionStore } from '@/store/permission.store'
 import { useThemeStore } from '@/store/theme.store'
 import type { LoginRequest, LoginResponse, RegisterRequest } from '@/types'
 
@@ -22,6 +24,7 @@ export function useAuth() {
     updateUser,
     setLoading,
   } = useAuthStore()
+  const { setPermissions, clearPermissions } = usePermissionStore()
 
   // ---------------------------------------------------------------------------
 
@@ -31,6 +34,8 @@ export function useAuth() {
       const response = await apiLogin(data)
       useThemeStore.getState().setPreference(response.user.themePreference)
       setAuth(response.user, response.accessToken)
+      const permissions = await getMyPermissions()
+      setPermissions(permissions)
       return response
     } catch (error) {
       setLoading(false)
@@ -56,6 +61,7 @@ export function useAuth() {
       // Swallow network errors; local state is cleared regardless.
     } finally {
       clearAuth()
+      clearPermissions()
       router.push('/login')
     }
   }

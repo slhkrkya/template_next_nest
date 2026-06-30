@@ -38,7 +38,7 @@ export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
           if (oldRole) await this.roles.removeFromUser(id, oldRole.id, command.tenantId)
         }
         await this.roles.assignToUser(id, newRole.id, command.tenantId)
-        await this.permissions.syncRolePermissionsToUser(newRole.id, id, command.tenantId ?? '')
+        await this.permissions.syncRolePermissionsToUser(newRole.id, id, command.tenantId)
       }
     }
 

@@ -15,6 +15,7 @@ import {
 import { LoginCommand } from '../login.command';
 import { IUnitOfWork, UNIT_OF_WORK } from '../../../../common/unit-of-work';
 import { CaptchaService } from '../../../../common/captcha';
+import { parseDurationMs } from '../../../../common/utils/parse-duration.util';
 
 const defaultThemePreference = {
   themeFamily: 'lara',
@@ -113,10 +114,14 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     });
 
     const isProduction = this.configService.get('NODE_ENV') === 'production';
+    const accessTokenMaxAge = parseDurationMs(
+      this.configService.get<string>('JWT_EXPIRES_IN', '15m'),
+    );
     res.cookie('access_token', accessToken, {
       httpOnly: true,
       secure: isProduction,
       sameSite: 'strict',
+      maxAge: accessTokenMaxAge,
       path: '/',
     });
     res.cookie('refreshToken', refreshToken, {
@@ -124,7 +129,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
       secure: isProduction,
       sameSite: 'strict',
       maxAge: expiresInDays * 24 * 60 * 60 * 1000,
-      path: '/',
+      path: '/auth/refresh',
     });
 
     const userWithRelations = await this.authRepo.findUserWithRelations(user.id);

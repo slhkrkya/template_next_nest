@@ -13,6 +13,7 @@ import { SwitchTenantCommand } from '../switch-tenant.command'
 import { IAuthRepository, AUTH_REPOSITORY } from '../../domain/auth.repository.interface'
 import { ITenantRepository, TENANT_REPOSITORY } from '../../../tenants/domain/tenant.repository.interface'
 import { IUnitOfWork, UNIT_OF_WORK } from '../../../../common/unit-of-work'
+import { parseDurationMs } from '../../../../common/utils/parse-duration.util'
 
 @Injectable()
 @CommandHandler(SwitchTenantCommand)
@@ -73,10 +74,14 @@ export class SwitchTenantHandler implements ICommandHandler<SwitchTenantCommand>
     })
 
     const isProduction = this.configService.get('NODE_ENV') === 'production'
+    const accessTokenMaxAge = parseDurationMs(
+      this.configService.get<string>('JWT_EXPIRES_IN', '15m'),
+    )
     res.cookie('access_token', accessToken, {
       httpOnly: true,
       secure: isProduction,
       sameSite: 'strict',
+      maxAge: accessTokenMaxAge,
       path: '/',
     })
     res.cookie('refreshToken', newRefreshToken, {
@@ -84,11 +89,11 @@ export class SwitchTenantHandler implements ICommandHandler<SwitchTenantCommand>
       secure: isProduction,
       sameSite: 'strict',
       maxAge: expiresInDays * 24 * 60 * 60 * 1000,
-      path: '/',
+      path: '/auth/refresh',
     })
 
     this.logger.log(
-      `SuperAdmin ${user.id} switched context → tenantId: ${tenantId ?? 'global'}`,
+      `SuperAdmin ${user.id} switched context to tenantId: ${tenantId ?? 'global'}`,
     )
 
     return { accessToken, tenantId: tenantId ?? null, tenantName }

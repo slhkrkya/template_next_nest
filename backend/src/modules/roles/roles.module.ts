@@ -9,9 +9,10 @@ import { ROLE_REPOSITORY } from './domain/role.repository.interface';
 import { PrismaRoleRepository } from './infrastructure/prisma-role.repository';
 import { PERMISSION_REPOSITORY } from '../permissions/domain/permission.repository.interface';
 import { PrismaPermissionRepository } from '../permissions/infrastructure/prisma-permission.repository';
+import { WebsocketsModule } from '../websockets/websockets.module';
 
 @Module({
-  imports: [CqrsModule, PrismaModule],
+  imports: [CqrsModule, PrismaModule, WebsocketsModule],
   controllers: [RolesController],
   providers: [
     RolesService,

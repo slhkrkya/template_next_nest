@@ -25,7 +25,7 @@ export class LogoutHandler implements ICommandHandler<LogoutCommand> {
       httpOnly: true,
       secure: isProduction,
       sameSite: 'strict',
-      path: '/',
+      path: '/auth/refresh',
     });
     res.clearCookie('access_token', {
       httpOnly: true,
